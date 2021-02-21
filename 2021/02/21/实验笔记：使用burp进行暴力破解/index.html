@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/367ED679E06241B19A79E26C0E49583B/203">
 <meta property="og:image" content="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/6BF6C717360348E0B1101D2619D1318A/206">
 <meta property="article:published_time" content="2021-02-21T11:06:23.771Z">
-<meta property="article:modified_time" content="2021-01-22T06:51:44.858Z">
+<meta property="article:modified_time" content="2021-02-21T11:16:39.942Z">
 <meta property="article:author" content="成殇Orz1">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/87BDD58F08F745C1A6D2C94B617AF874/156">
@@ -133,11 +133,14 @@
 <h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/012D0DD4D3364CB0AE7C7DC370C25F8F/190"></p>
 <h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/2FA7FFE815BF401F9F05286D29E7D2AF/192"></p>
 <h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p>
-<blockquote>
-<p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
-<p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
-<p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
-</blockquote>
+<ol>
+<li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
+</li>
+<li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
+</li>
+<li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
+</li>
+</ol>
 <h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/57B4AD66D428473A92F59AE8F2C620BE/194"></p>
 <h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/EC97CD483DF149A79353B068586A859C/196"></p>
 <h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/8CB810B878074B69AD8F6D05CAE10AEF/199"></p>
