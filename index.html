@@ -74,24 +74,36 @@
     <article id="post-实验笔记：使用burp进行暴力破解" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/" class="article-date">
-  <time class="dt-published" datetime="2021-02-21T11:06:23.771Z" itemprop="datePublished">2021-02-21</time>
+  <time class="dt-published" datetime="2021-02-21T11:19:40.000Z" itemprop="datePublished">2021-02-21</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/">实验笔记：使用burp进行暴力破解</a>
+    </h1>
+  
+
+      </header>
+    
     <div class="e-content article-entry" itemprop="articleBody">
       
         <h1 id="实验笔记：使用burp进行暴力破解"><a href="#实验笔记：使用burp进行暴力破解" class="headerlink" title="实验笔记：使用burp进行暴力破解"></a><strong>实验笔记：使用burp进行暴力破解</strong></h1><h2 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h2><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
-<p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/87BDD58F08F745C1A6D2C94B617AF874/156"></p>
+<p><img src="/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/Blog\onlycare\source_posts\实验笔记：使用burp进行暴力破解\1.png" alt="1"></p>
 <h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p>
-<blockquote>
-<p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
-<p>人可以完成，但是代价太大，或者太浪费时间。</p>
-</blockquote>
-<p>   正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
-<p>   暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
+<ol>
+<li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
+</li>
+<li><p>人可以完成，但是代价太大，或者太浪费时间。</p>
+<p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
+<p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
+</li>
+</ol>
 <h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p>
 <p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/FFFDCCAEB1EA430396C30F79C8AA4BB3/159"></p>
 <h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="https://note.youdao.com/yws/public/resource/2854b3b70bb875751e5954cc5573d2d6/xmlnote/7FD16099C26046999B230CEDDEDC59AE/170"></p>
@@ -127,7 +139,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/" data-id="cklf1q0oi0000m8v1gqdldm44" data-title="" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/" data-id="cklf1q0oi0000m8v1gqdldm44" data-title="实验笔记：使用burp进行暴力破解" class="article-share-link">Share</a>
       
       
       
@@ -221,7 +233,7 @@
       <ul>
         
           <li>
-            <a href="/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/">(no title)</a>
+            <a href="/2021/02/21/%E5%AE%9E%E9%AA%8C%E7%AC%94%E8%AE%B0%EF%BC%9A%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/">实验笔记：使用burp进行暴力破解</a>
           </li>
         
           <li>
