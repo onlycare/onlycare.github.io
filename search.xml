@@ -80,6 +80,8 @@
     <url>/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
     <content><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><hr>
 <h3 id="0x00-什么是信息收集"><a href="#0x00-什么是信息收集" class="headerlink" title="0x00 什么是信息收集"></a>0x00 什么是信息收集</h3><p>​    信息收集是指通过各种方式获取所需要的信息，以便我们在后续的渗透过程更好的进行。比如目标站点IP、中间件、脚本语言、端口、邮箱等等。信息收集包含资产收集但不限于资产收集。</p>
+<span id="more"></span>
+
 <h3 id="0x01-信息收集的分类"><a href="#0x01-信息收集的分类" class="headerlink" title="0x01 信息收集的分类"></a>0x01 信息收集的分类</h3><p>信息收集的方式可以分为两种：主动和被动。</p>
 <ul>
 <li>主动信息收集：通过直接访问在网站上进行操作，对网站进行扫描等，这种是有网络流量经过目标服务器得信息收集方式</li>
@@ -500,7 +502,8 @@
         <category>Web</category>
       </categories>
       <tags>
-        <tag>Web; 渗透测试</tag>
+        <tag>Web</tag>
+        <tag>渗透测试</tag>
       </tags>
   </entry>
 </search>
