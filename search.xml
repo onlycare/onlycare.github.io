@@ -1,101 +1,576 @@
 <?xml version="1.0" encoding="utf-8"?>
-<search> 
-  
-  
-    
-    <entry>
-      <title>CORS</title>
-      <link href="2021/02/24/CORS/"/>
-      <url>2021/02/24/CORS/</url>
-      
-        <content type="html"><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr><h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p><blockquote><ol><li>共享Cookie,LocalStorage,IndexDB  </li><li>获取DOM  </li><li>AJAX请求不能发送</li></ol></blockquote><h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p><p><img src="/2021/02/24/CORS/1.jpg"></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p><pre><code>Access-Control-Allow-Origin: http://a.com  服务端接受来自http://a.com的跨域请求    Access-Control-Allow-Credentials: true  表示是否允许发送Cookie，true即发送cookie</code></pre><h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p><h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p><pre><code>127.0.0.1 www.vuln.com 127.0.0.1 www.evil.com</code></pre><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p><pre><code>&lt;?phpecho &quot;username: admin; password:123456&quot;;?&gt;</code></pre><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p><pre><code>&lt;!-- www.evil.com/steal.html  --&gt;&lt;!DOCTYPE&gt;&lt;html&gt;&lt;h1&gt;Hello I evil page. &lt;/h1&gt;&lt;script type=&quot;text/javascript&quot;&gt;function loadXMLDoc()&#123;var xhr = new XMLHttpRequest();xhr.onreadystatechange=function()&#123;    if(xhr.readyState == 4 &amp;&amp; xhr.status == 200) //if receive xhr response    &#123;        var datas=xhr.responseText;        alert(datas);    &#125;&#125;//request vuln pagexhr.open(&quot;GET&quot;,&quot;http://www.vuln.com/a.php&quot;,&quot;true&quot;) xhr.send();&#125;loadXMLDoc();&lt;/script&gt;&lt;/html&gt;</code></pre><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p><p><img src="/2021/02/24/CORS/2.jpg"></p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p><pre><code>&lt;?phpheader(&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;);echo &quot;username: admin; password:123456&quot;;?&gt;</code></pre><p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p><p><img src="/2021/02/24/CORS/3.jpg"></p><h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul><li>不要盲目反射Origin头</li><li>严格校验Origin头，避免出现权限泄露</li><li>不要配置Access-Control-Allow-Origin: null</li><li>HTTPS网站不要信任HTTP域</li><li>不要信任全部自身子域，减少攻击面</li><li>不要配置Origin:*和Credentials: true</li><li>增加Vary: Origin头</li></ul>]]></content>
-      
-      
+<search>
+  <entry>
+    <title>CORS</title>
+    <url>/2021/02/24/CORS/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
+<h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p>
+<blockquote>
+<ol>
+<li>共享Cookie,LocalStorage,IndexDB  </li>
+<li>获取DOM  </li>
+<li>AJAX请求不能发送</li>
+</ol>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p>
+<p><img src="/2021/02/24/CORS/1.jpg"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p>
+<pre><code>Access-Control-Allow-Origin: http://a.com  服务端接受来自http://a.com的跨域请求    
+Access-Control-Allow-Credentials: true  表示是否允许发送Cookie，true即发送cookie
+</code></pre>
+<h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
+<h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p>
+<pre><code>127.0.0.1 www.vuln.com 
+127.0.0.1 www.evil.com
+</code></pre>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p>
+<pre><code>&lt;?php
+echo &quot;username: admin; password:123456&quot;;
+?&gt;
+</code></pre>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p>
+<pre><code>&lt;!-- www.evil.com/steal.html  --&gt;
+&lt;!DOCTYPE&gt;
+&lt;html&gt;
+&lt;h1&gt;Hello I evil page. &lt;/h1&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+function loadXMLDoc()
+&#123;
+var xhr = new XMLHttpRequest();
+
+xhr.onreadystatechange=function()
+&#123;
+    if(xhr.readyState == 4 &amp;&amp; xhr.status == 200) //if receive xhr response
+    &#123;
+        var datas=xhr.responseText;
+        alert(datas);
+    &#125;
+&#125;
+//request vuln page
+xhr.open(&quot;GET&quot;,&quot;http://www.vuln.com/a.php&quot;,&quot;true&quot;) 
+xhr.send();
+&#125;
+loadXMLDoc();
+&lt;/script&gt;
+&lt;/html&gt;
+</code></pre>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p>
+<p><img src="/2021/02/24/CORS/2.jpg"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p>
+<pre><code>&lt;?php
+header(&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;);
+echo &quot;username: admin; password:123456&quot;;
+?&gt;
+</code></pre>
+<p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p>
+<p><img src="/2021/02/24/CORS/3.jpg"></p>
+<h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul>
+<li>不要盲目反射Origin头</li>
+<li>严格校验Origin头，避免出现权限泄露</li>
+<li>不要配置Access-Control-Allow-Origin: null</li>
+<li>HTTPS网站不要信任HTTP域</li>
+<li>不要信任全部自身子域，减少攻击面</li>
+<li>不要配置Origin:*和Credentials: true</li>
+<li>增加Vary: Origin头</li>
+</ul>
+]]></content>
       <categories>
-          
-          <category> Web </category>
-          
+        <category>Web</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> Web </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>Hello World</title>
-      <link href="2021/02/24/hello-world/"/>
-      <url>2021/02/24/hello-world/</url>
-      
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><span id="more"></span><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
-      
-      
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>信息收集</title>
-      <link href="2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/"/>
-      <url>2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
-      
-        <content type="html"><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><hr><h3 id="0x00-什么是信息收集"><a href="#0x00-什么是信息收集" class="headerlink" title="0x00 什么是信息收集"></a>0x00 什么是信息收集</h3><p>​    信息收集是指通过各种方式获取所需要的信息，以便我们在后续的渗透过程更好的进行。比如目标站点IP、中间件、脚本语言、端口、邮箱等等。信息收集包含资产收集但不限于资产收集。</p><span id="more"></span><h3 id="0x01-信息收集的分类"><a href="#0x01-信息收集的分类" class="headerlink" title="0x01 信息收集的分类"></a>0x01 信息收集的分类</h3><p>信息收集的方式可以分为两种：主动和被动。</p><ul><li>主动信息收集：通过直接访问在网站上进行操作，对网站进行扫描等，这种是有网络流量经过目标服务器得信息收集方式</li><li>被动信息收集：基于公开的渠道，比如搜索引擎等在不与目标系统直接交互得情况下获取信息，并且尽量避免留下痕迹，比例：Google搜索、Shodan搜索等</li></ul><p>没有一种方式是最完美的，每个方式都有自己的优势，主动方式，能获取更多的信息，但是目标主机可能会记录你的操作记录。被动方式，收集的信息会相对较少，但是收集信息得行动并不会被目标主机发现。一个渗透项目下，需要有多次的信息收集，同时也要运用不同的收集方式，才能保证信息收集的完整性。</p><h5 id="常见搜集的信息包括"><a href="#常见搜集的信息包括" class="headerlink" title="常见搜集的信息包括"></a>常见搜集的信息包括</h5><ol><li>IP地址信息（服务、端口、协议、CDN）</li><li>域名信息（whois、备案信息（邮箱、联系人、地址、电话）、子域名）</li><li>网站信息（框架、服务器、数据库、编程语言、指纹、WAF、敏感文件、C段、敏感目录、源码泄露、旁站）</li><li>DNS记录</li><li>管理员信息（姓名、职务、生日、联系电话、邮件地址）</li></ol><h3 id="0x02-域名信息的收集"><a href="#0x02-域名信息的收集" class="headerlink" title="0x02 域名信息的收集"></a>0x02 域名信息的收集</h3><h4 id="1-域名介绍"><a href="#1-域名介绍" class="headerlink" title="1.域名介绍"></a>1.域名介绍</h4><p><strong>域名</strong>（Domain Name),简称域名、网域，是由一串用点分隔的名字组成的Internet上某一台计算机或计算机组的名称，用于在数据传输时标识计算机的电子方位（有时也指地理位置）。<br><strong>DNS</strong>(域名系统，Domain Name System)是互联网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。</p><p><img src="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/1.png"></p><h4 id="2-Whois"><a href="#2-Whois" class="headerlink" title="2. Whois"></a>2. Whois</h4><p>​    Whois是用来查询域名的IP以及所有者等信息的传输协议。简单说，Whois就是一个用来查询域名是否已经被注册，以及注册域名信息的数据库（如域名所有人、域名注册商、注册商邮箱等）。<br>​    通过Whois查询可以获得域名注册者邮箱地址等信息，一般情况下对于中小型网站域名注册者就是网站管理员，利用搜索引擎对Whois查询到的信息进行搜索，获取更多域名注册者的个人信息。</p><h5 id="1-web接口查询"><a href="#1-web接口查询" class="headerlink" title="(1) web接口查询"></a>(1) web接口查询</h5><p>常见的信息收集网站包括：</p><ul><li>Whois站长之家：<a href="http://whois.chinaz.com/">http://whois.chinaz.com/</a></li><li>微步在线：<a href="https://x.threatbook.cn/">https://x.threatbook.cn/</a></li><li>阿里云中国万网：<a href="https://whois.aliyun.com/">https://whois.aliyun.com/</a></li><li>Whois Lookup查找目标网站所有者信息：<a href="http://whois.domaintools.com/">http://whois.domaintools.com/</a></li><li>Netcraft Site Report显示目标网站使用的技术：<a href="http://toolbar.netcraft.com/site_report?url=">http://toolbar.netcraft.com/site_report?url=</a></li><li>全球Whois查询：<a href="https://www.whois365.com/cn/">https://www.whois365.com/cn/</a></li><li>站长工具爱站查询：<a href="https://whois.aizhan.com/">https://whois.aizhan.com/</a></li><li>DNS服务器解析：<a href="http://tool.chinaz.com/nslookup">http://tool.chinaz.com/nslookup</a></li><li>多地ping 检查dns是否存在：<a href="http://ping.chinaz.com/ping.chinaz.com">http://ping.chinaz.com/ping.chinaz.com</a></li><li>同ip查旁站：<a href="http://s.tool.chinaz.com/same">http://s.tool.chinaz.com/same</a></li></ul><h5 id="（2）通过Whois命令查询"><a href="#（2）通过Whois命令查询" class="headerlink" title="（2）通过Whois命令查询"></a>（2）通过Whois命令查询</h5><p>在Kali Linux下自带的Whois查询工具，通过命令Whois查询域名信息。</p><pre><code>Whois baidu.com</code></pre><h5 id="3-Python撰写Whois代码"><a href="#3-Python撰写Whois代码" class="headerlink" title="(3) Python撰写Whois代码"></a>(3) Python撰写Whois代码</h5><pre><code>1. import urllib.request2. req_whois = urllib.request.urlopen(&#39;http://whois.chinaz.com/doucube.com&#39;)3. print(req_whois.read().decode())4. 5. import whois6. data = whois.whois(&quot;sohu.com&quot;)7. print(data)</code></pre><h4 id="3-备案信息"><a href="#3-备案信息" class="headerlink" title="3.备案信息"></a>3.备案信息</h4><p>​    ICP备案是指网络内容提供商（Internet Content Provider），《互联网信息服务管理办法》指出需要对网站进行备案，未取得许可不得从事互联网信息服务。</p><ul><li>ICP站长之家：<a href="http://icp.chinaz.com/">http://icp.chinaz.com/</a></li><li>天眼查： <a href="http://www.tianyancha.com/">http://www.tianyancha.com</a> </li></ul><h4 id="4-子域名"><a href="#4-子域名" class="headerlink" title="4.子域名"></a>4.子域名</h4><p>​    子域名指二级域名，二级域名是顶级域名（一级域名）的下一级。比如mail.heetian.com和bbs.heetian.com是heetian.com的子域，而heetian.com<br>则是顶级域名.com的子域。</p><h5 id="1-Google-Hack"><a href="#1-Google-Hack" class="headerlink" title="(1) Google Hack"></a>(1) Google Hack</h5><p>​    Google Hack是指使用Google、百度等搜索引擎对某些特定网站主机漏洞（通常是服务器上的脚本漏洞）进行搜索，以达到快速找到漏洞主机或特定主机的漏洞的目的。</p><table><thead><tr><th>关键字</th><th>含义</th></tr></thead><tbody><tr><td>site</td><td>指定搜索域名                                                                    例如：site:hetianlab.com</td></tr><tr><td>inurl</td><td>指定url中是否存在某些关键字                                        例如：inurl : php?id=</td></tr><tr><td>intext</td><td>指定网页中是否存在某些关键字                                     例如：intext:网站管理</td></tr><tr><td>filetype</td><td>指定搜索文件类型                                                             例如：filetype:txt</td></tr><tr><td>intitle</td><td>指定网页标题是否存在某些关键字                                  例如：后台管理</td></tr><tr><td>link</td><td>指定网页链接                                                                     例如：link:hetianlab.com 指定与合天做了外链得站点</td></tr><tr><td>info</td><td>指定搜索网页信息                                                              例如： info:hetianlabcom</td></tr></tbody></table><h5 id="2-第三方web接口查询"><a href="#2-第三方web接口查询" class="headerlink" title="(2) 第三方web接口查询"></a>(2) 第三方web接口查询</h5><ul><li><a href="https://dnsdumpster.com/">https://dnsdumpster.com/</a></li><li><a href="http://tool.chinaz.com/subdomain">http://tool.chinaz.com/subdomain</a></li><li><a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li></ul><h5 id="3-网络空间安全搜索引擎"><a href="#3-网络空间安全搜索引擎" class="headerlink" title="(3) 网络空间安全搜索引擎"></a>(3) 网络空间安全搜索引擎</h5><ul><li>FoFa         <a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li><li>钟馗之眼  <a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li><li>Shodan    <a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li></ul><h5 id="4-SSL证书查询"><a href="#4-SSL证书查询" class="headerlink" title="(4) SSL证书查询"></a>(4) SSL证书查询</h5><ul><li><p><a href="https://crt.sh/">https://crt.sh/</a></p></li><li><p><a href="https://developers.facebook.com/tools/ct/search/">https://developers.facebook.com/tools/ct/search/</a></p></li></ul><h5 id="5-工具"><a href="#5-工具" class="headerlink" title="(5) 工具"></a>(5) 工具</h5><ul><li><p>Layer子域名挖掘机</p></li><li><p>JSFinder                        <a href="https://github.com/Threezh1/JSFinder">https://github.com/Threezh1/JSFinder</a></p></li><li><p>OneForAll                     <a href="https://github.com/shmilylty/OneForAll">https://github.com/shmilylty/OneForAll</a></p></li><li><p>subDomainsBrute      <a href="https://github.com/lijiejie/subDomainsBrute">https://github.com/lijiejie/subDomainsBrute</a></p></li></ul><h3 id="0x03-IP信息的收集"><a href="#0x03-IP信息的收集" class="headerlink" title="0x03 IP信息的收集"></a>0x03 IP信息的收集</h3><h4 id="1-IP反查域名"><a href="#1-IP反查域名" class="headerlink" title="1. IP反查域名"></a>1. IP反查域名</h4><p>​    如果渗透目标为虚拟主机，那么通过IP反查到的域名信息很有价值，因为一台物理服务器上面可能运行多个虚拟主机。这些虚拟主机有不同的域名，但通常共用一个IP地址。如果你知道有哪些网站共用这台服务器，就有可能通过此台服务器上其他网站的漏洞获取服务器控制权，进而迁回获取渗透目标的权限，这种技术也称为“旁注”。</p><ul><li><a href="http://stool.chinaz.com/same">http://stool.chinaz.com/same</a></li><li><a href="https://tools.ipip.net/ipdomain.php">https://tools.ipip.net/ipdomain.php</a></li></ul><h4 id="2-域名查询IP"><a href="#2-域名查询IP" class="headerlink" title="2. 域名查询IP"></a>2. 域名查询IP</h4><p>​    知道一个站点的域名需要得到它的IP以便之后获取端口信息或扫描等后续工作。</p><ul><li><a href="http://ip.tool.chinaz.com/">http://ip.tool.chinaz.com/</a></li></ul><h4 id="3-CDN"><a href="#3-CDN" class="headerlink" title="3. CDN"></a>3. CDN</h4><h5 id="1-CDN"><a href="#1-CDN" class="headerlink" title="(1)CDN"></a>(1)CDN</h5><p>​    CDN全称是Content Delivery Network，即内容分发网络。CDN是构建在网络之上的内容分发网络，依靠部署在各地的边缘服务器，通过中心平台的负载均衡、内容分发、调度等功能模块，使用户就近获取所需内容，降低网络拥塞，提高用户访问响应速度和命中率.其原理如下：某些大型网站在全国都会有很多用户，这些用户常常会向网站发送不同的请求，那么不同地域会具有不同的缓冲服务器来接收用户发送的流量。如果用户发送流量没有任何交互的数据，只是请求首页的话，此时根据用户所在地区来确定访问的高速缓存服务器，高速缓存服务器会返回对应的响应到用户的浏览器当中，比如广东。</p><p><img src="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/2.png"></p><p>​    当用户填写数据，需要交互时才会将请求发送到真实的服务器；此时通过广东省的缓存服务器来连接真实服务器。</p><h5 id="2-判断CDN"><a href="#2-判断CDN" class="headerlink" title="(2)判断CDN"></a>(2)判断CDN</h5><p>​    可以通过Ping来判断网站是否存在CDN，比如 <a href="http://www.xxxx.com/">http://www.xxxx.com/</a> 。显示如下图所示，可以看到该网站是存在CDN的。</p><p><img src="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/3.png"></p><h5 id="3-绕过CDN"><a href="#3-绕过CDN" class="headerlink" title="(3)绕过CDN"></a>(3)绕过CDN</h5><p><strong>如果目标使用CDN：</strong> 需要绕过CDN后去真实IP地址，方法如下：</p><ul><li><h6 id="多地Ping"><a href="#多地Ping" class="headerlink" title="多地Ping"></a>多地Ping</h6><p><a href="http://ping.chinaz.com/">http://ping.chinaz.com/</a><br><a href="http://www.webkaka.com/Ping.aspx">http://www.webkaka.com/Ping.aspx</a><br>用各种多地ping的服务，查看对应IP地址是否唯一</p></li><li><h6 id="国外访问"><a href="#国外访问" class="headerlink" title="国外访问"></a>国外访问</h6><p><a href="https://asm.ca.com/en/ping.php">https://asm.ca.com/en/ping.php</a><br>因为有些网站设置CDN可能没有把国外的访问包含进去，所以可以这么绕过</p></li><li><h6 id="查询子域名的IP"><a href="#查询子域名的IP" class="headerlink" title="查询子域名的IP"></a>查询子域名的IP</h6><p><a href="https://ip.tool.chinaz.com/ipbatch">https://ip.tool.chinaz.com/ipbatch</a><br>CDN流量收费高，所以很多站长可能只会对主站或者流量大的子站点做了CDN,而很多小站子站点又跟主站在同一台服务器或者同一个C段内，此时就可以通过查询子域名对应的IP来辅助查找网站的真实IP</p></li><li><h6 id="网站phpinfo文件：phpinfo-php"><a href="#网站phpinfo文件：phpinfo-php" class="headerlink" title="网站phpinfo文件：phpinfo.php"></a>网站phpinfo文件：phpinfo.php</h6></li><li><h6 id="内部邮箱源：收集到内部邮箱服务器IP地址"><a href="#内部邮箱源：收集到内部邮箱服务器IP地址" class="headerlink" title="内部邮箱源：收集到内部邮箱服务器IP地址"></a>内部邮箱源：收集到内部邮箱服务器IP地址</h6></li><li><h6 id="查询历史DNS记录"><a href="#查询历史DNS记录" class="headerlink" title="查询历史DNS记录"></a>查询历史DNS记录</h6><p>​    <a href="https://dnsdb.io/zh-cn/">https://dnsdb.io/zh-cn/</a></p><p>​    <a href="https://securitytrails.com/">https://securitytrails.com/</a></p><p>​    <a href="https://viewdns.info/iphistory/">https://viewdns.info/iphistory/</a></p><p>​    <a href="https://www.ip138.com/">https://www.ip138.com/</a></p></li></ul><h4 id="4-C段存货主机探测"><a href="#4-C段存货主机探测" class="headerlink" title="4. C段存货主机探测"></a>4. C段存货主机探测</h4><p>​    C段指的是同一内网段内的其他服务器，每个IP有ABCD四个段，举个例子，192.168.0.1，A段就是192，B段是168，C段是0，D段是1，而C段嗅探的意思就是拿下它同一C段中的其中一台服务器，也就是说是D段1-255中的一台服务器，然后利用工具嗅探拿下该服务器。C段在线查询地址：</p><ul><li><a href="http://www.webscan.cc/">http://www.webscan.cc/</a></li><li><a href="https://phpinfo.me/bing.php">https://phpinfo.me/bing.php</a></li><li><a href="https://scan.top15.cn/">https://scan.top15.cn</a></li></ul><h6 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h6><ul><li><p>Namp</p></li><li><p>Cwebscanner    <a href="https://github.com/se55i0n/Cwebscanner">https://github.com/se55i0n/Cwebscanner</a></p></li></ul><h3 id="0x04-端口信息收集"><a href="#0x04-端口信息收集" class="headerlink" title="0x04 端口信息收集"></a>0x04 端口信息收集</h3><h4 id="1-端口简介"><a href="#1-端口简介" class="headerlink" title="1.端口简介"></a>1.端口简介</h4><p>​    在Internet上，各主机间通过TCP/IP协议发送和接受数据包，各个数据包根据其目的主机的IP地址来进行互联网络中的路由选择，从而顺利的将数据包顺利的传送给目标主机。根据提供服务类型的不同，端口可分为以下两种：</p><ul><li>TCP端口：TCP是一种面向连接的可靠的传输层通信协议</li><li>UDP端口：UDP是一种无连接的不可靠的传输层协议</li></ul><p>​    TCP协议和UDP协议是独立的，因此各自的端口号也互相独立。</p><h4 id="2-常见端口"><a href="#2-常见端口" class="headerlink" title="2.常见端口"></a>2.常见端口</h4><h6 id="1-常用端口类"><a href="#1-常用端口类" class="headerlink" title="(1)  常用端口类"></a>(1)  常用端口类</h6><table><thead><tr><th>端口</th><th>服务</th></tr></thead><tbody><tr><td>21</td><td>ftp</td></tr><tr><td>22</td><td>SSH</td></tr><tr><td>23</td><td>Telnet</td></tr><tr><td>80</td><td>WWW</td></tr><tr><td>139/445</td><td>NetBIOS SessionService</td></tr><tr><td>161</td><td>SNMP</td></tr><tr><td>389</td><td>LDAP</td></tr><tr><td>445</td><td>SMB</td></tr><tr><td>1433</td><td>MSSQL</td></tr><tr><td>1521</td><td>Oracle</td></tr><tr><td>3306</td><td>MSSQL</td></tr><tr><td>3389</td><td>RDP远程桌面</td></tr><tr><td>5432</td><td>PostgreSQL</td></tr><tr><td>5900</td><td>vnc</td></tr><tr><td>6379</td><td>Redis</td></tr><tr><td>7001</td><td>Weblogic</td></tr><tr><td>8080</td><td>Tomcat</td></tr></tbody></table><h6 id="2-特殊服务类"><a href="#2-特殊服务类" class="headerlink" title="(2) 特殊服务类"></a>(2) 特殊服务类</h6><table><thead><tr><th>端口</th><th>服务</th><th>漏洞</th></tr></thead><tbody><tr><td>1099</td><td>rmi</td><td>RCE</td></tr><tr><td>8000</td><td>jdwp java</td><td>调试接口RCE</td></tr><tr><td>443</td><td>SSL</td><td>HeartBleed</td></tr><tr><td>873</td><td>Rsync</td><td>未授权</td></tr><tr><td>5984</td><td>CouchDB</td><td><a href="http://xxx:5984/_utils/">http://xxx:5984/_utils/</a></td></tr><tr><td>6379</td><td>redis</td><td>未授权</td></tr><tr><td>7001,7002</td><td>Weblogic</td><td>默认弱口令，反序列化</td></tr><tr><td>9200，9300</td><td>elasticsearch</td><td>未授权   RCE</td></tr><tr><td>11211</td><td>memcache</td><td>未授权</td></tr><tr><td>27017，27018</td><td>Mongodb</td><td>未授权</td></tr><tr><td>50000</td><td>SAP</td><td>命令执行</td></tr><tr><td>50060，50070，50030</td><td>hadoop</td><td>默认端口未授权</td></tr><tr><td>2375</td><td>docker</td><td>未授权</td></tr><tr><td>3128</td><td>squid</td><td>代理默认端口</td></tr><tr><td>2601，2604</td><td>zebra</td><td>路由，默认密码zebra</td></tr><tr><td>4440</td><td>rundeck</td><td></td></tr><tr><td>4848</td><td>glassfish</td><td>中间件弱口令</td></tr><tr><td>9000</td><td>fcigphp</td><td>代码执行</td></tr><tr><td>9043</td><td>websphere</td><td>弱口令</td></tr></tbody></table><h4 id="3-端口扫描"><a href="#3-端口扫描" class="headerlink" title="3.端口扫描"></a>3.端口扫描</h4><h6 id="Nmap"><a href="#Nmap" class="headerlink" title="Nmap"></a>Nmap</h6><p>​        Network Mapper,是一款开放源代码的网络探测和安全审核的工具<br>​        nmap参考指南（中文版）<a href="https://nmap.org/man/zh/">https://nmap.org/man/zh/</a></p><p>​    功能介绍<br>​        1. 检测网络存活主机（主机发现）<br>​        2. 检测主机开放端口（端口发现或枚举）<br>​        3. 检测相应端口软件（服务发现）版本<br>​        4 .检测操作系统，硬件地址，以及软件版本<br>​        5. 检测脆弱性的漏洞（nmap的脚本）</p><h4 id="4-端口防御措施"><a href="#4-端口防御措施" class="headerlink" title="4. 端口防御措施"></a>4. 端口防御措施</h4><p>​    对于端口攻击来说，只要端口开放并且可以连通，就可以利用对应的方式进行攻击测试。这里提供的防御措施包括：</p><ul><li>关闭不必要的端口；</li><li>对重要业务的服务端口设置防火墙；</li><li>加强员工信息安全意识，经常性更换用户密码，避免弱口令爆破；</li><li>经常更新软件，打补丁（Patch）；</li><li>利用CVE网站的漏洞信息，提高自身网站的安全。</li></ul><h3 id="0x05-网站信息收集"><a href="#0x05-网站信息收集" class="headerlink" title="0x05 网站信息收集"></a>0x05 网站信息收集</h3><h4 id="1-网站指纹识别"><a href="#1-网站指纹识别" class="headerlink" title="1. 网站指纹识别"></a>1. 网站指纹识别</h4><h6 id="1-操作系统"><a href="#1-操作系统" class="headerlink" title="(1) 操作系统"></a>(1) 操作系统</h6><ul><li>ping判断：windows的TTL值一般为128,Linux则为64。TTL大于100的一般为windows,几十的一般为linux。</li><li>nmap-O参数</li><li>windows大小写不敏感，linux则区分大小写</li></ul><h6 id="2-网站服务-容器类型"><a href="#2-网站服务-容器类型" class="headerlink" title="(2) 网站服务/容器类型"></a>(2) 网站服务/容器类型</h6><ul><li>F12查看响应头Server字段</li><li>whatweb    <a href="https://www.whatweb.net/">https://www.whatweb.net/</a></li><li>wappalyzer插件</li></ul><h6 id="3-脚本类型"><a href="#3-脚本类型" class="headerlink" title="(3) 脚本类型"></a>(3) 脚本类型</h6><p>​    php, jsp, asp/aspx, python</p><h6 id="4-数据库类型"><a href="#4-数据库类型" class="headerlink" title="(4) 数据库类型"></a>(4) 数据库类型</h6><p>​    mysql,sqlserver,access,oracle</p><h6 id="5-CMS识别"><a href="#5-CMS识别" class="headerlink" title="(5) CMS识别"></a>(5) CMS识别</h6><p>​    在渗透测试中，对目标服务器进行指纹识别是相当有必要的，因为只有识别出相应的Web容器或者CMS（内容管理系统），才能查找与其相关的漏洞，然后才能进行相应的渗透操作。CMS又称整站系统。常见的CMS有：WordPress、Dedecms（织梦）、Discuz、PhpWeb、PhpWind、Dvbbs、PhpCMS、ECShop、、SiteWeaver、AspCMS、帝国、Z-Blog等。</p><p>常见识别工具：</p><ul><li>BugScaner：<a href="http://whatweb.bugscaner.com/look/">http://whatweb.bugscaner.com/look/</a></li><li>云悉指纹：<a href="http://www.yunsee.cn/finger.html">http://www.yunsee.cn/finger.html</a></li><li>WhatWeb：<a href="https://whatweb.net/">https://whatweb.net/</a></li><li>Onlinetools    <a href="https://github.com/iceyhexman/onlinetools">https://github.com/iceyhexman/onlinetools</a>     <a href="https://pentest.gdpcisa.org/">https://pentest.gdpcisa.org/</a></li></ul><h4 id="2-敏感文件、目录探测"><a href="#2-敏感文件、目录探测" class="headerlink" title="2. 敏感文件、目录探测"></a>2. 敏感文件、目录探测</h4><p>针对目标Web目录结构和敏感隐藏文件探测是非常重要的，在探测过程中很可能会探测到后台页面、上传页面、数据库文件，甚至是网站源代码文件等。补充谢公子大佬的内容，扫描网站目录结构可以看看是否可以遍历目录，或者敏感文件泄漏，包括：</p><p> 后台目录：弱口令，万能密码，爆破<br> 安装包：获取数据库信息，甚至是网站源码<br> 上传目录：截断、上传图片马等<br> mysql管理接口：弱口令、爆破，万能密码，然后脱裤，甚至是拿到shell<br> 安装页面 ：可以二次安装进而绕过<br> phpinfo：会把你配置的各种信息暴露出来<br> 编辑器：fck、ke等<br> iis短文件利用：条件比较苛刻 windows、apache等</p><h6 id="1-敏感文件、目录"><a href="#1-敏感文件、目录" class="headerlink" title="(1) 敏感文件、目录"></a>(1) 敏感文件、目录</h6><ul><li><p>github</p><p>开发人员将代码上传到网站，在上传的时候，没有删除重要的一些信息。如邮箱信息，SVN信息，内部账号和密码，数据库连接信息，服务器配置信息等。尤其是邮箱信息和内部账号和密码。这类信息可以通过在github上搜索公司的一些特定信息，查看是否有程序员将这些信息上传到了github上</p></li><li><p>git</p><p>“.git” intitle:”index of “<br><a href="https://github.com/lijiejie/GitHack">https://github.com/lijiejie/GitHack</a></p></li><li><p>svn</p><p>“.svn” intitle:”index of “<br><a href="https://github.com/admintony/svnExploit">https://github.com/admintony/svnExploit</a></p></li><li><p>.DS_Storehg</p></li><li><p>.bzr</p></li><li><p>CVS</p></li><li><p>WEB-INF</p></li><li><p>备份文件</p></li></ul><h6 id="2-网站备份文件"><a href="#2-网站备份文件" class="headerlink" title="(2) 网站备份文件"></a>(2) 网站备份文件</h6><p>​    网站备份文件泄露指管理员误将网站备份文件或是敏感信息文件存放在某个网站目录下。<br><a href="https://github.com/7kbstorm/7kbscan-WebPathBrute">https://github.com/7kbstorm/7kbscan-WebPathBrute</a></p><h6 id="3-目录探测"><a href="#3-目录探测" class="headerlink" title="(3)目录探测"></a>(3)目录探测</h6><ul><li>dirsearch:<a href="https://github.com/maurosoria/dirsearch">https://github.com/maurosoria/dirsearch</a></li><li>御剑后台扫描工具</li><li>dirmap:<a href="https://github.com/H4ckForJob/dirmap">https://github.com/H4ckForJob/dirmap</a></li></ul><h4 id="3-网站WAF识别"><a href="#3-网站WAF识别" class="headerlink" title="3. 网站WAF识别"></a>3. 网站WAF识别</h4><p>​    <strong>WAF</strong>  即：Web Application FireWall(Web应用防火墙）。可以通俗的理解为：用于保护网站，防黑客、防网络攻击的安全防护系统；是最有效、最直接的Web安全防护产品。WAF功能如下</p><ol><li>防止常见的各类网络攻击，如：SQL注入、XSS跨站、CSRF、网页后门等；</li><li> 防止各类自动化攻击，如：暴力破解、撞库、批量注册、自动发贴等；</li><li> 阻止其它常见威胁，如：爬虫、0DAY攻击、代码分析、嗅探、数据慕改、越权访问、敏感信息泄漏、应用层DDOS、远程恶意包含、盗链、越权、扫描等。</li></ol><h6 id="1-WAF识别"><a href="#1-WAF识别" class="headerlink" title="(1) WAF识别"></a>(1) WAF识别</h6><ul><li><p>wafw00f<br><a href="https://github.com/EnableSecurity/wafwoof">https://github.com/EnableSecurity/wafwoof</a><br>nmap-p80,443–script http-waf-detect ip<br>nmap-p80,443–script http-waf-fingerprint ip</p></li><li><p>看图识waf,常见WAF拦截页面总结<br><a href="https://mp.weixin.qq.com/s/PWkqNsygi-c_S7tW1y_Hxw">https://mp.weixin.qq.com/s/PWkqNsygi-c_S7tW1y_Hxw</a></p></li></ul><h3 id="0x06-其他信息收集"><a href="#0x06-其他信息收集" class="headerlink" title="0x06 其他信息收集"></a>0x06 其他信息收集</h3><h4 id="1-历史漏洞信息"><a href="#1-历史漏洞信息" class="headerlink" title="1.历史漏洞信息"></a>1.历史漏洞信息</h4><ul><li>乌云镜像站<br><a href="http://wy.zone.ci/">http://wy.zone.ci/</a></li><li>乌云知识库<br><a href="https://wooyun.kieran.top/#!/">https://wooyun.kieran.top/#!/</a></li><li>exploit-db<br><a href="https://www.exploit-db.com/">https://www.exploit-db.com/</a></li><li>知道创宇seebug<br><a href="https://www.seebug.org/">https://www.seebug.org/</a></li></ul><h4 id="2-社会工程学"><a href="#2-社会工程学" class="headerlink" title="2.社会工程学"></a>2.社会工程学</h4><p>不谈，怕进去</p>]]></content>
-      
-      
+      <tags>
+        <tag>Web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用burp进行暴力破解</title>
+    <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
+<span id="more"></span>
+
+<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/1.png"></p>
+<h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p>
+<ol>
+<li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
+</li>
+<li><p>人可以完成，但是代价太大，或者太浪费时间。</p>
+<p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
+<p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
+</li>
+</ol>
+<h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p>
+<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/2.png"></p>
+<h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/3.png"></p>
+<h5 id="4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置"><a href="#4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置" class="headerlink" title="(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置"></a>(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/4.png"></p>
+<h5 id="5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面"><a href="#5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面" class="headerlink" title="(5)  这时，IE的设置已经完成，你可以访问 http://burp 将会看到Burp Suite的欢迎界面"></a>(5)  这时，IE的设置已经完成，你可以访问 <a href="http://burp/">http://burp</a> 将会看到Burp Suite的欢迎界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/5.png"></p>
+<h4 id="2-FireFox设置"><a href="#2-FireFox设置" class="headerlink" title="2. FireFox设置"></a>2. FireFox设置</h4><p>​    与IE的设置类似，在FireFox中，我们也要进行一些参数设置，才能将FireFox浏览器的通信流量，通过Burp Suite代理进行传输。详细的步骤如下：</p>
+<h5 id="1-启动FireFox浏览器，点击【工具】菜单，点击【选项】"><a href="#1-启动FireFox浏览器，点击【工具】菜单，点击【选项】" class="headerlink" title="(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】"></a>(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/6.png"></p>
+<h5 id="2-依次点击【高级】-【网络】【设置】"><a href="#2-依次点击【高级】-【网络】【设置】" class="headerlink" title="(2)    依次点击【高级】 【网络】【设置】"></a>(2)    依次点击【高级】 【网络】【设置】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/7.png"></p>
+<h5 id="3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"><a href="#3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。" class="headerlink" title="(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"></a>(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/8.png"></p>
+<h4 id="3-Google-Chrome设置"><a href="#3-Google-Chrome设置" class="headerlink" title="3. Google Chrome设置"></a>3. Google Chrome设置</h4><p>​    Google Chrome使用Burp Suite作为代理服务器的配置步骤如下：</p>
+<h5 id="1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面"><a href="#1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面" class="headerlink" title="(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面"></a>(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/9.png"></p>
+<h5 id="2-在搜索中搜索代理，点击进入"><a href="#2-在搜索中搜索代理，点击进入" class="headerlink" title="(2)  在搜索中搜索代理，点击进入"></a>(2)  在搜索中搜索代理，点击进入</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/10.png"></p>
+<h5 id="3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"><a href="#3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。" class="headerlink" title="(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"></a>(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。</h5><h3 id="0x03-熟悉comparer，repeater，intruder模块"><a href="#0x03-熟悉comparer，repeater，intruder模块" class="headerlink" title="0x03 熟悉comparer，repeater，intruder模块"></a>0x03 <strong>熟悉comparer，repeater，intruder模块</strong></h3><h4 id="1-comparer模块"><a href="#1-comparer模块" class="headerlink" title="1.  comparer模块"></a>1.  comparer模块</h4><h5 id="1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。"><a href="#1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。" class="headerlink" title="(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。"></a>(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/11.png"></p>
+<h5 id="2-此时，compare模块，上下界面多了一条记录"><a href="#2-此时，compare模块，上下界面多了一条记录" class="headerlink" title="(2)  此时，compare模块，上下界面多了一条记录"></a>(2)  此时，compare模块，上下界面多了一条记录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/12.png"></p>
+<h5 id="3-使用同样的方法，我们在为comparer模块添加另外的一条记录"><a href="#3-使用同样的方法，我们在为comparer模块添加另外的一条记录" class="headerlink" title="(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录"></a>(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录</h5><h5 id="4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）"><a href="#4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）" class="headerlink" title="(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）"></a>(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/13.png"></p>
+<h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/14.png"></p>
+<h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/15.png"></p>
+<h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p>
+<ol>
+<li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
+</li>
+<li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
+</li>
+<li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
+</li>
+</ol>
+<h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/16.png"></p>
+<h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/17.png"></p>
+<h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/18.png"></p>
+<h5 id="4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it"><a href="#4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it" class="headerlink" title="(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it"></a>(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/19.png"></p>
+<h5 id="5-返回网页，使用-用户名hetian-密码69-成功登录"><a href="#5-返回网页，使用-用户名hetian-密码69-成功登录" class="headerlink" title="(5)  返回网页，使用 用户名hetian 密码69 成功登录"></a>(5)  返回网页，使用 用户名hetian 密码69 成功登录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/20.png"></p>
+]]></content>
       <categories>
-          
-          <category> Web </category>
-          
+        <category>Web</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> Web </tag>
-            
-            <tag> 渗透测试 </tag>
-            
-            <tag> 信息收集 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>使用burp进行暴力破解</title>
-      <link href="2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/"/>
-      <url>2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
-      
-        <content type="html"><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p><span id="more"></span><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/1.png"></p><h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p><ol><li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p></li><li><p>人可以完成，但是代价太大，或者太浪费时间。</p><p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p><p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p></li></ol><h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/2.png"></p><h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/3.png"></p><h5 id="4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置"><a href="#4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置" class="headerlink" title="(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置"></a>(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/4.png"></p><h5 id="5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面"><a href="#5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面" class="headerlink" title="(5)  这时，IE的设置已经完成，你可以访问 http://burp 将会看到Burp Suite的欢迎界面"></a>(5)  这时，IE的设置已经完成，你可以访问 <a href="http://burp/">http://burp</a> 将会看到Burp Suite的欢迎界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/5.png"></p><h4 id="2-FireFox设置"><a href="#2-FireFox设置" class="headerlink" title="2. FireFox设置"></a>2. FireFox设置</h4><p>​    与IE的设置类似，在FireFox中，我们也要进行一些参数设置，才能将FireFox浏览器的通信流量，通过Burp Suite代理进行传输。详细的步骤如下：</p><h5 id="1-启动FireFox浏览器，点击【工具】菜单，点击【选项】"><a href="#1-启动FireFox浏览器，点击【工具】菜单，点击【选项】" class="headerlink" title="(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】"></a>(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/6.png"></p><h5 id="2-依次点击【高级】-【网络】【设置】"><a href="#2-依次点击【高级】-【网络】【设置】" class="headerlink" title="(2)    依次点击【高级】 【网络】【设置】"></a>(2)    依次点击【高级】 【网络】【设置】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/7.png"></p><h5 id="3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"><a href="#3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。" class="headerlink" title="(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"></a>(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/8.png"></p><h4 id="3-Google-Chrome设置"><a href="#3-Google-Chrome设置" class="headerlink" title="3. Google Chrome设置"></a>3. Google Chrome设置</h4><p>​    Google Chrome使用Burp Suite作为代理服务器的配置步骤如下：</p><h5 id="1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面"><a href="#1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面" class="headerlink" title="(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面"></a>(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/9.png"></p><h5 id="2-在搜索中搜索代理，点击进入"><a href="#2-在搜索中搜索代理，点击进入" class="headerlink" title="(2)  在搜索中搜索代理，点击进入"></a>(2)  在搜索中搜索代理，点击进入</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/10.png"></p><h5 id="3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"><a href="#3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。" class="headerlink" title="(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"></a>(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。</h5><h3 id="0x03-熟悉comparer，repeater，intruder模块"><a href="#0x03-熟悉comparer，repeater，intruder模块" class="headerlink" title="0x03 熟悉comparer，repeater，intruder模块"></a>0x03 <strong>熟悉comparer，repeater，intruder模块</strong></h3><h4 id="1-comparer模块"><a href="#1-comparer模块" class="headerlink" title="1.  comparer模块"></a>1.  comparer模块</h4><h5 id="1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。"><a href="#1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。" class="headerlink" title="(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。"></a>(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/11.png"></p><h5 id="2-此时，compare模块，上下界面多了一条记录"><a href="#2-此时，compare模块，上下界面多了一条记录" class="headerlink" title="(2)  此时，compare模块，上下界面多了一条记录"></a>(2)  此时，compare模块，上下界面多了一条记录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/12.png"></p><h5 id="3-使用同样的方法，我们在为comparer模块添加另外的一条记录"><a href="#3-使用同样的方法，我们在为comparer模块添加另外的一条记录" class="headerlink" title="(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录"></a>(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录</h5><h5 id="4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）"><a href="#4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）" class="headerlink" title="(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）"></a>(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/13.png"></p><h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/14.png"></p><h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/15.png"></p><h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p><ol><li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p></li><li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p></li><li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p></li></ol><h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/16.png"></p><h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/17.png"></p><h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/18.png"></p><h5 id="4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it"><a href="#4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it" class="headerlink" title="(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it"></a>(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/19.png"></p><h5 id="5-返回网页，使用-用户名hetian-密码69-成功登录"><a href="#5-返回网页，使用-用户名hetian-密码69-成功登录" class="headerlink" title="(5)  返回网页，使用 用户名hetian 密码69 成功登录"></a>(5)  返回网页，使用 用户名hetian 密码69 成功登录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/20.png"></p>]]></content>
-      
-      
+      <tags>
+        <tag>Web</tag>
+        <tag>实验笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>信息收集</title>
+    <url>/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
+    <content><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><hr>
+<h3 id="0x00-什么是信息收集"><a href="#0x00-什么是信息收集" class="headerlink" title="0x00 什么是信息收集"></a>0x00 什么是信息收集</h3><p>​    信息收集是指通过各种方式获取所需要的信息，以便我们在后续的渗透过程更好的进行。比如目标站点IP、中间件、脚本语言、端口、邮箱等等。信息收集包含资产收集但不限于资产收集。</p>
+<span id="more"></span>
+
+<h3 id="0x01-信息收集的分类"><a href="#0x01-信息收集的分类" class="headerlink" title="0x01 信息收集的分类"></a>0x01 信息收集的分类</h3><p>信息收集的方式可以分为两种：主动和被动。</p>
+<ul>
+<li>主动信息收集：通过直接访问在网站上进行操作，对网站进行扫描等，这种是有网络流量经过目标服务器得信息收集方式</li>
+<li>被动信息收集：基于公开的渠道，比如搜索引擎等在不与目标系统直接交互得情况下获取信息，并且尽量避免留下痕迹，比例：Google搜索、Shodan搜索等</li>
+</ul>
+<p>没有一种方式是最完美的，每个方式都有自己的优势，主动方式，能获取更多的信息，但是目标主机可能会记录你的操作记录。被动方式，收集的信息会相对较少，但是收集信息得行动并不会被目标主机发现。一个渗透项目下，需要有多次的信息收集，同时也要运用不同的收集方式，才能保证信息收集的完整性。</p>
+<h5 id="常见搜集的信息包括"><a href="#常见搜集的信息包括" class="headerlink" title="常见搜集的信息包括"></a>常见搜集的信息包括</h5><ol>
+<li>IP地址信息（服务、端口、协议、CDN）</li>
+<li>域名信息（whois、备案信息（邮箱、联系人、地址、电话）、子域名）</li>
+<li>网站信息（框架、服务器、数据库、编程语言、指纹、WAF、敏感文件、C段、敏感目录、源码泄露、旁站）</li>
+<li>DNS记录</li>
+<li>管理员信息（姓名、职务、生日、联系电话、邮件地址）</li>
+</ol>
+<h3 id="0x02-域名信息的收集"><a href="#0x02-域名信息的收集" class="headerlink" title="0x02 域名信息的收集"></a>0x02 域名信息的收集</h3><h4 id="1-域名介绍"><a href="#1-域名介绍" class="headerlink" title="1.域名介绍"></a>1.域名介绍</h4><p><strong>域名</strong>（Domain Name),简称域名、网域，是由一串用点分隔的名字组成的Internet上某一台计算机或计算机组的名称，用于在数据传输时标识计算机的电子方位（有时也指地理位置）。<br><strong>DNS</strong>(域名系统，Domain Name System)是互联网的一项服务。它作为将域名和IP地址相互映射的一个分布式数据库，能够使人更方便地访问互联网。</p>
+<p><img src="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/1.png"></p>
+<h4 id="2-Whois"><a href="#2-Whois" class="headerlink" title="2. Whois"></a>2. Whois</h4><p>​    Whois是用来查询域名的IP以及所有者等信息的传输协议。简单说，Whois就是一个用来查询域名是否已经被注册，以及注册域名信息的数据库（如域名所有人、域名注册商、注册商邮箱等）。<br>​    通过Whois查询可以获得域名注册者邮箱地址等信息，一般情况下对于中小型网站域名注册者就是网站管理员，利用搜索引擎对Whois查询到的信息进行搜索，获取更多域名注册者的个人信息。</p>
+<h5 id="1-web接口查询"><a href="#1-web接口查询" class="headerlink" title="(1) web接口查询"></a>(1) web接口查询</h5><p>常见的信息收集网站包括：</p>
+<ul>
+<li>Whois站长之家：<a href="http://whois.chinaz.com/">http://whois.chinaz.com/</a></li>
+<li>微步在线：<a href="https://x.threatbook.cn/">https://x.threatbook.cn/</a></li>
+<li>阿里云中国万网：<a href="https://whois.aliyun.com/">https://whois.aliyun.com/</a></li>
+<li>Whois Lookup查找目标网站所有者信息：<a href="http://whois.domaintools.com/">http://whois.domaintools.com/</a></li>
+<li>Netcraft Site Report显示目标网站使用的技术：<a href="http://toolbar.netcraft.com/site_report?url=">http://toolbar.netcraft.com/site_report?url=</a></li>
+<li>全球Whois查询：<a href="https://www.whois365.com/cn/">https://www.whois365.com/cn/</a></li>
+<li>站长工具爱站查询：<a href="https://whois.aizhan.com/">https://whois.aizhan.com/</a></li>
+<li>DNS服务器解析：<a href="http://tool.chinaz.com/nslookup">http://tool.chinaz.com/nslookup</a></li>
+<li>多地ping 检查dns是否存在：<a href="http://ping.chinaz.com/ping.chinaz.com">http://ping.chinaz.com/ping.chinaz.com</a></li>
+<li>同ip查旁站：<a href="http://s.tool.chinaz.com/same">http://s.tool.chinaz.com/same</a></li>
+</ul>
+<h5 id="（2）通过Whois命令查询"><a href="#（2）通过Whois命令查询" class="headerlink" title="（2）通过Whois命令查询"></a>（2）通过Whois命令查询</h5><p>在Kali Linux下自带的Whois查询工具，通过命令Whois查询域名信息。</p>
+<pre><code>Whois baidu.com
+</code></pre>
+<h5 id="3-Python撰写Whois代码"><a href="#3-Python撰写Whois代码" class="headerlink" title="(3) Python撰写Whois代码"></a>(3) Python撰写Whois代码</h5><pre><code>1. import urllib.request
+2. req_whois = urllib.request.urlopen(&#39;http://whois.chinaz.com/doucube.com&#39;)
+3. print(req_whois.read().decode())
+4. 
+5. import whois
+6. data = whois.whois(&quot;sohu.com&quot;)
+7. print(data)
+</code></pre>
+<h4 id="3-备案信息"><a href="#3-备案信息" class="headerlink" title="3.备案信息"></a>3.备案信息</h4><p>​    ICP备案是指网络内容提供商（Internet Content Provider），《互联网信息服务管理办法》指出需要对网站进行备案，未取得许可不得从事互联网信息服务。</p>
+<ul>
+<li>ICP站长之家：<a href="http://icp.chinaz.com/">http://icp.chinaz.com/</a></li>
+<li>天眼查： <a href="http://www.tianyancha.com/">http://www.tianyancha.com</a> </li>
+</ul>
+<h4 id="4-子域名"><a href="#4-子域名" class="headerlink" title="4.子域名"></a>4.子域名</h4><p>​    子域名指二级域名，二级域名是顶级域名（一级域名）的下一级。比如mail.heetian.com和bbs.heetian.com是heetian.com的子域，而heetian.com<br>则是顶级域名.com的子域。</p>
+<h5 id="1-Google-Hack"><a href="#1-Google-Hack" class="headerlink" title="(1) Google Hack"></a>(1) Google Hack</h5><p>​    Google Hack是指使用Google、百度等搜索引擎对某些特定网站主机漏洞（通常是服务器上的脚本漏洞）进行搜索，以达到快速找到漏洞主机或特定主机的漏洞的目的。</p>
+<table>
+<thead>
+<tr>
+<th>关键字</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>site</td>
+<td>指定搜索域名                                                                    例如：site:hetianlab.com</td>
+</tr>
+<tr>
+<td>inurl</td>
+<td>指定url中是否存在某些关键字                                        例如：inurl : php?id=</td>
+</tr>
+<tr>
+<td>intext</td>
+<td>指定网页中是否存在某些关键字                                     例如：intext:网站管理</td>
+</tr>
+<tr>
+<td>filetype</td>
+<td>指定搜索文件类型                                                             例如：filetype:txt</td>
+</tr>
+<tr>
+<td>intitle</td>
+<td>指定网页标题是否存在某些关键字                                  例如：后台管理</td>
+</tr>
+<tr>
+<td>link</td>
+<td>指定网页链接                                                                     例如：link:hetianlab.com 指定与合天做了外链得站点</td>
+</tr>
+<tr>
+<td>info</td>
+<td>指定搜索网页信息                                                              例如： info:hetianlabcom</td>
+</tr>
+</tbody></table>
+<h5 id="2-第三方web接口查询"><a href="#2-第三方web接口查询" class="headerlink" title="(2) 第三方web接口查询"></a>(2) 第三方web接口查询</h5><ul>
+<li><a href="https://dnsdumpster.com/">https://dnsdumpster.com/</a></li>
+<li><a href="http://tool.chinaz.com/subdomain">http://tool.chinaz.com/subdomain</a></li>
+<li><a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li>
+</ul>
+<h5 id="3-网络空间安全搜索引擎"><a href="#3-网络空间安全搜索引擎" class="headerlink" title="(3) 网络空间安全搜索引擎"></a>(3) 网络空间安全搜索引擎</h5><ul>
+<li>FoFa         <a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li>
+<li>钟馗之眼  <a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li>
+<li>Shodan    <a href="https://phpinfo.me/domain/">https://phpinfo.me/domain/</a></li>
+</ul>
+<h5 id="4-SSL证书查询"><a href="#4-SSL证书查询" class="headerlink" title="(4) SSL证书查询"></a>(4) SSL证书查询</h5><ul>
+<li><p><a href="https://crt.sh/">https://crt.sh/</a></p>
+</li>
+<li><p><a href="https://developers.facebook.com/tools/ct/search/">https://developers.facebook.com/tools/ct/search/</a></p>
+</li>
+</ul>
+<h5 id="5-工具"><a href="#5-工具" class="headerlink" title="(5) 工具"></a>(5) 工具</h5><ul>
+<li><p>Layer子域名挖掘机</p>
+</li>
+<li><p>JSFinder                        <a href="https://github.com/Threezh1/JSFinder">https://github.com/Threezh1/JSFinder</a></p>
+</li>
+<li><p>OneForAll                     <a href="https://github.com/shmilylty/OneForAll">https://github.com/shmilylty/OneForAll</a></p>
+</li>
+<li><p>subDomainsBrute      <a href="https://github.com/lijiejie/subDomainsBrute">https://github.com/lijiejie/subDomainsBrute</a></p>
+</li>
+</ul>
+<h3 id="0x03-IP信息的收集"><a href="#0x03-IP信息的收集" class="headerlink" title="0x03 IP信息的收集"></a>0x03 IP信息的收集</h3><h4 id="1-IP反查域名"><a href="#1-IP反查域名" class="headerlink" title="1. IP反查域名"></a>1. IP反查域名</h4><p>​    如果渗透目标为虚拟主机，那么通过IP反查到的域名信息很有价值，因为一台物理服务器上面可能运行多个虚拟主机。这些虚拟主机有不同的域名，但通常共用一个IP地址。如果你知道有哪些网站共用这台服务器，就有可能通过此台服务器上其他网站的漏洞获取服务器控制权，进而迁回获取渗透目标的权限，这种技术也称为“旁注”。</p>
+<ul>
+<li><a href="http://stool.chinaz.com/same">http://stool.chinaz.com/same</a></li>
+<li><a href="https://tools.ipip.net/ipdomain.php">https://tools.ipip.net/ipdomain.php</a></li>
+</ul>
+<h4 id="2-域名查询IP"><a href="#2-域名查询IP" class="headerlink" title="2. 域名查询IP"></a>2. 域名查询IP</h4><p>​    知道一个站点的域名需要得到它的IP以便之后获取端口信息或扫描等后续工作。</p>
+<ul>
+<li><a href="http://ip.tool.chinaz.com/">http://ip.tool.chinaz.com/</a></li>
+</ul>
+<h4 id="3-CDN"><a href="#3-CDN" class="headerlink" title="3. CDN"></a>3. CDN</h4><h5 id="1-CDN"><a href="#1-CDN" class="headerlink" title="(1)CDN"></a>(1)CDN</h5><p>​    CDN全称是Content Delivery Network，即内容分发网络。CDN是构建在网络之上的内容分发网络，依靠部署在各地的边缘服务器，通过中心平台的负载均衡、内容分发、调度等功能模块，使用户就近获取所需内容，降低网络拥塞，提高用户访问响应速度和命中率.其原理如下：某些大型网站在全国都会有很多用户，这些用户常常会向网站发送不同的请求，那么不同地域会具有不同的缓冲服务器来接收用户发送的流量。如果用户发送流量没有任何交互的数据，只是请求首页的话，此时根据用户所在地区来确定访问的高速缓存服务器，高速缓存服务器会返回对应的响应到用户的浏览器当中，比如广东。</p>
+<p><img src="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/2.png"></p>
+<p>​    当用户填写数据，需要交互时才会将请求发送到真实的服务器；此时通过广东省的缓存服务器来连接真实服务器。</p>
+<h5 id="2-判断CDN"><a href="#2-判断CDN" class="headerlink" title="(2)判断CDN"></a>(2)判断CDN</h5><p>​    可以通过Ping来判断网站是否存在CDN，比如 <a href="http://www.xxxx.com/">http://www.xxxx.com/</a> 。显示如下图所示，可以看到该网站是存在CDN的。</p>
+<p><img src="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/3.png"></p>
+<h5 id="3-绕过CDN"><a href="#3-绕过CDN" class="headerlink" title="(3)绕过CDN"></a>(3)绕过CDN</h5><p><strong>如果目标使用CDN：</strong> 需要绕过CDN后去真实IP地址，方法如下：</p>
+<ul>
+<li><h6 id="多地Ping"><a href="#多地Ping" class="headerlink" title="多地Ping"></a>多地Ping</h6><p><a href="http://ping.chinaz.com/">http://ping.chinaz.com/</a><br><a href="http://www.webkaka.com/Ping.aspx">http://www.webkaka.com/Ping.aspx</a><br>用各种多地ping的服务，查看对应IP地址是否唯一</p>
+</li>
+<li><h6 id="国外访问"><a href="#国外访问" class="headerlink" title="国外访问"></a>国外访问</h6><p><a href="https://asm.ca.com/en/ping.php">https://asm.ca.com/en/ping.php</a><br>因为有些网站设置CDN可能没有把国外的访问包含进去，所以可以这么绕过</p>
+</li>
+<li><h6 id="查询子域名的IP"><a href="#查询子域名的IP" class="headerlink" title="查询子域名的IP"></a>查询子域名的IP</h6><p><a href="https://ip.tool.chinaz.com/ipbatch">https://ip.tool.chinaz.com/ipbatch</a><br>CDN流量收费高，所以很多站长可能只会对主站或者流量大的子站点做了CDN,而很多小站子站点又跟主站在同一台服务器或者同一个C段内，此时就可以通过查询子域名对应的IP来辅助查找网站的真实IP</p>
+</li>
+<li><h6 id="网站phpinfo文件：phpinfo-php"><a href="#网站phpinfo文件：phpinfo-php" class="headerlink" title="网站phpinfo文件：phpinfo.php"></a>网站phpinfo文件：phpinfo.php</h6></li>
+<li><h6 id="内部邮箱源：收集到内部邮箱服务器IP地址"><a href="#内部邮箱源：收集到内部邮箱服务器IP地址" class="headerlink" title="内部邮箱源：收集到内部邮箱服务器IP地址"></a>内部邮箱源：收集到内部邮箱服务器IP地址</h6></li>
+<li><h6 id="查询历史DNS记录"><a href="#查询历史DNS记录" class="headerlink" title="查询历史DNS记录"></a>查询历史DNS记录</h6><p>​    <a href="https://dnsdb.io/zh-cn/">https://dnsdb.io/zh-cn/</a></p>
+<p>​    <a href="https://securitytrails.com/">https://securitytrails.com/</a></p>
+<p>​    <a href="https://viewdns.info/iphistory/">https://viewdns.info/iphistory/</a></p>
+<p>​    <a href="https://www.ip138.com/">https://www.ip138.com/</a></p>
+</li>
+</ul>
+<h4 id="4-C段存货主机探测"><a href="#4-C段存货主机探测" class="headerlink" title="4. C段存货主机探测"></a>4. C段存货主机探测</h4><p>​    C段指的是同一内网段内的其他服务器，每个IP有ABCD四个段，举个例子，192.168.0.1，A段就是192，B段是168，C段是0，D段是1，而C段嗅探的意思就是拿下它同一C段中的其中一台服务器，也就是说是D段1-255中的一台服务器，然后利用工具嗅探拿下该服务器。C段在线查询地址：</p>
+<ul>
+<li><a href="http://www.webscan.cc/">http://www.webscan.cc/</a></li>
+<li><a href="https://phpinfo.me/bing.php">https://phpinfo.me/bing.php</a></li>
+<li><a href="https://scan.top15.cn/">https://scan.top15.cn</a></li>
+</ul>
+<h6 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h6><ul>
+<li><p>Namp</p>
+</li>
+<li><p>Cwebscanner    <a href="https://github.com/se55i0n/Cwebscanner">https://github.com/se55i0n/Cwebscanner</a></p>
+</li>
+</ul>
+<h3 id="0x04-端口信息收集"><a href="#0x04-端口信息收集" class="headerlink" title="0x04 端口信息收集"></a>0x04 端口信息收集</h3><h4 id="1-端口简介"><a href="#1-端口简介" class="headerlink" title="1.端口简介"></a>1.端口简介</h4><p>​    在Internet上，各主机间通过TCP/IP协议发送和接受数据包，各个数据包根据其目的主机的IP地址来进行互联网络中的路由选择，从而顺利的将数据包顺利的传送给目标主机。根据提供服务类型的不同，端口可分为以下两种：</p>
+<ul>
+<li>TCP端口：TCP是一种面向连接的可靠的传输层通信协议</li>
+<li>UDP端口：UDP是一种无连接的不可靠的传输层协议</li>
+</ul>
+<p>​    TCP协议和UDP协议是独立的，因此各自的端口号也互相独立。</p>
+<h4 id="2-常见端口"><a href="#2-常见端口" class="headerlink" title="2.常见端口"></a>2.常见端口</h4><h6 id="1-常用端口类"><a href="#1-常用端口类" class="headerlink" title="(1)  常用端口类"></a>(1)  常用端口类</h6><table>
+<thead>
+<tr>
+<th>端口</th>
+<th>服务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>21</td>
+<td>ftp</td>
+</tr>
+<tr>
+<td>22</td>
+<td>SSH</td>
+</tr>
+<tr>
+<td>23</td>
+<td>Telnet</td>
+</tr>
+<tr>
+<td>80</td>
+<td>WWW</td>
+</tr>
+<tr>
+<td>139/445</td>
+<td>NetBIOS SessionService</td>
+</tr>
+<tr>
+<td>161</td>
+<td>SNMP</td>
+</tr>
+<tr>
+<td>389</td>
+<td>LDAP</td>
+</tr>
+<tr>
+<td>445</td>
+<td>SMB</td>
+</tr>
+<tr>
+<td>1433</td>
+<td>MSSQL</td>
+</tr>
+<tr>
+<td>1521</td>
+<td>Oracle</td>
+</tr>
+<tr>
+<td>3306</td>
+<td>MSSQL</td>
+</tr>
+<tr>
+<td>3389</td>
+<td>RDP远程桌面</td>
+</tr>
+<tr>
+<td>5432</td>
+<td>PostgreSQL</td>
+</tr>
+<tr>
+<td>5900</td>
+<td>vnc</td>
+</tr>
+<tr>
+<td>6379</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>7001</td>
+<td>Weblogic</td>
+</tr>
+<tr>
+<td>8080</td>
+<td>Tomcat</td>
+</tr>
+</tbody></table>
+<h6 id="2-特殊服务类"><a href="#2-特殊服务类" class="headerlink" title="(2) 特殊服务类"></a>(2) 特殊服务类</h6><table>
+<thead>
+<tr>
+<th>端口</th>
+<th>服务</th>
+<th>漏洞</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1099</td>
+<td>rmi</td>
+<td>RCE</td>
+</tr>
+<tr>
+<td>8000</td>
+<td>jdwp java</td>
+<td>调试接口RCE</td>
+</tr>
+<tr>
+<td>443</td>
+<td>SSL</td>
+<td>HeartBleed</td>
+</tr>
+<tr>
+<td>873</td>
+<td>Rsync</td>
+<td>未授权</td>
+</tr>
+<tr>
+<td>5984</td>
+<td>CouchDB</td>
+<td><a href="http://xxx:5984/_utils/">http://xxx:5984/_utils/</a></td>
+</tr>
+<tr>
+<td>6379</td>
+<td>redis</td>
+<td>未授权</td>
+</tr>
+<tr>
+<td>7001,7002</td>
+<td>Weblogic</td>
+<td>默认弱口令，反序列化</td>
+</tr>
+<tr>
+<td>9200，9300</td>
+<td>elasticsearch</td>
+<td>未授权   RCE</td>
+</tr>
+<tr>
+<td>11211</td>
+<td>memcache</td>
+<td>未授权</td>
+</tr>
+<tr>
+<td>27017，27018</td>
+<td>Mongodb</td>
+<td>未授权</td>
+</tr>
+<tr>
+<td>50000</td>
+<td>SAP</td>
+<td>命令执行</td>
+</tr>
+<tr>
+<td>50060，50070，50030</td>
+<td>hadoop</td>
+<td>默认端口未授权</td>
+</tr>
+<tr>
+<td>2375</td>
+<td>docker</td>
+<td>未授权</td>
+</tr>
+<tr>
+<td>3128</td>
+<td>squid</td>
+<td>代理默认端口</td>
+</tr>
+<tr>
+<td>2601，2604</td>
+<td>zebra</td>
+<td>路由，默认密码zebra</td>
+</tr>
+<tr>
+<td>4440</td>
+<td>rundeck</td>
+<td></td>
+</tr>
+<tr>
+<td>4848</td>
+<td>glassfish</td>
+<td>中间件弱口令</td>
+</tr>
+<tr>
+<td>9000</td>
+<td>fcigphp</td>
+<td>代码执行</td>
+</tr>
+<tr>
+<td>9043</td>
+<td>websphere</td>
+<td>弱口令</td>
+</tr>
+</tbody></table>
+<h4 id="3-端口扫描"><a href="#3-端口扫描" class="headerlink" title="3.端口扫描"></a>3.端口扫描</h4><h6 id="Nmap"><a href="#Nmap" class="headerlink" title="Nmap"></a>Nmap</h6><p>​        Network Mapper,是一款开放源代码的网络探测和安全审核的工具<br>​        nmap参考指南（中文版）<a href="https://nmap.org/man/zh/">https://nmap.org/man/zh/</a></p>
+<p>​    功能介绍<br>​        1. 检测网络存活主机（主机发现）<br>​        2. 检测主机开放端口（端口发现或枚举）<br>​        3. 检测相应端口软件（服务发现）版本<br>​        4 .检测操作系统，硬件地址，以及软件版本<br>​        5. 检测脆弱性的漏洞（nmap的脚本）</p>
+<h4 id="4-端口防御措施"><a href="#4-端口防御措施" class="headerlink" title="4. 端口防御措施"></a>4. 端口防御措施</h4><p>​    对于端口攻击来说，只要端口开放并且可以连通，就可以利用对应的方式进行攻击测试。这里提供的防御措施包括：</p>
+<ul>
+<li>关闭不必要的端口；</li>
+<li>对重要业务的服务端口设置防火墙；</li>
+<li>加强员工信息安全意识，经常性更换用户密码，避免弱口令爆破；</li>
+<li>经常更新软件，打补丁（Patch）；</li>
+<li>利用CVE网站的漏洞信息，提高自身网站的安全。</li>
+</ul>
+<h3 id="0x05-网站信息收集"><a href="#0x05-网站信息收集" class="headerlink" title="0x05 网站信息收集"></a>0x05 网站信息收集</h3><h4 id="1-网站指纹识别"><a href="#1-网站指纹识别" class="headerlink" title="1. 网站指纹识别"></a>1. 网站指纹识别</h4><h6 id="1-操作系统"><a href="#1-操作系统" class="headerlink" title="(1) 操作系统"></a>(1) 操作系统</h6><ul>
+<li>ping判断：windows的TTL值一般为128,Linux则为64。TTL大于100的一般为windows,几十的一般为linux。</li>
+<li>nmap-O参数</li>
+<li>windows大小写不敏感，linux则区分大小写</li>
+</ul>
+<h6 id="2-网站服务-容器类型"><a href="#2-网站服务-容器类型" class="headerlink" title="(2) 网站服务/容器类型"></a>(2) 网站服务/容器类型</h6><ul>
+<li>F12查看响应头Server字段</li>
+<li>whatweb    <a href="https://www.whatweb.net/">https://www.whatweb.net/</a></li>
+<li>wappalyzer插件</li>
+</ul>
+<h6 id="3-脚本类型"><a href="#3-脚本类型" class="headerlink" title="(3) 脚本类型"></a>(3) 脚本类型</h6><p>​    php, jsp, asp/aspx, python</p>
+<h6 id="4-数据库类型"><a href="#4-数据库类型" class="headerlink" title="(4) 数据库类型"></a>(4) 数据库类型</h6><p>​    mysql,sqlserver,access,oracle</p>
+<h6 id="5-CMS识别"><a href="#5-CMS识别" class="headerlink" title="(5) CMS识别"></a>(5) CMS识别</h6><p>​    在渗透测试中，对目标服务器进行指纹识别是相当有必要的，因为只有识别出相应的Web容器或者CMS（内容管理系统），才能查找与其相关的漏洞，然后才能进行相应的渗透操作。CMS又称整站系统。常见的CMS有：WordPress、Dedecms（织梦）、Discuz、PhpWeb、PhpWind、Dvbbs、PhpCMS、ECShop、、SiteWeaver、AspCMS、帝国、Z-Blog等。</p>
+<p>常见识别工具：</p>
+<ul>
+<li>BugScaner：<a href="http://whatweb.bugscaner.com/look/">http://whatweb.bugscaner.com/look/</a></li>
+<li>云悉指纹：<a href="http://www.yunsee.cn/finger.html">http://www.yunsee.cn/finger.html</a></li>
+<li>WhatWeb：<a href="https://whatweb.net/">https://whatweb.net/</a></li>
+<li>Onlinetools    <a href="https://github.com/iceyhexman/onlinetools">https://github.com/iceyhexman/onlinetools</a>     <a href="https://pentest.gdpcisa.org/">https://pentest.gdpcisa.org/</a></li>
+</ul>
+<h4 id="2-敏感文件、目录探测"><a href="#2-敏感文件、目录探测" class="headerlink" title="2. 敏感文件、目录探测"></a>2. 敏感文件、目录探测</h4><p>针对目标Web目录结构和敏感隐藏文件探测是非常重要的，在探测过程中很可能会探测到后台页面、上传页面、数据库文件，甚至是网站源代码文件等。补充谢公子大佬的内容，扫描网站目录结构可以看看是否可以遍历目录，或者敏感文件泄漏，包括：</p>
+<p> 后台目录：弱口令，万能密码，爆破<br> 安装包：获取数据库信息，甚至是网站源码<br> 上传目录：截断、上传图片马等<br> mysql管理接口：弱口令、爆破，万能密码，然后脱裤，甚至是拿到shell<br> 安装页面 ：可以二次安装进而绕过<br> phpinfo：会把你配置的各种信息暴露出来<br> 编辑器：fck、ke等<br> iis短文件利用：条件比较苛刻 windows、apache等</p>
+<h6 id="1-敏感文件、目录"><a href="#1-敏感文件、目录" class="headerlink" title="(1) 敏感文件、目录"></a>(1) 敏感文件、目录</h6><ul>
+<li><p>github</p>
+<p>开发人员将代码上传到网站，在上传的时候，没有删除重要的一些信息。如邮箱信息，SVN信息，内部账号和密码，数据库连接信息，服务器配置信息等。尤其是邮箱信息和内部账号和密码。这类信息可以通过在github上搜索公司的一些特定信息，查看是否有程序员将这些信息上传到了github上</p>
+</li>
+<li><p>git</p>
+<p>“.git” intitle:”index of “<br><a href="https://github.com/lijiejie/GitHack">https://github.com/lijiejie/GitHack</a></p>
+</li>
+<li><p>svn</p>
+<p>“.svn” intitle:”index of “<br><a href="https://github.com/admintony/svnExploit">https://github.com/admintony/svnExploit</a></p>
+</li>
+<li><p>.DS_Storehg</p>
+</li>
+<li><p>.bzr</p>
+</li>
+<li><p>CVS</p>
+</li>
+<li><p>WEB-INF</p>
+</li>
+<li><p>备份文件</p>
+</li>
+</ul>
+<h6 id="2-网站备份文件"><a href="#2-网站备份文件" class="headerlink" title="(2) 网站备份文件"></a>(2) 网站备份文件</h6><p>​    网站备份文件泄露指管理员误将网站备份文件或是敏感信息文件存放在某个网站目录下。<br><a href="https://github.com/7kbstorm/7kbscan-WebPathBrute">https://github.com/7kbstorm/7kbscan-WebPathBrute</a></p>
+<h6 id="3-目录探测"><a href="#3-目录探测" class="headerlink" title="(3)目录探测"></a>(3)目录探测</h6><ul>
+<li>dirsearch:<a href="https://github.com/maurosoria/dirsearch">https://github.com/maurosoria/dirsearch</a></li>
+<li>御剑后台扫描工具</li>
+<li>dirmap:<a href="https://github.com/H4ckForJob/dirmap">https://github.com/H4ckForJob/dirmap</a></li>
+</ul>
+<h4 id="3-网站WAF识别"><a href="#3-网站WAF识别" class="headerlink" title="3. 网站WAF识别"></a>3. 网站WAF识别</h4><p>​    <strong>WAF</strong>  即：Web Application FireWall(Web应用防火墙）。可以通俗的理解为：用于保护网站，防黑客、防网络攻击的安全防护系统；是最有效、最直接的Web安全防护产品。WAF功能如下</p>
+<ol>
+<li>防止常见的各类网络攻击，如：SQL注入、XSS跨站、CSRF、网页后门等；</li>
+<li> 防止各类自动化攻击，如：暴力破解、撞库、批量注册、自动发贴等；</li>
+<li> 阻止其它常见威胁，如：爬虫、0DAY攻击、代码分析、嗅探、数据慕改、越权访问、敏感信息泄漏、应用层DDOS、远程恶意包含、盗链、越权、扫描等。</li>
+</ol>
+<h6 id="1-WAF识别"><a href="#1-WAF识别" class="headerlink" title="(1) WAF识别"></a>(1) WAF识别</h6><ul>
+<li><p>wafw00f<br><a href="https://github.com/EnableSecurity/wafwoof">https://github.com/EnableSecurity/wafwoof</a><br>nmap-p80,443–script http-waf-detect ip<br>nmap-p80,443–script http-waf-fingerprint ip</p>
+</li>
+<li><p>看图识waf,常见WAF拦截页面总结<br><a href="https://mp.weixin.qq.com/s/PWkqNsygi-c_S7tW1y_Hxw">https://mp.weixin.qq.com/s/PWkqNsygi-c_S7tW1y_Hxw</a></p>
+</li>
+</ul>
+<h3 id="0x06-其他信息收集"><a href="#0x06-其他信息收集" class="headerlink" title="0x06 其他信息收集"></a>0x06 其他信息收集</h3><h4 id="1-历史漏洞信息"><a href="#1-历史漏洞信息" class="headerlink" title="1.历史漏洞信息"></a>1.历史漏洞信息</h4><ul>
+<li>乌云镜像站<br><a href="http://wy.zone.ci/">http://wy.zone.ci/</a></li>
+<li>乌云知识库<br><a href="https://wooyun.kieran.top/#!/">https://wooyun.kieran.top/#!/</a></li>
+<li>exploit-db<br><a href="https://www.exploit-db.com/">https://www.exploit-db.com/</a></li>
+<li>知道创宇seebug<br><a href="https://www.seebug.org/">https://www.seebug.org/</a></li>
+</ul>
+<h4 id="2-社会工程学"><a href="#2-社会工程学" class="headerlink" title="2.社会工程学"></a>2.社会工程学</h4><p>不谈，怕进去</p>
+]]></content>
       <categories>
-          
-          <category> Web </category>
-          
+        <category>Web</category>
       </categories>
-      
-      
-        <tags>
-            
-            <tag> Web </tag>
-            
-            <tag> 实验笔记 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-  
-  
+      <tags>
+        <tag>Web</tag>
+        <tag>渗透测试</tag>
+        <tag>信息收集</tag>
+      </tags>
+  </entry>
 </search>
