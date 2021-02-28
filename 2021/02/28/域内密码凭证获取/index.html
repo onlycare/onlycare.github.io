@@ -22,30 +22,46 @@
     var CONFIG = {"hostname":"onlycare.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="菜鸡一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="成殇のBlog">
-<meta property="og:url" content="http://onlycare.github.io/index.html">
+  <meta name="description" content="成殇Orz10x00 活动目录数据库  由ntds.dit文件构成 默认存储在所有域控制器上的%SystemRoot%\NTSD文件夹中 只能通过域控制器进程和协议访问ntds.dit：活动目录数据库，包括有关域用户、组和组成员身份的信息。它还包括域中所有用户的密码哈希值。   为了保护密码哈希值，使用存储在SYSTEM注册表配置单元中的密钥对这些哈希值进行加密。因此想要破解sam文 件与ntds">
+<meta property="og:type" content="article">
+<meta property="og:title" content="域内密码凭证获取">
+<meta property="og:url" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/index.html">
 <meta property="og:site_name" content="成殇のBlog">
-<meta property="og:description" content="菜鸡一枚">
+<meta property="og:description" content="成殇Orz10x00 活动目录数据库  由ntds.dit文件构成 默认存储在所有域控制器上的%SystemRoot%\NTSD文件夹中 只能通过域控制器进程和协议访问ntds.dit：活动目录数据库，包括有关域用户、组和组成员身份的信息。它还包括域中所有用户的密码哈希值。   为了保护密码哈希值，使用存储在SYSTEM注册表配置单元中的密钥对这些哈希值进行加密。因此想要破解sam文 件与ntds">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/8.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/9.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/10.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png">
+<meta property="article:published_time" content="2021-02-28T06:41:22.000Z">
+<meta property="article:modified_time" content="2021-02-28T06:47:27.345Z">
 <meta property="article:author" content="成殇Orz1">
+<meta property="article:tag" content="渗透测试">
+<meta property="article:tag" content="信息收集">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.png">
 
-<link rel="canonical" href="http://onlycare.github.io/">
+<link rel="canonical" href="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>成殇のBlog</title>
+  <title>域内密码凭证获取 | 成殇のBlog</title>
   
 
 
@@ -190,9 +206,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -208,10 +225,9 @@
       <meta itemprop="name" content="成殇のBlog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/" class="post-title-link" itemprop="url">域内密码凭证获取</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          域内密码凭证获取
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -233,7 +249,14 @@
                 </span>
             </span>
 
-          <br>
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
             <span class="post-meta-item" title="本文字数">
               <span class="post-meta-item-icon">
                 <i class="far fa-file-word"></i>
@@ -258,7 +281,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-活动目录数据库"><a href="#0x00-活动目录数据库" class="headerlink" title="0x00 活动目录数据库"></a>0x00 活动目录数据库</h3><blockquote>
+        <h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-活动目录数据库"><a href="#0x00-活动目录数据库" class="headerlink" title="0x00 活动目录数据库"></a>0x00 活动目录数据库</h3><blockquote>
 <ul>
 <li>由ntds.dit文件构成</li>
 <li>默认存储在所有域控制器上的%SystemRoot%\NTSD文件夹中</li>
@@ -338,422 +361,79 @@
 
 <p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png"></p>
 
-      
     </div>
   <div>
+  
+    <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
   
 </div>
     
     
     
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
       
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/2.png">
-      <meta itemprop="name" content="成殇Orz1">
-      <meta itemprop="description" content="菜鸡一枚">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="成殇のBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" class="post-title-link" itemprop="url">Windows主机信息收集</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-02-25 13:32:30 / 修改时间：13:38:07" itemprop="dateCreated datePublished" datetime="2021-02-25T13:32:30+08:00">2021-02-25</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">渗透测试</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>9.1k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>8 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="成殇Orz1 微信支付">
+        <p>微信支付</p>
+      </div>
       
-          <h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h2 id="0x00-什么是内网渗透"><a href="#0x00-什么是内网渗透" class="headerlink" title="0x00  什么是内网渗透"></a>0x00  什么是内网渗透</h2><p>在拿到webshell的时候，想办法获得系统信息拿到系统权限，进入到网络系统内部之后收集内部网络的各种 信息，获取内部网络有价值的人员、资产信息</p>
-<ol>
-<li><p>内网基础环境判断</p>
-<p>IP、网关、DNS、是否能连通外网、网络连接及端口、本机host文件、机器的代理、是否在域内，域名是什么</p>
-</li>
-<li><p>分析机器所处位置区域 </p>
-<p>DMZ区、办公区、生产区、核心DB等等</p>
-</li>
-<li><p>分析机器的角色 </p>
-<p>普通WEB服务器、开发服务器、文件服务器、代理服务器、DNS服务器、数据存储服务器等等</p>
-</li>
-<li><p>分析进出口流量是否能连通 </p>
-<p>协议的判断：常见的TCP、DNS、HTTP、ICMP等协议 端口判断：外网vps做监听，内网机器测试常见端口，常见能出去的端口有80,8080,443,53,110,123 等。</p>
-</li>
-</ol>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="成殇Orz1 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
         
-      
-    </div>
-  <div>
-  
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>成殇Orz1
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/" title="域内密码凭证获取">http://onlycare.github.io/2021/02/28/域内密码凭证获取/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
 </div>
-    
-    
-    
+
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+          <div class="post-tags">
+              <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag"><i class="fa fa-tags"></i>渗透测试</a>
+              <a href="/tags/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" rel="tag"><i class="fa fa-tags"></i>信息收集</a>
+          </div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/02/24/CORS/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/2.png">
-      <meta itemprop="name" content="成殇Orz1">
-      <meta itemprop="description" content="菜鸡一枚">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="成殇のBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/24/CORS/" class="post-title-link" itemprop="url">CORS</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-02-24 15:52:02 / 修改时间：16:01:24" itemprop="dateCreated datePublished" datetime="2021-02-24T15:52:02+08:00">2021-02-24</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index"><span itemprop="name">Web</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
-<h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p>
-<blockquote>
-<ol>
-<li>共享Cookie,LocalStorage,IndexDB  </li>
-<li>获取DOM  </li>
-<li>AJAX请求不能发送</li>
-</ol>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/02/24/CORS/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
-  <div>
-  
-</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/2.png">
-      <meta itemprop="name" content="成殇Orz1">
-      <meta itemprop="description" content="菜鸡一枚">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="成殇のBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" class="post-title-link" itemprop="url">信息收集</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-02-22 20:39:56" itemprop="dateCreated datePublished" datetime="2021-02-22T20:39:56+08:00">2021-02-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-02-24 22:57:00" itemprop="dateModified" datetime="2021-02-24T22:57:00+08:00">2021-02-24</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index"><span itemprop="name">Web</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>7.3k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>7 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><hr>
-<h3 id="0x00-什么是信息收集"><a href="#0x00-什么是信息收集" class="headerlink" title="0x00 什么是信息收集"></a>0x00 什么是信息收集</h3><p>​    信息收集是指通过各种方式获取所需要的信息，以便我们在后续的渗透过程更好的进行。比如目标站点IP、中间件、脚本语言、端口、邮箱等等。信息收集包含资产收集但不限于资产收集。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/02/25/Windows%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" rel="prev" title="Windows主机信息收集">
+      <i class="fa fa-chevron-left"></i> Windows主机信息收集
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-  <div>
-  
-</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/2.png">
-      <meta itemprop="name" content="成殇Orz1">
-      <meta itemprop="description" content="菜鸡一枚">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="成殇のBlog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/" class="post-title-link" itemprop="url">使用burp进行暴力破解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-02-21 20:31:13" itemprop="dateCreated datePublished" datetime="2021-02-21T20:31:13+08:00">2021-02-21</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-02-24 15:31:12" itemprop="dateModified" datetime="2021-02-24T15:31:12+08:00">2021-02-24</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web/" itemprop="url" rel="index"><span itemprop="name">Web</span></a>
-                </span>
-            </span>
-
-          <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>2.2k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>2 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-  <div>
-  
-</div>
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
   
 
 
@@ -806,6 +486,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%88%90%E6%AE%87Orz1"><span class="nav-text">成殇Orz1</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-%E6%B4%BB%E5%8A%A8%E7%9B%AE%E5%BD%95%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-text">0x00 活动目录数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-%E8%8E%B7%E5%8F%96NTSD-DIT"><span class="nav-text">0x01 获取NTSD.DIT</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Volume-Shadow-Copy-Service"><span class="nav-text">Volume Shadow Copy Service</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ntdsutil"><span class="nav-text">Ntdsutil</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%A4%E4%BA%92%E5%BC%8F%EF%BC%9A"><span class="nav-text">交互式：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E4%BA%A4%E4%BA%92%E5%BC%8F"><span class="nav-text">非交互式:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ntdsutil-InstallFromMedia"><span class="nav-text">Ntdsutil-InstallFromMedia</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%A4%E4%BA%92%E5%BC%8F%EF%BC%9A-1"><span class="nav-text">交互式：</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E4%BA%A4%E4%BA%92%E5%BC%8F-1"><span class="nav-text">非交互式:</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Vssadmin"><span class="nav-text">Vssadmin</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#mklink"><span class="nav-text">mklink</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Vshadow"><span class="nav-text">Vshadow</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E5%BF%AB%E7%85%A7"><span class="nav-text">查询快照</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%BF%AB%E7%85%A7"><span class="nav-text">创建快照</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6"><span class="nav-text">复制</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NinjaCopy"><span class="nav-text">NinjaCopy</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0"><span class="nav-text">本地</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#cobaltstrike"><span class="nav-text">cobaltstrike</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E5%8A%A0%E8%BD%BD"><span class="nav-text">远程加载</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-%E8%A7%A3%E5%AF%86ntds-dit"><span class="nav-text">0x02 解密ntds.dit</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#QuarkPwDump"><span class="nav-text">QuarkPwDump</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#secretsdump"><span class="nav-text">secretsdump</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NtdsAudit"><span class="nav-text">NtdsAudit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mimikatz"><span class="nav-text">mimikatz</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
