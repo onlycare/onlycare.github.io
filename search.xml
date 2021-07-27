@@ -429,7 +429,7 @@
 <li>本地或远程服务器上存在漏洞 </li>
 <li>拥有漏洞利用工具代码</li>
 </ul>
-<h5 id="Windows提权思路-•"><a href="#Windows提权思路-•" class="headerlink" title="Windows提权思路 •"></a>Windows提权思路 •</h5><ul>
+<h5 id="Windows提权思路"><a href="#Windows提权思路" class="headerlink" title="Windows提权思路"></a>Windows提权思路</h5><ul>
 <li>前期信息收集 </li>
 <li>Meterpreter提权 </li>
 <li>Windows系统内核漏洞 </li>
@@ -1440,9 +1440,9 @@
 <h6 id="3-目录探测"><a href="#3-目录探测" class="headerlink" title="(3)目录探测"></a>(3)目录探测</h6><ul>
 <li>dirsearch:<a href="https://github.com/maurosoria/dirsearch">https://github.com/maurosoria/dirsearch</a></li>
 <li>御剑后台扫描工具</li>
-<li>dirmap:<a href="https://github.com/H4ckForJob/dirmap">https://github.com/H4ckForJob/dirmap</a></li>
+<li>dirmap:<a href="https://github.com/H4ckForJob/dirmap">https://github.com/H4ckForJob/dirmap</a><h4 id="3-网站WAF识别"><a href="#3-网站WAF识别" class="headerlink" title="3. 网站WAF识别"></a>3. 网站WAF识别</h4></li>
 </ul>
-<h4 id="3-网站WAF识别"><a href="#3-网站WAF识别" class="headerlink" title="3. 网站WAF识别"></a>3. 网站WAF识别</h4><p>​    <strong>WAF</strong>  即：Web Application FireWall(Web应用防火墙）。可以通俗的理解为：用于保护网站，防黑客、防网络攻击的安全防护系统；是最有效、最直接的Web安全防护产品。WAF功能如下</p>
+<p>​    <strong>WAF</strong>  即：Web Application FireWall(Web应用防火墙）。可以通俗的理解为：用于保护网站，防黑客、防网络攻击的安全防护系统；是最有效、最直接的Web安全防护产品。WAF功能如下</p>
 <ol>
 <li>防止常见的各类网络攻击，如：SQL注入、XSS跨站、CSRF、网页后门等；</li>
 <li> 防止各类自动化攻击，如：暴力破解、撞库、批量注册、自动发贴等；</li>
